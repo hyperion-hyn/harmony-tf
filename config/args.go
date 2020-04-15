@@ -43,7 +43,8 @@ var (
 		},
 	}
 
-	VersionWrap = fmt.Sprintf("github.com/SebastianJ (C) 2020. %v, version %s/%s-%s\n", path.Base(os.Args[0]), runtime.Version(), runtime.GOOS, runtime.GOARCH)
+	// VersionWrap - binary version string
+	VersionWrap = fmt.Sprintf("Harmony (C) 2020. %v, version %s/%s-%s\n", path.Base(os.Args[0]), runtime.Version(), runtime.GOOS, runtime.GOARCH)
 )
 
 func init() {
