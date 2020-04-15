@@ -62,6 +62,7 @@ func (testCase *TestCase) Initialize() {
 func (testCase *TestCase) SetError(err error) {
 	testCase.Error = err
 	testCase.Result = false
+	testCase.FinishedAt = time.Now().UTC()
 	logger.ErrorLog(err.Error(), testCase.Verbose)
 	Title(testCase, "footer", testCase.Verbose)
 }
@@ -71,6 +72,7 @@ func (testCase *TestCase) ReportError() bool {
 	if testCase.Error != nil {
 		logger.ErrorLog(testCase.Error.Error(), testCase.Verbose)
 		testCase.Result = false
+		testCase.FinishedAt = time.Now().UTC()
 		logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
 		Title(testCase, "footer", testCase.Verbose)
 		return true

@@ -76,6 +76,16 @@ func ExportCSV(results []*testing.TestCase, dismissed []*testing.TestCase, succe
 }
 
 func csvRow(testCase *testing.TestCase) []string {
+	startedAtString := ""
+	if !testCase.StartedAt.IsZero() {
+		startedAtString = testCase.StartedAt.Format(timeFormat)
+	}
+
+	finishedAtString := ""
+	if !testCase.FinishedAt.IsZero() {
+		finishedAtString = testCase.FinishedAt.Format(timeFormat)
+	}
+
 	duration := testCase.Duration()
 	durationString := ""
 	if duration.Seconds() > 0.0 {
@@ -89,8 +99,8 @@ func csvRow(testCase *testing.TestCase) []string {
 		fmt.Sprintf("%t", testCase.Executed),
 		fmt.Sprintf("%t", testCase.Expected),
 		fmt.Sprintf("%t", testCase.Result),
-		testCase.StartedAt.Format(timeFormat),
-		testCase.FinishedAt.Format(timeFormat),
+		startedAtString,
+		finishedAtString,
 		durationString,
 	}
 }

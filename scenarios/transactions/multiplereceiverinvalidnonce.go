@@ -30,11 +30,11 @@ func MultipleReceiverInvalidNonceScenario(testCase *testing.TestCase) {
 	}
 
 	testCase.Executed = true
+	testCase.StartedAt = time.Now().UTC()
+
 	if testCase.ReportError() {
 		return
 	}
-
-	testCase.StartedAt = time.Now().UTC()
 
 	fundingAccountBalance := testing.RetrieveFundingAccountBalanceOrError(testCase)
 	if testCase.Error != nil {

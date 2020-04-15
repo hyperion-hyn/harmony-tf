@@ -18,10 +18,11 @@ import (
 func InvalidAddressScenario(testCase *testing.TestCase) {
 	testing.Title(testCase, "header", testCase.Verbose)
 	testCase.Executed = true
+	testCase.StartedAt = time.Now().UTC()
+
 	if testCase.ReportError() {
 		return
 	}
-	testCase.StartedAt = time.Now().UTC()
 
 	accounts := map[string]sdkAccounts.Account{}
 	accountTypes := []string{

@@ -16,10 +16,11 @@ import (
 func InvalidAddressScenario(testCase *testing.TestCase) {
 	testing.Title(testCase, "header", testCase.Verbose)
 	testCase.Executed = true
+	testCase.StartedAt = time.Now().UTC()
+
 	if testCase.ReportError() {
 		return
 	}
-	testCase.StartedAt = time.Now().UTC()
 
 	senderName := accounts.GenerateTestCaseAccountName(testCase.Name, "InvalidSender")
 	senderAccount, err := testing.GenerateAndFundAccount(testCase, senderName, testCase.StakingParameters.Create.Validator.Amount, 1)

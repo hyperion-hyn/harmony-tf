@@ -30,11 +30,11 @@ func MultipleSenderScenario(testCase *testing.TestCase) {
 	}
 
 	testCase.Executed = true
+	testCase.StartedAt = time.Now().UTC()
+
 	if testCase.ReportError() {
 		return
 	}
-
-	testCase.StartedAt = time.Now().UTC()
 
 	receiverAccountName := accounts.GenerateTestCaseAccountName(testCase.Name, "Receiver")
 	receiverAccount, err := accounts.GenerateAccount(receiverAccountName)
