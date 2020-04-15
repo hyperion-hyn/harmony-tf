@@ -3,12 +3,12 @@ package create
 import (
 	"fmt"
 
-	"github.com/SebastianJ/harmony-tf/accounts"
-	"github.com/SebastianJ/harmony-tf/balances"
-	"github.com/SebastianJ/harmony-tf/config"
-	"github.com/SebastianJ/harmony-tf/logger"
-	"github.com/SebastianJ/harmony-tf/staking"
-	"github.com/SebastianJ/harmony-tf/testing"
+	"github.com/harmony-one/harmony-tf/accounts"
+	"github.com/harmony-one/harmony-tf/balances"
+	"github.com/harmony-one/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/logger"
+	"github.com/harmony-one/harmony-tf/staking"
+	"github.com/harmony-one/harmony-tf/testing"
 )
 
 // InvalidAddressScenario - executes a create validator test case where the validator address isn't the same as the account/address sending the create validator transaction

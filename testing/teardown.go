@@ -3,11 +3,11 @@ package testing
 import (
 	"sync"
 
-	"github.com/SebastianJ/harmony-tf/balances"
-	"github.com/SebastianJ/harmony-tf/config"
-	"github.com/SebastianJ/harmony-tf/transactions"
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"
 	goSdkAccount "github.com/harmony-one/go-sdk/pkg/account"
+	"github.com/harmony-one/harmony-tf/balances"
+	"github.com/harmony-one/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/transactions"
 	"github.com/harmony-one/harmony/numeric"
 )
 

@@ -6,15 +6,15 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/SebastianJ/harmony-tf/accounts"
-	"github.com/SebastianJ/harmony-tf/balances"
-	"github.com/SebastianJ/harmony-tf/config"
-	"github.com/SebastianJ/harmony-tf/utils"
 	"github.com/ethereum/go-ethereum/crypto"
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"
 	goSdkAccount "github.com/harmony-one/go-sdk/pkg/account"
 	"github.com/harmony-one/go-sdk/pkg/address"
 	goSdkAddress "github.com/harmony-one/go-sdk/pkg/address"
+	"github.com/harmony-one/harmony-tf/accounts"
+	"github.com/harmony-one/harmony-tf/balances"
+	"github.com/harmony-one/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/utils"
 )
 
 var (

@@ -3,8 +3,8 @@ package crypto
 import (
 	"math/big"
 
-	"github.com/SebastianJ/harmony-tf/config"
 	sdkCrypto "github.com/harmony-one/go-lib/crypto"
+	"github.com/harmony-one/harmony-tf/config"
 )
 
 // GenerateBlsKeys - generates a set of bls keys given a count

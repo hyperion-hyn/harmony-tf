@@ -3,11 +3,11 @@ package staking
 import (
 	"errors"
 
-	"github.com/SebastianJ/harmony-tf/config"
-	testParams "github.com/SebastianJ/harmony-tf/testing/parameters"
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"
 	sdkNetworkNonce "github.com/harmony-one/go-lib/network/rpc/nonces"
 	sdkDelegation "github.com/harmony-one/go-lib/staking/delegation"
+	"github.com/harmony-one/harmony-tf/config"
+	testParams "github.com/harmony-one/harmony-tf/testing/parameters"
 	"github.com/harmony-one/harmony/numeric"
 )
 

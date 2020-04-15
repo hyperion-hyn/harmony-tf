@@ -9,18 +9,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SebastianJ/harmony-tf/config"
-	"github.com/SebastianJ/harmony-tf/funding"
-	"github.com/SebastianJ/harmony-tf/keys"
-	stakingDelegationDelegateScenarios "github.com/SebastianJ/harmony-tf/scenarios/staking/delegation/delegate"
-	stakingDelegationUndelegateScenarios "github.com/SebastianJ/harmony-tf/scenarios/staking/delegation/undelegate"
-	stakingCreateValidatorScenarios "github.com/SebastianJ/harmony-tf/scenarios/staking/validator/create"
-	stakingEditValidatorScenarios "github.com/SebastianJ/harmony-tf/scenarios/staking/validator/edit"
-	transactionScenarios "github.com/SebastianJ/harmony-tf/scenarios/transactions"
-	"github.com/SebastianJ/harmony-tf/testing"
-	"github.com/SebastianJ/harmony-tf/utils"
 	"github.com/elliotchance/orderedmap"
 	"github.com/gookit/color"
+	"github.com/harmony-one/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/funding"
+	"github.com/harmony-one/harmony-tf/keys"
+	stakingDelegationDelegateScenarios "github.com/harmony-one/harmony-tf/scenarios/staking/delegation/delegate"
+	stakingDelegationUndelegateScenarios "github.com/harmony-one/harmony-tf/scenarios/staking/delegation/undelegate"
+	stakingCreateValidatorScenarios "github.com/harmony-one/harmony-tf/scenarios/staking/validator/create"
+	stakingEditValidatorScenarios "github.com/harmony-one/harmony-tf/scenarios/staking/validator/edit"
+	transactionScenarios "github.com/harmony-one/harmony-tf/scenarios/transactions"
+	"github.com/harmony-one/harmony-tf/testing"
+	"github.com/harmony-one/harmony-tf/utils"
 )
 
 var (

@@ -3,9 +3,9 @@ package testing
 import (
 	"fmt"
 
-	"github.com/SebastianJ/harmony-tf/config"
-	"github.com/SebastianJ/harmony-tf/logger"
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"
+	"github.com/harmony-one/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/logger"
 )
 
 // HandleError - handle test case errors (log a message, set the result to false and return any eventual funds)

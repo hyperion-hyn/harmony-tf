@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SebastianJ/harmony-tf/config"
 	"github.com/gookit/color"
+	"github.com/harmony-one/harmony-tf/config"
 )
 
 var (

@@ -3,7 +3,7 @@ package funding
 import (
 	"fmt"
 
-	"github.com/SebastianJ/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/config"
 	"github.com/harmony-one/harmony/numeric"
 )
 

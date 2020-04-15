@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/SebastianJ/harmony-tf/logger"
 	sdkNetworkTypes "github.com/harmony-one/go-lib/network/types/network"
 	sdkValidator "github.com/harmony-one/go-lib/staking/validator"
+	"github.com/harmony-one/harmony-tf/logger"
 )
 
 // EditValidatorParameters - the parameters for editing a validator

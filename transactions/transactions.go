@@ -3,11 +3,11 @@ package transactions
 import (
 	"encoding/base64"
 
-	"github.com/SebastianJ/harmony-tf/config"
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"
 	sdkNetworkNonce "github.com/harmony-one/go-lib/network/rpc/nonces"
 	sdkTxs "github.com/harmony-one/go-lib/transactions"
 	"github.com/harmony-one/go-sdk/pkg/rpc"
+	"github.com/harmony-one/harmony-tf/config"
 	"github.com/harmony-one/harmony/numeric"
 )
 

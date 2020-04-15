@@ -1,11 +1,11 @@
 package parameters
 
 import (
-	"github.com/SebastianJ/harmony-tf/config"
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"
 	sdkNetworkTypes "github.com/harmony-one/go-lib/network/types/network"
 	sdkTxs "github.com/harmony-one/go-lib/transactions"
 	"github.com/harmony-one/go-sdk/pkg/common"
+	"github.com/harmony-one/harmony-tf/config"
 	"github.com/harmony-one/harmony/numeric"
 	"github.com/pkg/errors"
 )

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/SebastianJ/harmony-tf/config"
-	"github.com/SebastianJ/harmony-tf/logger"
-	"github.com/SebastianJ/harmony-tf/testing/parameters"
-	"github.com/SebastianJ/harmony-tf/utils"
 	sdkTxs "github.com/harmony-one/go-lib/transactions"
+	"github.com/harmony-one/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/logger"
+	"github.com/harmony-one/harmony-tf/testing/parameters"
+	"github.com/harmony-one/harmony-tf/utils"
 )
 
 // TestCase - represents a test case

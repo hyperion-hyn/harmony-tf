@@ -3,8 +3,8 @@ package testing
 import (
 	"fmt"
 
-	"github.com/SebastianJ/harmony-tf/config"
 	"github.com/gookit/color"
+	"github.com/harmony-one/harmony-tf/config"
 )
 
 // Title - header/footer for test cases

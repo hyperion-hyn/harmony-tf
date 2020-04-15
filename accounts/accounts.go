@@ -5,9 +5,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/SebastianJ/harmony-tf/config"
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"
 	goSdkAccount "github.com/harmony-one/go-sdk/pkg/account"
+	"github.com/harmony-one/harmony-tf/config"
 )
 
 // GenerateTestCaseAccountName - generate a test case prefixed account name

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/SebastianJ/harmony-tf/balances"
-	"github.com/SebastianJ/harmony-tf/config"
-	"github.com/SebastianJ/harmony-tf/crypto"
-	"github.com/SebastianJ/harmony-tf/logger"
-	"github.com/SebastianJ/harmony-tf/testing"
+	"github.com/harmony-one/harmony-tf/balances"
+	"github.com/harmony-one/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/crypto"
+	"github.com/harmony-one/harmony-tf/logger"
+	"github.com/harmony-one/harmony-tf/testing"
 	"github.com/harmony-one/harmony/numeric"
 
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"

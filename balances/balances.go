@@ -3,9 +3,9 @@ package balances
 import (
 	"fmt"
 
-	"github.com/SebastianJ/harmony-tf/config"
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"
 	"github.com/harmony-one/go-sdk/pkg/common"
+	"github.com/harmony-one/harmony-tf/config"
 	"github.com/harmony-one/harmony/numeric"
 )
 
