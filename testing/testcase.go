@@ -3,6 +3,7 @@ package testing
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	sdkTxs "github.com/harmony-one/go-lib/transactions"
 	"github.com/harmony-one/harmony-tf/config"
@@ -13,17 +14,19 @@ import (
 
 // TestCase - represents a test case
 type TestCase struct {
-	Name              string `yaml:"name"`
-	Category          string `yaml:"category"`
-	Goal              string `yaml:"goal"`
-	Priority          int    `yaml:"priority"`
-	Execute           bool   `yaml:"execute"`
-	Executed          bool   `yaml:"-"`
-	Result            bool   `yaml:"result"`
-	Expected          bool   `yaml:"expected"`
-	Verbose           bool   `yaml:"verbose"`
-	Scenario          string `yaml:"scenario"`
-	Dismissal         string `yaml:"-"`
+	Name              string    `yaml:"name"`
+	Category          string    `yaml:"category"`
+	Goal              string    `yaml:"goal"`
+	Priority          int       `yaml:"priority"`
+	Execute           bool      `yaml:"execute"`
+	Executed          bool      `yaml:"-"`
+	Result            bool      `yaml:"result"`
+	Expected          bool      `yaml:"expected"`
+	StartedAt         time.Time `yaml:"-"`
+	FinishedAt        time.Time `yaml:"-"`
+	Verbose           bool      `yaml:"verbose"`
+	Scenario          string    `yaml:"scenario"`
+	Dismissal         string    `yaml:"-"`
 	Error             error
 	Parameters        parameters.Parameters        `yaml:"parameters"`
 	StakingParameters parameters.StakingParameters `yaml:"staking_parameters"`
@@ -73,6 +76,15 @@ func (testCase *TestCase) ReportError() bool {
 		return true
 	}
 	return false
+}
+
+// Duration - how long it took to run the test case
+func (testCase *TestCase) Duration() time.Duration {
+	if !testCase.StartedAt.IsZero() && !testCase.FinishedAt.IsZero() {
+		return testCase.FinishedAt.Sub(testCase.StartedAt)
+	}
+
+	return time.Duration(0)
 }
 
 // ReportMemoryDismissal - reports memory dismissal for a given test case

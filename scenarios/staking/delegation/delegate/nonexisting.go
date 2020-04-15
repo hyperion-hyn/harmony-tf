@@ -2,6 +2,7 @@ package delegate
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/harmony-one/harmony-tf/accounts"
 	"github.com/harmony-one/harmony-tf/config"
@@ -17,6 +18,7 @@ func NonExistingScenario(testCase *testing.TestCase) {
 	if testCase.ReportError() {
 		return
 	}
+	testCase.StartedAt = time.Now().UTC()
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
 	validatorAccount, err := accounts.GenerateAccount(validatorName)
@@ -50,4 +52,6 @@ func NonExistingScenario(testCase *testing.TestCase) {
 		testing.Teardown(&validatorAccount, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
 	}
 	testing.Teardown(&delegatorAccount, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+
+	testCase.FinishedAt = time.Now().UTC()
 }

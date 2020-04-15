@@ -19,6 +19,7 @@ func StandardScenario(testCase *testing.TestCase) {
 	if testCase.ReportError() {
 		return
 	}
+	testCase.StartedAt = time.Now().UTC()
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
 	account, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.Create.Validator.Amount, 1)
@@ -56,4 +57,6 @@ func StandardScenario(testCase *testing.TestCase) {
 	testing.Title(testCase, "footer", testCase.Verbose)
 
 	testing.Teardown(&account, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+
+	testCase.FinishedAt = time.Now().UTC()
 }

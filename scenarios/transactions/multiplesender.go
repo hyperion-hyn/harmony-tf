@@ -34,6 +34,8 @@ func MultipleSenderScenario(testCase *testing.TestCase) {
 		return
 	}
 
+	testCase.StartedAt = time.Now().UTC()
+
 	receiverAccountName := accounts.GenerateTestCaseAccountName(testCase.Name, "Receiver")
 	receiverAccount, err := accounts.GenerateAccount(receiverAccountName)
 	if err != nil {
@@ -86,6 +88,8 @@ func MultipleSenderScenario(testCase *testing.TestCase) {
 
 	multipleSendersTeardown(testCase, senderAccounts, receiverAccount)
 	testing.Title(testCase, "footer", testCase.Verbose)
+
+	testCase.FinishedAt = time.Now().UTC()
 }
 
 func executeMultiSenderTransactions(testCase *testing.TestCase, senderAccounts []sdkAccounts.Account, receiverAccount sdkAccounts.Account) {

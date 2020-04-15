@@ -2,6 +2,7 @@ package edit
 
 import (
 	"fmt"
+	"time"
 
 	sdkValidator "github.com/harmony-one/go-lib/staking/validator"
 	sdkTxs "github.com/harmony-one/go-lib/transactions"
@@ -19,6 +20,7 @@ func StandardScenario(testCase *testing.TestCase) {
 	if testCase.ReportError() {
 		return
 	}
+	testCase.StartedAt = time.Now().UTC()
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
 	account, validator, err := staking.ReuseOrCreateValidator(testCase, validatorName)
@@ -73,4 +75,6 @@ func StandardScenario(testCase *testing.TestCase) {
 
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
 	testing.Title(testCase, "footer", testCase.Verbose)
+
+	testCase.FinishedAt = time.Now().UTC()
 }

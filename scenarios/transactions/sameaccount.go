@@ -22,6 +22,7 @@ func SameAccountScenario(testCase *testing.TestCase) {
 	if testCase.ReportError() {
 		return
 	}
+	testCase.StartedAt = time.Now().UTC()
 
 	fundingAccountBalance := testing.RetrieveFundingAccountBalanceOrError(testCase)
 	if testCase.Error != nil {
@@ -117,4 +118,6 @@ func SameAccountScenario(testCase *testing.TestCase) {
 	testing.Title(testCase, "footer", testCase.Verbose)
 
 	testing.Teardown(&account, testCase.Parameters.ToShardID, config.Configuration.Funding.Account.Address, testCase.Parameters.FromShardID)
+
+	testCase.FinishedAt = time.Now().UTC()
 }

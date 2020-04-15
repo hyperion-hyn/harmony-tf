@@ -21,6 +21,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	if testCase.ReportError() {
 		return
 	}
+	testCase.StartedAt = time.Now().UTC()
 
 	accounts := map[string]sdkAccounts.Account{}
 	accountTypes := []string{
@@ -84,4 +85,5 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 		testing.Teardown(&validatorAccount, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
 	}
 	testing.Teardown(&delegatorAccount, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+	testCase.FinishedAt = time.Now().UTC()
 }

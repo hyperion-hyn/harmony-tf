@@ -34,6 +34,8 @@ func MultipleReceiverInvalidNonceScenario(testCase *testing.TestCase) {
 		return
 	}
 
+	testCase.StartedAt = time.Now().UTC()
+
 	fundingAccountBalance := testing.RetrieveFundingAccountBalanceOrError(testCase)
 	if testCase.Error != nil {
 		return
@@ -80,6 +82,8 @@ func MultipleReceiverInvalidNonceScenario(testCase *testing.TestCase) {
 
 	multipleReceiversTeardown(testCase, senderAccount, receiverAccounts)
 	testing.Title(testCase, "footer", testCase.Verbose)
+
+	testCase.FinishedAt = time.Now().UTC()
 }
 
 func executeMultiInvalidNonceTransactions(testCase *testing.TestCase, senderAccount sdkAccounts.Account, receiverAccounts []sdkAccounts.Account) {

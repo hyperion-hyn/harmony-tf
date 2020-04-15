@@ -12,6 +12,7 @@ import (
 	"github.com/elliotchance/orderedmap"
 	"github.com/gookit/color"
 	"github.com/harmony-one/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/export"
 	"github.com/harmony-one/harmony-tf/funding"
 	"github.com/harmony-one/harmony-tf/keys"
 	stakingDelegationDelegateScenarios "github.com/harmony-one/harmony-tf/scenarios/staking/delegation/delegate"
@@ -44,7 +45,21 @@ func Execute() error {
 
 	if len(TestCases) > 0 {
 		execute()
-		results()
+		successfulCount, failedCount, duration := results()
+
+		switch strings.ToLower(config.Configuration.Export.Format) {
+		case "csv":
+			csvPath, err := export.ExportCSV(Results, Dismissed, successfulCount, failedCount, duration)
+			if err != nil {
+				fmt.Println("Failed to export test case results to CSV")
+			} else if csvPath != "" {
+				fmt.Printf("Successfully exported test case results to %s\n", csvPath)
+			}
+		//case "json":
+		default:
+		}
+
+		footer()
 	} else {
 		fmt.Println(fmt.Sprintf("Couldn't find any test cases - are you sure you've placed them in the testcases folder?"))
 	}
@@ -206,11 +221,11 @@ func execute() {
 	}
 }
 
-func results() {
-	config.Configuration.Framework.EndTime = time.Now()
-	duration := config.Configuration.Framework.EndTime.Sub(config.Configuration.Framework.StartTime)
-	successfulCount := 0
-	failedCount := 0
+func results() (successfulCount int, failedCount int, duration time.Duration) {
+	config.Configuration.Framework.EndTime = time.Now().UTC()
+	duration = config.Configuration.Framework.EndTime.Sub(config.Configuration.Framework.StartTime)
+	successfulCount = 0
+	failedCount = 0
 
 	for _, testCase := range Results {
 		if testCase.Result == testCase.Expected {
@@ -264,6 +279,10 @@ func results() {
 		fmt.Println("")
 	}
 
+	return successfulCount, failedCount, duration
+}
+
+func footer() {
 	fmt.Println("")
 	color.Style{color.FgBlack, color.BgWhite, color.OpBold}.Println(
 		fmt.Sprintf(

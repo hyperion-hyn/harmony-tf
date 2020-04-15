@@ -24,6 +24,7 @@ func StandardScenario(testCase *testing.TestCase) {
 	if testCase.ReportError() {
 		return
 	}
+	testCase.StartedAt = time.Now().UTC()
 
 	fundingAccountBalance := testing.RetrieveFundingAccountBalanceOrError(testCase)
 	if testCase.Error != nil {
@@ -97,6 +98,8 @@ func StandardScenario(testCase *testing.TestCase) {
 
 	standardTeardown(testCase, senderAccount, receiverAccount)
 	testing.Title(testCase, "footer", testCase.Verbose)
+
+	testCase.FinishedAt = time.Now().UTC()
 }
 
 func standardTeardown(testCase *testing.TestCase, senderAccount sdkAccounts.Account, receiverAccount sdkAccounts.Account) {

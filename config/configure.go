@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -48,6 +49,10 @@ func Configure(basePath string) (err error) {
 	configureAccountConfig()
 
 	if err = configureFundingConfig(); err != nil {
+		return err
+	}
+
+	if err = configureExports(); err != nil {
 		return err
 	}
 
@@ -152,7 +157,7 @@ func configureFrameworkConfig() error {
 	}
 	Configuration.Framework.SystemMemory = totalMemory
 
-	Configuration.Framework.StartTime = time.Now()
+	Configuration.Framework.StartTime = time.Now().UTC()
 
 	testTarget := strings.ToLower(Args.TestTarget)
 	if testTarget != "" && testTarget != Configuration.Framework.Test {
@@ -205,6 +210,19 @@ func configureFundingConfig() error {
 
 	if err := Configuration.Funding.Gas.Initialize(); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func configureExports() error {
+	Configuration.Export.Path = filepath.Join(Configuration.Framework.BasePath, Args.ExportPath)
+	if err := os.MkdirAll(Configuration.Export.Path, 0755); err != nil {
+		return err
+	}
+
+	if Args.Export != "" {
+		Configuration.Export.Format = Args.Export
 	}
 
 	return nil
