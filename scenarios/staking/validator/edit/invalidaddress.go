@@ -17,14 +17,15 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
 	account, validator, err := staking.ReuseOrCreateValidator(testCase, validatorName)
 	if err != nil {
-		testing.HandleError(testCase, account, fmt.Sprintf("Failed to create validator using account %s", validatorName), err)
+		msg := fmt.Sprintf("Failed to create validator using account %s", validatorName)
+		testCase.HandleError(err, account, msg)
 		return
 	}
 
@@ -32,13 +33,15 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 		invalidAccountName := accounts.GenerateTestCaseAccountName(testCase.Name, "InvalidChanger")
 		invalidAccount, err := testing.GenerateAndFundAccount(testCase, invalidAccountName, testCase.StakingParameters.Create.Validator.Amount, 1)
 		if err != nil {
-			testing.HandleError(testCase, validator.Account, fmt.Sprintf("Failed to generate and fund account %s", invalidAccountName), err)
+			msg := fmt.Sprintf("Failed to generate and fund account %s", invalidAccountName)
+			testCase.HandleError(err, validator.Account, msg)
 			return
 		}
 
 		lastEditTx, lastEditTxErr := staking.BasicEditValidator(testCase, validator.Account, &invalidAccount, nil, nil)
 		if lastEditTxErr != nil {
-			testing.HandleError(testCase, validator.Account, fmt.Sprintf("Failed to edit validator using account %s, address: %s", invalidAccount.Name, invalidAccount.Address), lastEditTxErr)
+			msg := fmt.Sprintf("Failed to edit validator using account %s, address: %s", invalidAccount.Name, invalidAccount.Address)
+			testCase.HandleError(lastEditTxErr, validator.Account, msg)
 			return
 		}
 		testCase.Transactions = append(testCase.Transactions, lastEditTx)

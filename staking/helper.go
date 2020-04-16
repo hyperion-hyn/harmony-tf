@@ -59,8 +59,7 @@ func ReuseOrCreateValidator(testCase *testing.TestCase, validatorName string) (a
 	}
 
 	if testCase.StakingParameters.ReuseExistingValidator && config.Configuration.Framework.CurrentValidator == nil && validatorExists {
-		config.Configuration.Framework.CurrentValidator = &testCase.StakingParameters.Create.Validator
-		config.Configuration.Framework.CurrentValidator.Account = account
+		config.Configuration.Framework.CurrentValidator = validator
 		validator = config.Configuration.Framework.CurrentValidator
 	}
 
@@ -101,7 +100,7 @@ func BasicCreateValidator(testCase *testing.TestCase, validatorAccount *sdkAccou
 	txResultColoring := logger.ResultColoring(tx.Success, true).Render(fmt.Sprintf("tx successful: %t", tx.Success))
 	logger.TransactionLog(fmt.Sprintf("Performed create validator - address: %s - transaction hash: %s, %s", validatorAccount.Address, tx.TransactionHash, txResultColoring), testCase.Verbose)
 
-	rpcClient, _ := config.Configuration.Network.API.RPCClient(testCase.StakingParameters.FromShardID)
+	rpcClient, err := config.Configuration.Network.API.RPCClient(testCase.StakingParameters.FromShardID)
 	validatorExists := sdkValidator.Exists(rpcClient, validatorAccount.Address)
 	addressExistsColoring := logger.ResultColoring(validatorExists, true).Render(fmt.Sprintf("is acting as a validator on the network: %t", validatorExists))
 	logger.StakingLog(fmt.Sprintf("Address %s %s", validatorAccount.Address, addressExistsColoring), testCase.Verbose)

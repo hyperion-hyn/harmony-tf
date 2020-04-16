@@ -17,14 +17,15 @@ func StandardScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
 	account, validator, err := staking.ReuseOrCreateValidator(testCase, validatorName)
 	if err != nil {
-		testing.HandleError(testCase, account, fmt.Sprintf("Failed to create validator using account %s", validatorName), err)
+		msg := fmt.Sprintf("Failed to create validator using account %s", validatorName)
+		testCase.HandleError(err, account, msg)
 		return
 	}
 
@@ -32,13 +33,15 @@ func StandardScenario(testCase *testing.TestCase) {
 		delegatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Delegator")
 		delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.Delegation.Amount, 1)
 		if err != nil {
-			testing.HandleError(testCase, &delegatorAccount, fmt.Sprintf("Failed to generate and fund account %s", delegatorName), err)
+			msg := fmt.Sprintf("Failed to generate and fund account %s", delegatorName)
+			testCase.HandleError(err, &delegatorAccount, msg)
 			return
 		}
 
 		delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, validator.Account, nil)
 		if err != nil {
-			testing.HandleError(testCase, validator.Account, fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validator.Account.Name, validator.Account.Address), err)
+			msg := fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validator.Account.Name, validator.Account.Address)
+			testCase.HandleError(err, validator.Account, msg)
 			return
 		}
 		testCase.Transactions = append(testCase.Transactions, delegationTx)
@@ -48,7 +51,8 @@ func StandardScenario(testCase *testing.TestCase) {
 		if successfulDelegation {
 			undelegationTx, undelegationSucceeded, err := staking.BasicUndelegation(testCase, &delegatorAccount, validator.Account, nil)
 			if err != nil {
-				testing.HandleError(testCase, validator.Account, fmt.Sprintf("Failed to undelegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validator.Account.Name, validator.Account.Address), err)
+				msg := fmt.Sprintf("Failed to undelegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validator.Account.Name, validator.Account.Address)
+				testCase.HandleError(err, validator.Account, msg)
 				return
 			}
 			testCase.Transactions = append(testCase.Transactions, undelegationTx)

@@ -17,27 +17,30 @@ func NonExistingScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
 	validatorAccount, err := accounts.GenerateAccount(validatorName)
 	if err != nil {
-		testing.HandleError(testCase, &validatorAccount, fmt.Sprintf("Failed to generate account %s", validatorName), err)
+		msg := fmt.Sprintf("Failed to generate account %s", validatorName)
+		testCase.HandleError(err, &validatorAccount, msg)
 		return
 	}
 
 	delegatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Delegator")
 	delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.Delegation.Amount, 1)
 	if err != nil {
-		testing.HandleError(testCase, &delegatorAccount, fmt.Sprintf("Failed to generate and fund account %s", delegatorName), err)
+		msg := fmt.Sprintf("Failed to generate and fund account %s", delegatorName)
+		testCase.HandleError(err, &delegatorAccount, msg)
 		return
 	}
 
 	undelegationTx, undelegationSucceeded, err := staking.BasicUndelegation(testCase, &delegatorAccount, &validatorAccount, nil)
 	if err != nil {
-		testing.HandleError(testCase, &validatorAccount, fmt.Sprintf("Failed to undelegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address), err)
+		msg := fmt.Sprintf("Failed to undelegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address)
+		testCase.HandleError(err, &validatorAccount, msg)
 		return
 	}
 	testCase.Transactions = append(testCase.Transactions, undelegationTx)

@@ -88,17 +88,21 @@ func configureNetworkConfig() error {
 		return errors.New("you need to specify a valid network name to use! Valid options: localnet, devnet, testnet, staking, stressnet, mainnet")
 	}
 
-	for networkType, nodes := range Configuration.Network.Endpoints {
-		if networkType == Configuration.Network.Name {
-			Configuration.Network.Nodes = nodes
-			break
-		}
-	}
-
 	Configuration.Network.Mode = strings.ToLower(Configuration.Network.Mode)
 	mode := strings.ToLower(Args.Mode)
 	if mode != "" && mode != Configuration.Network.Mode {
 		Configuration.Network.Mode = mode
+	}
+
+	if len(Args.Nodes) > 0 {
+		Configuration.Network.Nodes = Args.Nodes
+	} else {
+		for networkType, nodes := range Configuration.Network.Endpoints {
+			if networkType == Configuration.Network.Name {
+				Configuration.Network.Nodes = nodes
+				break
+			}
+		}
 	}
 
 	node := sdkNetworkUtils.ResolveStartingNode(Configuration.Network.Name, Configuration.Network.Mode, 0, Configuration.Network.Nodes)

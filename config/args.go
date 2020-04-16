@@ -18,6 +18,7 @@ type CommandArguments struct {
 	Network        string
 	Mode           string
 	Node           string
+	Nodes          []string
 	Path           string
 	Export         string
 	ExportPath     string
@@ -52,6 +53,7 @@ func init() {
 	RootCommand.PersistentFlags().StringVar(&Args.Network, "network", "stressnet", "--network <network>")
 	RootCommand.PersistentFlags().StringVar(&Args.Mode, "mode", "api", "--mode <mode>")
 	RootCommand.PersistentFlags().StringVar(&Args.Node, "node", "", "--node <node>")
+	RootCommand.PersistentFlags().StringSliceVar(&Args.Nodes, "nodes", []string{}, "--nodes node1,node2")
 	RootCommand.PersistentFlags().StringVar(&Args.Path, "path", ".", "<path>")
 	RootCommand.PersistentFlags().StringVar(&Args.Export, "export", ".", "<path>")
 	RootCommand.PersistentFlags().StringVar(&Args.ExportPath, "export-path", "./export", "<path>")

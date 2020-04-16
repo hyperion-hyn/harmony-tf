@@ -32,20 +32,22 @@ func MultipleSenderScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
 	receiverAccountName := accounts.GenerateTestCaseAccountName(testCase.Name, "Receiver")
 	receiverAccount, err := accounts.GenerateAccount(receiverAccountName)
 	if err != nil {
-		testing.HandleError(testCase, &receiverAccount, fmt.Sprintf("Failed to generate account %s", receiverAccountName), err)
+		msg := fmt.Sprintf("Failed to generate account %s", receiverAccountName)
+		testCase.HandleError(err, &receiverAccount, msg)
 		return
 	}
 
 	receiverStartingBalance, err := balances.GetShardBalance(receiverAccount.Address, testCase.Parameters.ToShardID)
 	if err != nil {
-		testing.HandleError(testCase, &receiverAccount, fmt.Sprintf("Failed to retrieve balance for account %s, address: %s", receiverAccount.Name, receiverAccount.Address), err)
+		msg := fmt.Sprintf("Failed to retrieve balance for account %s, address: %s", receiverAccount.Name, receiverAccount.Address)
+		testCase.HandleError(err, &receiverAccount, msg)
 		return
 	}
 
@@ -54,7 +56,8 @@ func MultipleSenderScenario(testCase *testing.TestCase) {
 	nameTemplate := accounts.GenerateTestCaseAccountName(testCase.Name, "Sender_")
 	senderAccounts, err := funding.GenerateAndFundAccounts(testCase.Parameters.SenderCount, nameTemplate, testCase.Parameters.Amount, testCase.Parameters.FromShardID, testCase.Parameters.FromShardID)
 	if err != nil {
-		testing.HandleError(testCase, nil, fmt.Sprintf("Failed to generate a total of %d sender accounts", testCase.Parameters.SenderCount), err)
+		msg := fmt.Sprintf("Failed to generate a total of %d sender accounts", testCase.Parameters.SenderCount)
+		testCase.HandleError(err, nil, msg)
 		return
 	}
 

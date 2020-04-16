@@ -21,7 +21,7 @@ func SameAccountScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
@@ -32,7 +32,7 @@ func SameAccountScenario(testCase *testing.TestCase) {
 
 	fundingAmount, err := funding.CalculateFundingAmount(testCase.Parameters.Amount, fundingAccountBalance, testCase.Parameters.ReceiverCount)
 	if err != nil {
-		testCase.SetError(err)
+		testCase.ErrorOccurred(err)
 		return
 	}
 
@@ -40,7 +40,7 @@ func SameAccountScenario(testCase *testing.TestCase) {
 	logger.AccountLog(fmt.Sprintf("Generating a new account: %s", accountName), testCase.Verbose)
 	account, err := accounts.GenerateAccount(accountName)
 	if err != nil {
-		testCase.SetError(err)
+		testCase.ErrorOccurred(err)
 		return
 	}
 
@@ -60,13 +60,13 @@ func SameAccountScenario(testCase *testing.TestCase) {
 
 	senderStartingBalance, err := balances.GetShardBalanceWithRetries(account.Address, testCase.Parameters.FromShardID, 5)
 	if err != nil {
-		testCase.SetError(err)
+		testCase.ErrorOccurred(err)
 		return
 	}
 
 	receiverStartingBalance, err := balances.GetShardBalanceWithRetries(account.Address, testCase.Parameters.ToShardID, 5)
 	if err != nil {
-		testCase.SetError(err)
+		testCase.ErrorOccurred(err)
 		return
 	}
 
@@ -82,7 +82,7 @@ func SameAccountScenario(testCase *testing.TestCase) {
 
 	rawTx, err := transactions.SendTransaction(&account, testCase.Parameters.FromShardID, account.Address, testCase.Parameters.ToShardID, testCase.Parameters.Amount, testCase.Parameters.Nonce, testCase.Parameters.Gas.Limit, testCase.Parameters.Gas.Price, txData, testCase.Parameters.Timeout)
 	if err != nil {
-		testCase.SetError(err)
+		testCase.ErrorOccurred(err)
 		return
 	}
 
@@ -99,7 +99,7 @@ func SameAccountScenario(testCase *testing.TestCase) {
 
 	receiverEndingBalance, err := balances.GetShardBalanceWithRetries(account.Address, testCase.Parameters.ToShardID, 5)
 	if err != nil {
-		testCase.SetError(err)
+		testCase.ErrorOccurred(err)
 		return
 	}
 	expectedReceiverEndingBalance := receiverStartingBalance.Add(testCase.Parameters.Amount)

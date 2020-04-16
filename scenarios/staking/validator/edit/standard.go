@@ -19,14 +19,15 @@ func StandardScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
 	account, validator, err := staking.ReuseOrCreateValidator(testCase, validatorName)
 	if err != nil {
-		testing.HandleError(testCase, account, fmt.Sprintf("Failed to create validator using account %s", validatorName), err)
+		msg := fmt.Sprintf("Failed to create validator using account %s", validatorName)
+		testCase.HandleError(err, account, msg)
 		return
 	}
 
@@ -43,20 +44,23 @@ func StandardScenario(testCase *testing.TestCase) {
 			if i == 0 || (lastEditTxErr == nil && lastEditTx.Success && lastSuccessfullyUpdated) {
 				blsKeyToRemove, blsKeyToAdd, blsErr := staking.ManageBLSKeys(validator, testCase.StakingParameters.Edit.Mode, testCase.StakingParameters.Create.BLSSignatureMessage, testCase.Verbose)
 				if blsErr != nil {
-					testing.HandleError(testCase, validator.Account, fmt.Sprintf("Failed to generate new bls key to use for adding to existing validator %s", validator.Account.Address), blsErr)
+					msg := fmt.Sprintf("Failed to generate new bls key to use for adding to existing validator %s", validator.Account.Address)
+					testCase.HandleError(blsErr, validator.Account, msg)
 					return
 				}
 
 				lastEditTx, lastEditTxErr = staking.BasicEditValidator(testCase, validator.Account, nil, blsKeyToRemove, blsKeyToAdd)
 				if lastEditTxErr != nil {
-					testing.HandleError(testCase, validator.Account, fmt.Sprintf("Failed to edit validator using account %s, address: %s", validator.Account.Name, validator.Account.Address), lastEditTxErr)
+					msg := fmt.Sprintf("Failed to edit validator using account %s, address: %s", validator.Account.Name, validator.Account.Address)
+					testCase.HandleError(lastEditTxErr, validator.Account, msg)
 					return
 				}
 				testCase.Transactions = append(testCase.Transactions, lastEditTx)
 
 				lastValidatorResult, lastEditTxErr = sdkValidator.Information(node, validator.Account.Address)
 				if lastEditTxErr != nil {
-					testing.HandleError(testCase, validator.Account, fmt.Sprintf("Failed to retrieve validator info for validator %s", validator.Account.Address), lastEditTxErr)
+					msg := fmt.Sprintf("Failed to retrieve validator info for validator %s", validator.Account.Address)
+					testCase.HandleError(lastEditTxErr, validator.Account, msg)
 					return
 				}
 

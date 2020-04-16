@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	sdkAccounts "github.com/harmony-one/go-lib/accounts"
 	sdkTxs "github.com/harmony-one/go-lib/transactions"
 	"github.com/harmony-one/harmony-tf/config"
 	"github.com/harmony-one/harmony-tf/logger"
@@ -58,28 +59,6 @@ func (testCase *TestCase) Initialize() {
 	}
 }
 
-// SetError - sets the latest error for a given testcase
-func (testCase *TestCase) SetError(err error) {
-	testCase.Error = err
-	testCase.Result = false
-	testCase.FinishedAt = time.Now().UTC()
-	logger.ErrorLog(err.Error(), testCase.Verbose)
-	Title(testCase, "footer", testCase.Verbose)
-}
-
-// ReportError - report if there's something wrong with the test case before even starting it (e.g. if some params etc are invalid)
-func (testCase *TestCase) ReportError() bool {
-	if testCase.Error != nil {
-		logger.ErrorLog(testCase.Error.Error(), testCase.Verbose)
-		testCase.Result = false
-		testCase.FinishedAt = time.Now().UTC()
-		logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
-		Title(testCase, "footer", testCase.Verbose)
-		return true
-	}
-	return false
-}
-
 // Duration - how long it took to run the test case
 func (testCase *TestCase) Duration() time.Duration {
 	if !testCase.StartedAt.IsZero() && !testCase.FinishedAt.IsZero() {
@@ -119,4 +98,44 @@ func statusMessage(status bool) string {
 	}
 
 	return "FAILURE"
+}
+
+// SetErrorState - set the error state for a test case based on a given error
+func (testCase *TestCase) SetErrorState() {
+	testCase.Result = false
+	testCase.FinishedAt = time.Now().UTC()
+}
+
+// ErrorOccurred - check if an error has occurred for a test case using either a supplied error or if there's already an error registered for the test case
+func (testCase *TestCase) ErrorOccurred(err error) bool {
+	if err != nil {
+		testCase.Error = err
+	}
+
+	if testCase.Error != nil {
+		testCase.SetErrorState()
+		logger.ErrorLog(testCase.Error.Error(), testCase.Verbose)
+		logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
+		Title(testCase, "footer", testCase.Verbose)
+		return true
+	}
+	return false
+}
+
+// HandleError - handle test case errors (log a message, set the result to false and return any eventual funds)
+func (testCase *TestCase) HandleError(err error, account *sdkAccounts.Account, message string) {
+	if err != nil {
+		testCase.Error = err
+		testCase.SetErrorState()
+
+		logger.ErrorLog(err.Error(), testCase.Verbose)
+
+		if account != nil {
+			logger.TeardownLog("Performing test teardown (returning funds and removing accounts)\n", testCase.Verbose)
+			Teardown(account, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+		}
+
+		logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
+		Title(testCase, "footer", testCase.Verbose)
+	}
 }

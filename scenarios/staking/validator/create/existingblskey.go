@@ -17,21 +17,23 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
 	account, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.Create.Validator.Amount, 1)
 	if err != nil {
-		testing.HandleError(testCase, &account, fmt.Sprintf("Failed to generate and fund the account %s", validatorName), err)
+		msg := fmt.Sprintf("Failed to generate and fund the account %s", validatorName)
+		testCase.HandleError(err, &account, msg)
 		return
 	}
 
 	testCase.StakingParameters.Create.Validator.Account = &account
 	tx, blsKeys, validatorExists, err := staking.BasicCreateValidator(testCase, &account, nil, nil)
 	if err != nil {
-		testing.HandleError(testCase, &account, fmt.Sprintf("Failed to create validator using account %s, address: %s", account.Name, account.Address), err)
+		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", account.Name, account.Address)
+		testCase.HandleError(err, &account, msg)
 		return
 	}
 	testCase.Transactions = append(testCase.Transactions, tx)
@@ -42,14 +44,16 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 		duplicateValidatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator_DuplicateBLSKey")
 		duplicateAccount, err := testing.GenerateAndFundAccount(testCase, duplicateValidatorName, testCase.StakingParameters.Create.Validator.Amount, 1)
 		if err != nil {
-			testing.HandleError(testCase, &duplicateAccount, fmt.Sprintf("Failed to generate and fund account: %s", duplicateValidatorName), err)
+			msg := fmt.Sprintf("Failed to generate and fund account: %s", duplicateValidatorName)
+			testCase.HandleError(err, &duplicateAccount, msg)
 			return
 		}
 
 		testCase.StakingParameters.Create.Validator.Account = &duplicateAccount
 		duplicateTx, _, duplicateValidatorExists, err := staking.BasicCreateValidator(testCase, &duplicateAccount, nil, blsKeys)
 		if err != nil {
-			testing.HandleError(testCase, &account, fmt.Sprintf("Failed to create validator using account %s, address: %s", duplicateAccount.Name, duplicateAccount.Address), err)
+			msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", duplicateAccount.Name, duplicateAccount.Address)
+			testCase.HandleError(err, &account, msg)
 			return
 		}
 		testCase.Transactions = append(testCase.Transactions, duplicateTx)

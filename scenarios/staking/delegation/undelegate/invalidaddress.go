@@ -20,7 +20,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
@@ -35,7 +35,8 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 		accountName := tfAccounts.GenerateTestCaseAccountName(testCase.Name, strings.Title(accountType))
 		account, err := testing.GenerateAndFundAccount(testCase, accountName, testCase.StakingParameters.Create.Validator.Amount, 1)
 		if err != nil {
-			testing.HandleError(testCase, &account, fmt.Sprintf("Failed to generate and fund %s account %s", accountType, accountName), err)
+			msg := fmt.Sprintf("Failed to generate and fund %s account %s", accountType, accountName)
+			testCase.HandleError(err, &account, msg)
 			return
 		}
 		accounts[accountType] = account
@@ -45,7 +46,8 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	testCase.StakingParameters.Create.Validator.Account = &validatorAccount
 	tx, _, validatorExists, err := staking.BasicCreateValidator(testCase, &validatorAccount, &senderAccount, nil)
 	if err != nil {
-		testing.HandleError(testCase, &validatorAccount, fmt.Sprintf("Failed to create validator using account %s, address: %s", validatorAccount.Name, validatorAccount.Address), err)
+		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", validatorAccount.Name, validatorAccount.Address)
+		testCase.HandleError(err, &validatorAccount, msg)
 		return
 	}
 	testCase.Transactions = append(testCase.Transactions, tx)
@@ -57,7 +59,8 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
 	accountEndingBalance, err := balances.GetShardBalance(validatorAccount.Address, testCase.StakingParameters.FromShardID)
 	if err != nil {
-		testing.HandleError(testCase, &validatorAccount, fmt.Sprintf("Failed to fetch ending balance for account %s, address: %s", validatorAccount.Name, validatorAccount.Address), err)
+		msg := fmt.Sprintf("Failed to fetch ending balance for account %s, address: %s", validatorAccount.Name, validatorAccount.Address)
+		testCase.HandleError(err, &validatorAccount, msg)
 		return
 	}
 	expectedAccountEndingBalance := validatorAccount.Balance.Sub(testCase.StakingParameters.Create.Validator.Amount)
@@ -73,7 +76,8 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	if successfulValidatorCreation {
 		delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, &validatorAccount, nil)
 		if err != nil {
-			testing.HandleError(testCase, &validatorAccount, fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address), err)
+			msg := fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address)
+			testCase.HandleError(err, &validatorAccount, msg)
 			return
 		}
 		testCase.Transactions = append(testCase.Transactions, delegationTx)
@@ -83,7 +87,8 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 		if successfulDelegation {
 			undelegationTx, undelegationSucceeded, err := staking.BasicUndelegation(testCase, &delegatorAccount, &validatorAccount, &senderAccount)
 			if err != nil {
-				testing.HandleError(testCase, &validatorAccount, fmt.Sprintf("Failed to undelegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address), err)
+				msg := fmt.Sprintf("Failed to undelegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address)
+				testCase.HandleError(err, &validatorAccount, msg)
 				return
 			}
 			testCase.Transactions = append(testCase.Transactions, undelegationTx)

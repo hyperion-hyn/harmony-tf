@@ -32,7 +32,7 @@ func MultipleReceiverInvalidNonceScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
@@ -43,7 +43,7 @@ func MultipleReceiverInvalidNonceScenario(testCase *testing.TestCase) {
 
 	fundingAmount, err := funding.CalculateFundingAmount(testCase.Parameters.Amount, fundingAccountBalance, testCase.Parameters.SenderCount)
 	if err != nil {
-		testCase.SetError(err)
+		testCase.ErrorOccurred(err)
 		return
 	}
 
@@ -51,7 +51,8 @@ func MultipleReceiverInvalidNonceScenario(testCase *testing.TestCase) {
 	logger.AccountLog(fmt.Sprintf("Generating a new sender account: %s", senderAccountName), testCase.Verbose)
 	senderAccount, err := accounts.GenerateAccount(senderAccountName)
 	if err != nil {
-		testing.HandleError(testCase, &senderAccount, fmt.Sprintf("Failed to generate account %s", senderAccountName), err)
+		msg := fmt.Sprintf("Failed to generate account %s", senderAccountName)
+		testCase.HandleError(err, &senderAccount, msg)
 		return
 	}
 

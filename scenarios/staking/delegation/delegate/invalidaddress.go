@@ -2,7 +2,6 @@ package delegate
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"
@@ -20,7 +19,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
@@ -32,10 +31,11 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	for _, accountType := range accountTypes {
-		accountName := tfAccounts.GenerateTestCaseAccountName(testCase.Name, strings.ToUpper(accountType))
+		accountName := tfAccounts.GenerateTestCaseAccountName(testCase.Name, accountType)
 		account, err := testing.GenerateAndFundAccount(testCase, accountName, testCase.StakingParameters.Create.Validator.Amount, 1)
 		if err != nil {
-			testing.HandleError(testCase, &account, fmt.Sprintf("Failed to generate and fund %s account %s", accountType, accountName), err)
+			msg := fmt.Sprintf("Failed to generate and fund %s account %s", accountType, accountName)
+			testCase.HandleError(err, &account, msg)
 			return
 		}
 		accounts[accountType] = account
@@ -45,7 +45,8 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	testCase.StakingParameters.Create.Validator.Account = &validatorAccount
 	tx, _, validatorExists, err := staking.BasicCreateValidator(testCase, &validatorAccount, &senderAccount, nil)
 	if err != nil {
-		testing.HandleError(testCase, &validatorAccount, fmt.Sprintf("Failed to create validator using account %s, address: %s", validatorAccount.Name, validatorAccount.Address), err)
+		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", validatorAccount.Name, validatorAccount.Address)
+		testCase.HandleError(err, &validatorAccount, msg)
 		return
 	}
 	testCase.Transactions = append(testCase.Transactions, tx)
@@ -69,7 +70,8 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	if successfulValidatorCreation {
 		delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, &validatorAccount, &senderAccount)
 		if err != nil {
-			testing.HandleError(testCase, &validatorAccount, fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address), err)
+			msg := fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address)
+			testCase.HandleError(err, &validatorAccount, msg)
 			return
 		}
 		testCase.Transactions = append(testCase.Transactions, delegationTx)

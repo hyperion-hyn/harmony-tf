@@ -23,7 +23,7 @@ func StandardScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
@@ -34,7 +34,7 @@ func StandardScenario(testCase *testing.TestCase) {
 
 	fundingAmount, err := funding.CalculateFundingAmount(testCase.Parameters.Amount, fundingAccountBalance, testCase.Parameters.ReceiverCount)
 	if err != nil {
-		testCase.SetError(err)
+		testCase.ErrorOccurred(err)
 		return
 	}
 
@@ -42,7 +42,7 @@ func StandardScenario(testCase *testing.TestCase) {
 	logger.AccountLog(fmt.Sprintf("Generating a new sender account: %s", senderAccountName), testCase.Verbose)
 	senderAccount, err := accounts.GenerateAccount(senderAccountName)
 	if err != nil {
-		testCase.SetError(err)
+		testCase.ErrorOccurred(err)
 		return
 	}
 

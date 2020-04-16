@@ -18,21 +18,23 @@ func StandardScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
 	account, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.Create.Validator.Amount, 1)
 	if err != nil {
-		testing.HandleError(testCase, &account, fmt.Sprintf("Failed to generate and fund account %s", validatorName), err)
+		msg := fmt.Sprintf("Failed to generate and fund account %s", validatorName)
+		testCase.HandleError(err, &account, msg)
 		return
 	}
 
 	testCase.StakingParameters.Create.Validator.Account = &account
 	tx, _, validatorExists, err := staking.BasicCreateValidator(testCase, &account, nil, nil)
 	if err != nil {
-		testing.HandleError(testCase, &account, fmt.Sprintf("Failed to create validator using account %s, address: %s", account.Name, account.Address), err)
+		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", account.Name, account.Address)
+		testCase.HandleError(err, &account, msg)
 		return
 	}
 	testCase.Transactions = append(testCase.Transactions, tx)

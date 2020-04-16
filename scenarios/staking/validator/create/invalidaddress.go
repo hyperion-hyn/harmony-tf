@@ -18,14 +18,15 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
 
-	if testCase.ReportError() {
+	if testCase.ErrorOccurred(nil) {
 		return
 	}
 
 	senderName := accounts.GenerateTestCaseAccountName(testCase.Name, "InvalidSender")
 	senderAccount, err := testing.GenerateAndFundAccount(testCase, senderName, testCase.StakingParameters.Create.Validator.Amount, 1)
 	if err != nil {
-		testing.HandleError(testCase, &senderAccount, fmt.Sprintf("Failed to generate and fund account: %s", senderName), err)
+		msg := fmt.Sprintf("Failed to generate and fund account: %s", senderName)
+		testCase.HandleError(err, &senderAccount, msg)
 		return
 	}
 
@@ -33,14 +34,20 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	logger.AccountLog(fmt.Sprintf("Generating a new account: %s", validatorName), testCase.Verbose)
 	validatorAccount, err := accounts.GenerateAccount(validatorName)
 	if err != nil {
-		testing.HandleError(testCase, &validatorAccount, fmt.Sprintf("Failed to generate account %s", validatorName), err)
+		msg := fmt.Sprintf("Failed to generate account %s", validatorName)
+		testCase.HandleError(err, &validatorAccount, msg)
 		return
 	}
 	logger.AccountLog(fmt.Sprintf("Generated account: %s, address: %s", validatorAccount.Name, validatorAccount.Address), testCase.Verbose)
 
 	testCase.StakingParameters.Create.Validator.Account = &validatorAccount
 	tx, _, validatorExists, err := staking.BasicCreateValidator(testCase, &validatorAccount, &senderAccount, nil)
-	testing.HandleError(testCase, &senderAccount, fmt.Sprintf("Failed to create validator using account %s, address: %s", senderAccount.Name, senderAccount.Address), err)
+	if err != nil {
+		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", senderAccount.Name, senderAccount.Address)
+		testCase.HandleError(err, &senderAccount, msg)
+		return
+	}
+
 	testCase.Transactions = append(testCase.Transactions, tx)
 
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation

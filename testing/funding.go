@@ -71,12 +71,12 @@ func RetrieveFundingAccountBalanceOrError(testCase *TestCase) numeric.Dec {
 	fundingAccountBalance, err := balances.GetShardBalance(config.Configuration.Funding.Account.Address, testCase.Parameters.FromShardID)
 	if err != nil {
 		err = fmt.Errorf("Failed to fetch latest account balance for the funding account %s, address: %s - error: %s", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, err.Error())
-		testCase.SetError(err)
+		testCase.ErrorOccurred(err)
 	}
 
 	if fundingAccountBalance.IsNil() || fundingAccountBalance.IsZero() {
 		err = fmt.Errorf("Funding account %s, address: %s doesn't have a sufficient balance in shard %d - balance: %f", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, testCase.Parameters.FromShardID, fundingAccountBalance)
-		testCase.SetError(err)
+		testCase.ErrorOccurred(err)
 	}
 
 	return fundingAccountBalance
