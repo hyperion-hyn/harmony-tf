@@ -40,7 +40,7 @@ func NonExistingScenario(testCase *testing.TestCase) {
 
 	testCase.Result = tx.Success
 
-	logger.TeardownLog("Performing test teardown (returning funds and removing accounts)\n", testCase.Verbose)
+	logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
 	testing.Title(testCase, "footer", testCase.Verbose)
 

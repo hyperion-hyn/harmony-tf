@@ -64,6 +64,7 @@ type Network struct {
 	Gas                  sdkNetworkTypes.Gas     `yaml:"gas"`
 	API                  sdkNetworkTypes.Network `yaml:"-"`
 	Retry                Retry                   `yaml:"retry"`
+	Balances             Balances                `yaml:"balances"`
 }
 
 // Account - represents the account settings group
@@ -88,6 +89,11 @@ type Funding struct {
 type Retry struct {
 	Attempts int `yaml:"attempts"`
 	Wait     int `yaml:"wait"`
+}
+
+// Balances - settings for balance RPC calls
+type Balances struct {
+	Retry Retry `yaml:"retry"`
 }
 
 // Export - export settings

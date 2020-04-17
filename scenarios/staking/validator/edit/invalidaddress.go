@@ -48,7 +48,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 
 		testCase.Result = lastEditTx.Success
 
-		logger.TeardownLog("Performing test teardown (returning funds and removing accounts)\n", testCase.Verbose)
+		logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
 
 		testing.Teardown(&invalidAccount, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
 		if !testCase.StakingParameters.ReuseExistingValidator {

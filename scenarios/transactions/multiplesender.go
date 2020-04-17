@@ -31,8 +31,12 @@ func MultipleSenderScenario(testCase *testing.TestCase) {
 
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
-
 	if testCase.ErrorOccurred(nil) {
+		return
+	}
+
+	_, _, err := funding.CalculateFundingDetails(testCase.Parameters.Amount, testCase.Parameters.SenderCount, testCase.Parameters.FromShardID)
+	if testCase.ErrorOccurred(err) {
 		return
 	}
 
@@ -66,27 +70,28 @@ func MultipleSenderScenario(testCase *testing.TestCase) {
 
 	logger.TransactionLog(fmt.Sprintf("A total of %d/%d transactions were successful", testCase.SuccessfulTxCount, testCase.Parameters.SenderCount), testCase.Verbose)
 
-	if txsSuccessful && testCase.Parameters.FromShardID != testCase.Parameters.ToShardID {
-		totalWaitTime := config.Configuration.Network.CrossShardTxWaitTime * 2
-		logger.TransactionLog(fmt.Sprintf("Because this is a cross shard test case with multiple accounts involved we need to wait an extra %d seconds to correctly receive the ending balance of the receiver account %s in shard %d", totalWaitTime, receiverAccount.Address, testCase.Parameters.ToShardID), testCase.Verbose)
-		// Double the standard wait time since we're waiting on the results of multiple transactions
-		time.Sleep(time.Duration(totalWaitTime) * time.Second)
-	}
+	if txsSuccessful {
+		receiverEndingBalance, err := balances.GetNonZeroShardBalance(receiverAccount.Address, testCase.Parameters.ToShardID)
+		if testCase.ErrorOccurred(err) {
+			return
+		}
+		decSenderCount := numeric.NewDec(testCase.Parameters.SenderCount)
+		var expectedBalance numeric.Dec
 
-	receiverEndingBalance, err := balances.GetShardBalance(receiverAccount.Address, testCase.Parameters.ToShardID)
-	decSenderCount := numeric.NewDec(testCase.Parameters.SenderCount)
-	var expectedBalance numeric.Dec
+		if testCase.Expected {
+			expectedBalance = testCase.Parameters.Amount.Mul(decSenderCount)
+		} else {
+			expectedBalance = numeric.NewDec(0)
+		}
 
-	if testCase.Expected {
-		expectedBalance = testCase.Parameters.Amount.Mul(decSenderCount)
+		testCase.Result = (txsSuccessful && receiverEndingBalance.Equal(expectedBalance))
+
+		logger.BalanceLog(fmt.Sprintf("Receiver account %s (address: %s) has an ending balance of %f in shard %d after the test - expected balance: %f", receiverAccount.Name, receiverAccount.Address, receiverEndingBalance, testCase.Parameters.ToShardID, expectedBalance), testCase.Verbose)
 	} else {
-		expectedBalance = numeric.NewDec(0)
+		testCase.Result = false
 	}
 
-	testCase.Result = (txsSuccessful && receiverEndingBalance.Equal(expectedBalance))
-
-	logger.BalanceLog(fmt.Sprintf("Receiver account %s (address: %s) has an ending balance of %f in shard %d after the test - expected balance: %f", receiverAccount.Name, receiverAccount.Address, receiverEndingBalance, testCase.Parameters.ToShardID, expectedBalance), testCase.Verbose)
-	logger.TeardownLog("Performing test teardown (returning funds and removing accounts)\n", testCase.Verbose)
+	logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
 
 	multipleSendersTeardown(testCase, senderAccounts, receiverAccount)
@@ -118,28 +123,12 @@ func executeMultiSenderTransactions(testCase *testing.TestCase, senderAccounts [
 
 func executeSenderTransaction(testCase *testing.TestCase, senderAccount sdkAccounts.Account, receiverAccount sdkAccounts.Account, responses chan<- sdkTxs.Transaction, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
-
 	var testCaseTx sdkTxs.Transaction
+	balanceRetrieved := true
 
-	senderStartingBalance, err := balances.GetShardBalance(senderAccount.Address, testCase.Parameters.FromShardID)
+	senderStartingBalance, err := balances.GetNonZeroShardBalance(senderAccount.Address, testCase.Parameters.FromShardID)
 	if err != nil {
-		testCaseTx = sdkTxs.Transaction{
-			Success: false,
-			Error:   fmt.Errorf("can't fetch starting balance for sender account %s", senderAccount.Address),
-		}
-	}
-
-	if testCase.Parameters.FromShardID != testCase.Parameters.ToShardID && (senderStartingBalance.IsNil() || senderStartingBalance.IsZero()) {
-		logger.FundingLog(fmt.Sprintf("We need to wait an extra %d seconds for the funding to arrive to sender account %s in shard %d", config.Configuration.Network.CrossShardTxWaitTime, senderAccount.Address, testCase.Parameters.FromShardID), testCase.Verbose)
-		time.Sleep(time.Duration(config.Configuration.Network.CrossShardTxWaitTime) * time.Second)
-		senderStartingBalance, err = balances.GetShardBalance(senderAccount.Address, testCase.Parameters.FromShardID)
-
-		if err != nil {
-			testCaseTx = sdkTxs.Transaction{
-				Success: false,
-				Error:   fmt.Errorf("can't fetch starting balance for sender account %s", senderAccount.Address),
-			}
-		}
+		balanceRetrieved = false
 	}
 
 	if !senderStartingBalance.IsNil() && !senderStartingBalance.IsZero() {
@@ -157,6 +146,10 @@ func executeSenderTransaction(testCase *testing.TestCase, senderAccount sdkAccou
 			logger.TransactionLog(fmt.Sprintf("Sent %f coins from %s (shard %d) to %s (shard %d) - transaction hash: %s, %s", testCase.Parameters.Amount, senderAccount.Address, testCase.Parameters.FromShardID, receiverAccount.Address, testCase.Parameters.ToShardID, testCaseTx.TransactionHash, txResultColoring), testCase.Verbose)
 		}
 	} else {
+		balanceRetrieved = false
+	}
+
+	if !balanceRetrieved {
 		logger.FundingLog(fmt.Sprintf("Couldn't proceed with executing transaction since sender account %s hasn't been funded properly, balance is: %f", senderAccount.Address, senderStartingBalance), testCase.Verbose)
 
 		testCaseTx = sdkTxs.Transaction{

@@ -36,14 +36,8 @@ func MultipleReceiverInvalidNonceScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	fundingAccountBalance := testing.RetrieveFundingAccountBalanceOrError(testCase)
-	if testCase.Error != nil {
-		return
-	}
-
-	fundingAmount, err := funding.CalculateFundingAmount(testCase.Parameters.Amount, fundingAccountBalance, testCase.Parameters.SenderCount)
-	if err != nil {
-		testCase.ErrorOccurred(err)
+	_, requiredFunding, err := funding.CalculateFundingDetails(testCase.Parameters.Amount, testCase.Parameters.ReceiverCount, testCase.Parameters.FromShardID)
+	if testCase.ErrorOccurred(err) {
 		return
 	}
 
@@ -62,7 +56,7 @@ func MultipleReceiverInvalidNonceScenario(testCase *testing.TestCase) {
 		testCase.Parameters.FromShardID,
 		senderAccount.Address,
 		testCase.Parameters.ToShardID,
-		fundingAmount, -1,
+		requiredFunding, -1,
 		config.Configuration.Funding.Gas.Limit,
 		config.Configuration.Funding.Gas.Price,
 		config.Configuration.Funding.Timeout,
@@ -78,7 +72,7 @@ func MultipleReceiverInvalidNonceScenario(testCase *testing.TestCase) {
 
 	testCase.Result = (testCase.SuccessfulTxCount == testCase.Parameters.ReceiverCount)
 
-	logger.TeardownLog("Performing test teardown (returning funds and removing accounts)\n", testCase.Verbose)
+	logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
 
 	multipleReceiversTeardown(testCase, senderAccount, receiverAccounts)
@@ -118,15 +112,13 @@ func executeMultiInvalidNonceTransactions(testCase *testing.TestCase, senderAcco
 func executeInvalidNonceTransaction(testCase *testing.TestCase, senderAccount sdkAccounts.Account, receiverAccount sdkAccounts.Account, nonce int, responses chan<- sdkTxs.Transaction, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 	var testCaseTx sdkTxs.Transaction
-	senderStartingBalance, _ := balances.GetShardBalance(senderAccount.Address, testCase.Parameters.FromShardID)
-
-	if testCase.Parameters.FromShardID != testCase.Parameters.ToShardID && (senderStartingBalance.IsNil() || senderStartingBalance.IsZero()) {
-		logger.FundingLog(fmt.Sprintf("We need to wait an extra %d seconds for the funding to arrive to sender account %s in shard %d", config.Configuration.Network.CrossShardTxWaitTime, senderAccount.Address, testCase.Parameters.FromShardID), testCase.Verbose)
-		time.Sleep(time.Duration(config.Configuration.Network.CrossShardTxWaitTime) * time.Second)
-		senderStartingBalance, _ = balances.GetShardBalance(senderAccount.Address, testCase.Parameters.FromShardID)
+	balanceRetrieved := true
+	senderStartingBalance, err := balances.GetNonZeroShardBalance(senderAccount.Address, testCase.Parameters.FromShardID)
+	if testCase.ErrorOccurred(err) {
+		balanceRetrieved = false
 	}
 
-	if !senderStartingBalance.IsZero() {
+	if !senderStartingBalance.IsNil() && !senderStartingBalance.IsZero() {
 		logger.AccountLog(fmt.Sprintf("Generated a new receiver account: %s, address: %s", receiverAccount.Name, receiverAccount.Address), testCase.Verbose)
 		logger.AccountLog(fmt.Sprintf("Using sender account %s (address: %s) and receiver account %s (address : %s)", senderAccount.Name, senderAccount.Address, receiverAccount.Name, receiverAccount.Address), testCase.Verbose)
 		logger.BalanceLog(fmt.Sprintf("Sender account %s (address: %s) has a starting balance of %f in shard %d before the test", senderAccount.Name, senderAccount.Address, senderStartingBalance, testCase.Parameters.FromShardID), testCase.Verbose)
@@ -141,6 +133,10 @@ func executeInvalidNonceTransaction(testCase *testing.TestCase, senderAccount sd
 
 		logger.TransactionLog(fmt.Sprintf("Sent %f token(s) from %s to %s - transaction hash: %s, %s", testCase.Parameters.Amount, config.Configuration.Funding.Account.Address, receiverAccount.Address, testCaseTx.TransactionHash, txResultColoring), testCase.Verbose)
 	} else {
+		balanceRetrieved = false
+	}
+
+	if !balanceRetrieved {
 		logger.FundingLog(fmt.Sprintf("Couldn't proceed with executing transaction since sender account %s hasn't been funded properly, balance is: %f", senderAccount.Address, senderStartingBalance), testCase.Verbose)
 
 		testCaseTx = sdkTxs.Transaction{

@@ -206,8 +206,6 @@ func configureFundingConfig() error {
 		}
 	}
 
-	Configuration.Funding.Timeout = utils.NetworkTimeoutAdjustment(Configuration.Network.Name, Configuration.Funding.Timeout)
-
 	if Args.MinimumFunds != 0.0 && Args.MinimumFunds != Configuration.Funding.MinimumFunds {
 		Configuration.Funding.MinimumFunds = Args.MinimumFunds
 	}

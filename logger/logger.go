@@ -71,7 +71,7 @@ func ResultLog(result bool, expected bool, verbose bool) {
 			formattedCategory = color.Style{color.FgRed, color.OpBold}.Render("RESULT")
 		}
 
-		fmt.Println(fmt.Sprintf("[%s] %s - %s", time.Now().Format(timeFormat), formattedCategory, formattedMessage))
+		fmt.Println(fmt.Sprintf("\n[%s] %s - %s", time.Now().Format(timeFormat), formattedCategory, formattedMessage))
 	}
 }
 

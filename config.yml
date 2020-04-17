@@ -1,8 +1,8 @@
 network:
   name: "stressnet"
   mode: "api"
-  cross_shard_tx_wait_time: 32 # The time to wait for account balances to properly updated when performing cross shard transfers - this time will be 1.5x'd for localnet, the open staking network and the stress test network since they seem to be slower with processing txs and blocks
-  staking_wait_time: 16
+  cross_shard_tx_wait_time: 60 # The time to wait for account balances to properly updated when performing cross shard transfers - this time will be 1.5x'd for localnet, the open staking network and the stress test network since they seem to be slower with processing txs and blocks
+  staking_wait_time: 30
 
   # endpoints should map to correct chan ids
   endpoints:
@@ -15,9 +15,14 @@ network:
       - http://54.245.77.197:9500
       - http://52.53.161.58:9500
   
-  retry:
+  retry: # Retry settings for common RPC calls (if used). Can be overriden by specific RPC functionality (e.g. balances)
     attempts: 3 # How many attempts that should be performed per RPC call
     wait: 1 # How long to wait after each attempt
+  
+  balances:
+    retry:
+      attempts: 25
+      wait: 5
   
   gas:
     cost: 0.1 # Estimated gas cost that will be used for various transaction and funding calculations etc.
@@ -39,7 +44,7 @@ funding:
     address: ""
   shards: "all"
   minimum_funds: 10.0
-  timeout: 30
+  timeout: 60
   verbose: false
   retry:
     attempts: 5 # How many funding attempts that should be performed

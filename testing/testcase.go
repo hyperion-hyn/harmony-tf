@@ -10,7 +10,6 @@ import (
 	"github.com/harmony-one/harmony-tf/config"
 	"github.com/harmony-one/harmony-tf/logger"
 	"github.com/harmony-one/harmony-tf/testing/parameters"
-	"github.com/harmony-one/harmony-tf/utils"
 )
 
 // TestCase - represents a test case
@@ -47,7 +46,6 @@ func (testCase *TestCase) Initialize() {
 			testCase.Error = err
 			testCase.Result = false
 		}
-		testCase.Parameters.Timeout = utils.NetworkTimeoutAdjustment(config.Configuration.Network.Name, testCase.Parameters.Timeout)
 	}
 
 	if testCase.StakingParameters.Create.Validator.RawAmount != "" || testCase.StakingParameters.Edit.Validator.RawAmount != "" || testCase.StakingParameters.Delegation.Delegate.RawAmount != "" || testCase.StakingParameters.Delegation.Undelegate.RawAmount != "" {
@@ -55,7 +53,6 @@ func (testCase *TestCase) Initialize() {
 			testCase.Error = err
 			testCase.Result = false
 		}
-		testCase.StakingParameters.Timeout = utils.NetworkTimeoutAdjustment(config.Configuration.Network.Name, testCase.StakingParameters.Timeout)
 	}
 }
 
@@ -131,7 +128,7 @@ func (testCase *TestCase) HandleError(err error, account *sdkAccounts.Account, m
 		logger.ErrorLog(err.Error(), testCase.Verbose)
 
 		if account != nil {
-			logger.TeardownLog("Performing test teardown (returning funds and removing accounts)\n", testCase.Verbose)
+			logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
 			Teardown(account, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
 		}
 

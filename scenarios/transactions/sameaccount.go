@@ -25,22 +25,15 @@ func SameAccountScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	fundingAccountBalance := testing.RetrieveFundingAccountBalanceOrError(testCase)
-	if testCase.Error != nil {
-		return
-	}
-
-	fundingAmount, err := funding.CalculateFundingAmount(testCase.Parameters.Amount, fundingAccountBalance, testCase.Parameters.ReceiverCount)
-	if err != nil {
-		testCase.ErrorOccurred(err)
+	_, requiredFunding, err := funding.CalculateFundingDetails(testCase.Parameters.Amount, testCase.Parameters.ReceiverCount, testCase.Parameters.FromShardID)
+	if testCase.ErrorOccurred(err) {
 		return
 	}
 
 	accountName := accounts.GenerateTestCaseAccountName(testCase.Name, "Account")
 	logger.AccountLog(fmt.Sprintf("Generating a new account: %s", accountName), testCase.Verbose)
 	account, err := accounts.GenerateAccount(accountName)
-	if err != nil {
-		testCase.ErrorOccurred(err)
+	if testCase.ErrorOccurred(err) {
 		return
 	}
 
@@ -50,7 +43,7 @@ func SameAccountScenario(testCase *testing.TestCase) {
 		testCase.Parameters.FromShardID,
 		account.Address,
 		testCase.Parameters.FromShardID,
-		fundingAmount,
+		requiredFunding,
 		-1,
 		config.Configuration.Funding.Gas.Limit,
 		config.Configuration.Funding.Gas.Price,
@@ -58,15 +51,13 @@ func SameAccountScenario(testCase *testing.TestCase) {
 		config.Configuration.Funding.Retry.Attempts,
 	)
 
-	senderStartingBalance, err := balances.GetShardBalanceWithRetries(account.Address, testCase.Parameters.FromShardID, 5)
-	if err != nil {
-		testCase.ErrorOccurred(err)
+	senderStartingBalance, err := balances.GetShardBalance(account.Address, testCase.Parameters.FromShardID)
+	if testCase.ErrorOccurred(err) {
 		return
 	}
 
-	receiverStartingBalance, err := balances.GetShardBalanceWithRetries(account.Address, testCase.Parameters.ToShardID, 5)
-	if err != nil {
-		testCase.ErrorOccurred(err)
+	receiverStartingBalance, err := balances.GetShardBalance(account.Address, testCase.Parameters.ToShardID)
+	if testCase.ErrorOccurred(err) {
 		return
 	}
 
@@ -81,8 +72,7 @@ func SameAccountScenario(testCase *testing.TestCase) {
 	logger.TransactionLog(fmt.Sprintf("Will wait up to %d seconds to let the transaction get finalized", testCase.Parameters.Timeout), testCase.Verbose)
 
 	rawTx, err := transactions.SendTransaction(&account, testCase.Parameters.FromShardID, account.Address, testCase.Parameters.ToShardID, testCase.Parameters.Amount, testCase.Parameters.Nonce, testCase.Parameters.Gas.Limit, testCase.Parameters.Gas.Price, txData, testCase.Parameters.Timeout)
-	if err != nil {
-		testCase.ErrorOccurred(err)
+	if testCase.ErrorOccurred(err) {
 		return
 	}
 
@@ -92,14 +82,13 @@ func SameAccountScenario(testCase *testing.TestCase) {
 
 	logger.TransactionLog(fmt.Sprintf("Sent %f token(s) from %s (shard %d) to %s (shard %d) - transaction hash: %s, %s", testCase.Parameters.Amount, account.Address, testCase.Parameters.FromShardID, account.Address, testCase.Parameters.ToShardID, testCaseTx.TransactionHash, txResultColoring), testCase.Verbose)
 
-	if testCaseTx.Success && testCase.Parameters.FromShardID != testCase.Parameters.ToShardID {
+	/*if testCaseTx.Success && testCase.Parameters.FromShardID != testCase.Parameters.ToShardID {
 		logger.BalanceLog(fmt.Sprintf("Because this is a cross shard transaction we need to wait an extra %d seconds to correctly receive the ending balance of the receiver account %s in shard %d", config.Configuration.Network.CrossShardTxWaitTime, account.Address, testCase.Parameters.ToShardID), testCase.Verbose)
 		time.Sleep(time.Duration(config.Configuration.Network.CrossShardTxWaitTime) * time.Second)
-	}
+	}*/
 
-	receiverEndingBalance, err := balances.GetShardBalanceWithRetries(account.Address, testCase.Parameters.ToShardID, 5)
-	if err != nil {
-		testCase.ErrorOccurred(err)
+	receiverEndingBalance, err := balances.GetNonZeroShardBalance(account.Address, testCase.Parameters.ToShardID)
+	if testCase.ErrorOccurred(err) {
 		return
 	}
 	expectedReceiverEndingBalance := receiverStartingBalance.Add(testCase.Parameters.Amount)

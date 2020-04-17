@@ -60,7 +60,7 @@ func StandardScenario(testCase *testing.TestCase) {
 			testCase.Result = undelegationTx.Success && undelegationSucceeded
 		}
 
-		logger.TeardownLog("Performing test teardown (returning funds and removing accounts)\n", testCase.Verbose)
+		logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
 		testing.Teardown(&delegatorAccount, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
 	}
 

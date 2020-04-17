@@ -65,19 +65,3 @@ func GenerateAndFundAccount(testCase *TestCase, accountName string, amount numer
 
 	return account, nil
 }
-
-// RetrieveFundingAccountBalanceOrError - retrieves the balance of the funding account in a specific shard - errors
-func RetrieveFundingAccountBalanceOrError(testCase *TestCase) numeric.Dec {
-	fundingAccountBalance, err := balances.GetShardBalance(config.Configuration.Funding.Account.Address, testCase.Parameters.FromShardID)
-	if err != nil {
-		err = fmt.Errorf("Failed to fetch latest account balance for the funding account %s, address: %s - error: %s", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, err.Error())
-		testCase.ErrorOccurred(err)
-	}
-
-	if fundingAccountBalance.IsNil() || fundingAccountBalance.IsZero() {
-		err = fmt.Errorf("Funding account %s, address: %s doesn't have a sufficient balance in shard %d - balance: %f", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, testCase.Parameters.FromShardID, fundingAccountBalance)
-		testCase.ErrorOccurred(err)
-	}
-
-	return fundingAccountBalance
-}

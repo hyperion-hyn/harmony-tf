@@ -27,22 +27,15 @@ func StandardScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	fundingAccountBalance := testing.RetrieveFundingAccountBalanceOrError(testCase)
-	if testCase.Error != nil {
-		return
-	}
-
-	fundingAmount, err := funding.CalculateFundingAmount(testCase.Parameters.Amount, fundingAccountBalance, testCase.Parameters.ReceiverCount)
-	if err != nil {
-		testCase.ErrorOccurred(err)
+	_, requiredFunding, err := funding.CalculateFundingDetails(testCase.Parameters.Amount, testCase.Parameters.ReceiverCount, testCase.Parameters.FromShardID)
+	if testCase.ErrorOccurred(err) {
 		return
 	}
 
 	senderAccountName := accounts.GenerateTestCaseAccountName(testCase.Name, "Sender")
 	logger.AccountLog(fmt.Sprintf("Generating a new sender account: %s", senderAccountName), testCase.Verbose)
 	senderAccount, err := accounts.GenerateAccount(senderAccountName)
-	if err != nil {
-		testCase.ErrorOccurred(err)
+	if testCase.ErrorOccurred(err) {
 		return
 	}
 
@@ -52,7 +45,7 @@ func StandardScenario(testCase *testing.TestCase) {
 		testCase.Parameters.FromShardID,
 		senderAccount.Address,
 		testCase.Parameters.FromShardID,
-		fundingAmount,
+		requiredFunding,
 		-1,
 		config.Configuration.Funding.Gas.Limit,
 		config.Configuration.Funding.Gas.Price,
@@ -81,14 +74,21 @@ func StandardScenario(testCase *testing.TestCase) {
 
 	logger.TransactionLog(fmt.Sprintf("Sent %f token(s) from %s to %s - transaction hash: %s, %s", testCase.Parameters.Amount, senderAccount.Address, receiverAccount.Address, testCaseTx.TransactionHash, txResultColoring), testCase.Verbose)
 
-	senderEndingBalance, _ := balances.GetShardBalance(senderAccount.Address, testCase.Parameters.FromShardID)
-
-	if testCaseTx.Success && testCase.Parameters.FromShardID != testCase.Parameters.ToShardID {
-		logger.TransactionLog(fmt.Sprintf("Because this is a cross shard transaction we need to wait an extra %d seconds to correctly receive the ending balance of the receiver account %s in shard %d", config.Configuration.Network.CrossShardTxWaitTime, receiverAccount.Address, testCase.Parameters.ToShardID), testCase.Verbose)
-		time.Sleep(time.Duration(config.Configuration.Network.CrossShardTxWaitTime) * time.Second)
+	senderEndingBalance, err := balances.GetShardBalance(senderAccount.Address, testCase.Parameters.FromShardID)
+	if testCase.ErrorOccurred(err) {
+		return
 	}
 
-	receiverEndingBalance, _ := balances.GetShardBalance(receiverAccount.Address, testCase.Parameters.ToShardID)
+	/*if testCaseTx.Success && testCase.Parameters.FromShardID != testCase.Parameters.ToShardID {
+		logger.TransactionLog(fmt.Sprintf("Because this is a cross shard transaction we need to wait an extra %d seconds to correctly receive the ending balance of the receiver account %s in shard %d", config.Configuration.Network.CrossShardTxWaitTime, receiverAccount.Address, testCase.Parameters.ToShardID), testCase.Verbose)
+		time.Sleep(time.Duration(config.Configuration.Network.CrossShardTxWaitTime) * time.Second)
+	}*/
+
+	receiverEndingBalance, err := balances.GetNonZeroShardBalance(receiverAccount.Address, testCase.Parameters.ToShardID)
+	if testCase.ErrorOccurred(err) {
+		return
+	}
+
 	expectedReceiverEndingBalance := receiverStartingBalance.Add(testCase.Parameters.Amount)
 	testCase.Result = testCaseTx.Success && receiverEndingBalance.Equal(expectedReceiverEndingBalance)
 

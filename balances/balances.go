@@ -2,6 +2,7 @@ package balances
 
 import (
 	"fmt"
+	"time"
 
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"
 	"github.com/harmony-one/go-sdk/pkg/common"
@@ -14,19 +15,23 @@ func GetShardBalance(address string, shardID uint32) (numeric.Dec, error) {
 	return config.Configuration.Network.API.GetShardBalance(address, shardID)
 }
 
-// GetShardBalanceWithRetries - gets the balance for a given address and shard with auto retry upon failure
-func GetShardBalanceWithRetries(address string, shardID uint32, attempts int) (balance numeric.Dec, err error) {
+// GetNonZeroShardBalance - gets the balance for a given address and shard with auto retry upon failure/balance being nil/balance being zero
+func GetNonZeroShardBalance(address string, shardID uint32) (balance numeric.Dec, err error) {
+	attempts := config.Configuration.Network.Balances.Retry.Attempts
+
 	for {
 		attempts--
 
 		balance, err = GetShardBalance(address, shardID)
-		if err == nil && !balance.IsNil() {
+		if err == nil && !balance.IsNil() && !balance.IsZero() {
 			return balance, nil
 		}
 
 		if attempts <= 0 {
 			break
 		}
+
+		time.Sleep(time.Duration(config.Configuration.Network.Balances.Retry.Wait) * time.Second)
 	}
 
 	return balance, err
