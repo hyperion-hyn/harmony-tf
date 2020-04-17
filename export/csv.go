@@ -37,6 +37,7 @@ func ExportCSV(results []*testing.TestCase, dismissed []*testing.TestCase, succe
 			"Executed",
 			"Expected",
 			"Result",
+			"Status",
 			"Started At",
 			"Finished At",
 			"Duration",
@@ -50,21 +51,21 @@ func ExportCSV(results []*testing.TestCase, dismissed []*testing.TestCase, succe
 	}
 
 	if len(dismissed) > 0 {
-		records = append(records, []string{"", "", "", "", "", "", "", "", ""})
-		records = append(records, []string{"", "", "", "", "", "", "", "", ""})
-		records = append(records, []string{"Dismissed:", "", "", "", "", "", "", "", ""})
+		records = append(records, emptyRow())
+		records = append(records, emptyRow())
+		records = append(records, []string{"Dismissed:", "", "", "", "", "", "", "", "", ""})
 		for _, result := range results {
 			records = append(records, csvRow(result))
 		}
 	}
 
-	records = append(records, []string{"", "", "", "", "", "", "", "", ""})
-	records = append(records, []string{"", "", "", "", "", "", "", "", ""})
+	records = append(records, emptyRow())
+	records = append(records, emptyRow())
 	records = append(records, []string{"", "", "", "", "", "", "", "Summary:", ""})
 	records = append(records, []string{"", "", "", "", "", "", "", "Successful:", fmt.Sprintf("%d", successfulCount)})
 	records = append(records, []string{"", "", "", "", "", "", "", "Failed:", fmt.Sprintf("%d", failedCount)})
 	records = append(records, []string{"", "", "", "", "", "", "", "Dismissed:", fmt.Sprintf("%d", len(dismissed))})
-	records = append(records, []string{"", "", "", "", "", "", "", "", ""})
+	records = append(records, emptyRow())
 	records = append(records, []string{"", "", "", "", "", "", "", "Duration:", totalDuration.String()})
 
 	filePath, err := writeCSVToFile(records)
@@ -92,6 +93,13 @@ func csvRow(testCase *testing.TestCase) []string {
 		durationString = duration.String()
 	}
 
+	status := ""
+	if testCase.Result == testCase.Expected {
+		status = "Success"
+	} else {
+		status = "Failed"
+	}
+
 	return []string{
 		testCase.Category,
 		testCase.Name,
@@ -99,10 +107,15 @@ func csvRow(testCase *testing.TestCase) []string {
 		fmt.Sprintf("%t", testCase.Executed),
 		fmt.Sprintf("%t", testCase.Expected),
 		fmt.Sprintf("%t", testCase.Result),
+		status,
 		startedAtString,
 		finishedAtString,
 		durationString,
 	}
+}
+
+func emptyRow() []string {
+	return []string{"", "", "", "", "", "", "", "", "", ""}
 }
 
 func writeCSVToFile(records [][]string) (string, error) {
