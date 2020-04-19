@@ -221,6 +221,8 @@ github.com/harmony-one/go-lib v0.0.0-20200416122339-865b1b937866 h1:E/8xtymvJay2
 github.com/harmony-one/go-lib v0.0.0-20200416122339-865b1b937866/go.mod h1:XcIUiXhA3PmoOqkUQWEZ+7Be6Xkqp9rh1L+n3NISV9A=
 github.com/harmony-one/go-lib v0.0.0-20200417043710-6c6e80ec417d h1:4WtsPnrdGp+i1ObWDpcgtbShxk1K+q7NUUcgV2mE1Ug=
 github.com/harmony-one/go-lib v0.0.0-20200417043710-6c6e80ec417d/go.mod h1:nLO6PmiOfsau5p7Ki5hP/YwP/7eXK+0xivH7SlK3S4U=
+github.com/harmony-one/go-lib v0.0.0-20200419044755-5e54f0e650d5 h1:I1XRe5haSFHnvDhDUjdx3Kxvuy3LOUgGwZ3d+7wNCQo=
+github.com/harmony-one/go-lib v0.0.0-20200419044755-5e54f0e650d5/go.mod h1:pu2Y4XIKCwB794qAfr0JsWLhIDYwqFadyVqfD/0OPLU=
 github.com/harmony-one/go-sdk v1.0.10-0.20200414115829-dadde2e25cc0 h1:rueU8oW6rJnNEub2CIXZt/MyKed0E3S8gbawvw3iwEY=
 github.com/harmony-one/go-sdk v1.0.10-0.20200414115829-dadde2e25cc0/go.mod h1:VijWa1mMfMjRBh5jnCfjcsJngLsvnVDlSshHti4Ion0=
 github.com/harmony-one/go-sdk v1.0.10-0.20200415083118-dd234e8a9529 h1:0a1W7NYNKi5clVLjrnFNDf3jUDUnVX6GiRMfhaF9eME=
@@ -234,6 +236,8 @@ github.com/harmony-one/harmony v1.9.1-0.20200416054205-6e08ce26a9f2 h1:ofei7q6iP
 github.com/harmony-one/harmony v1.9.1-0.20200416054205-6e08ce26a9f2/go.mod h1:z59iKtxB4fJXMXfi7UPaXtNylTwVuxDSeOlTCtaFNdY=
 github.com/harmony-one/harmony v1.9.1-0.20200416212517-7123b8153a37 h1:/BJxN99j1r1+K1OVEbbswfrIPQFKtQ+fabUHja6FlRQ=
 github.com/harmony-one/harmony v1.9.1-0.20200416212517-7123b8153a37/go.mod h1:z59iKtxB4fJXMXfi7UPaXtNylTwVuxDSeOlTCtaFNdY=
+github.com/harmony-one/harmony v1.9.1-0.20200419032823-e0ccc7b71cc1 h1:gZLgLZSS+N4iGK9xMCxQ8wpgJByAmKYdGzNB1wUPq54=
+github.com/harmony-one/harmony v1.9.1-0.20200419032823-e0ccc7b71cc1/go.mod h1:z59iKtxB4fJXMXfi7UPaXtNylTwVuxDSeOlTCtaFNdY=
 github.com/harmony-one/taggedrlp v0.1.4 h1:RZ+qy0VCzT+d/mTfq23gH3an5tSvxOhg6AddLDO6tKw=
 github.com/harmony-one/taggedrlp v0.1.4/go.mod h1:osO5TRXLKdgCP+oj2J9qfqhywMOOA+4nP5q+o8nDSYA=
 github.com/harmony-one/vdf v0.0.0-20190924175951-620379da8849/go.mod h1:EgNU7X5HLNBBho+OqCm1A1NrpD6xb1SHfi9pMCYaKKw=
