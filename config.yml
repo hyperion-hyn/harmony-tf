@@ -43,7 +43,7 @@ funding:
     name: "FundingAccount" # This name will be prefixed with the current network name
     address: ""
   shards: "all"
-  minimum_funds: 10.0
+  minimum_funds: 100.0
   timeout: 60
   verbose: false
   retry:

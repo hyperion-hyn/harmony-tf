@@ -97,13 +97,13 @@ func BasicCreateValidator(testCase *testing.TestCase, validatorAccount *sdkAccou
 	}
 
 	tx := sdkTxs.ToTransaction(senderAccount.Address, testCase.StakingParameters.FromShardID, senderAccount.Address, testCase.StakingParameters.FromShardID, rawTx, err)
-	txResultColoring := logger.ResultColoring(tx.Success, true).Render(fmt.Sprintf("tx successful: %t", tx.Success))
-	logger.TransactionLog(fmt.Sprintf("Performed create validator - address: %s - transaction hash: %s, %s", validatorAccount.Address, tx.TransactionHash, txResultColoring), testCase.Verbose)
+	txResultColoring := logger.ResultColoring(tx.Success, true)
+	logger.TransactionLog(fmt.Sprintf("Performed create validator - address: %s - transaction hash: %s, tx successful: %s", validatorAccount.Address, tx.TransactionHash, txResultColoring), testCase.Verbose)
 
 	rpcClient, err := config.Configuration.Network.API.RPCClient(testCase.StakingParameters.FromShardID)
 	validatorExists := sdkValidator.Exists(rpcClient, validatorAccount.Address)
-	addressExistsColoring := logger.ResultColoring(validatorExists, true).Render(fmt.Sprintf("is acting as a validator on the network: %t", validatorExists))
-	logger.StakingLog(fmt.Sprintf("Address %s %s", validatorAccount.Address, addressExistsColoring), testCase.Verbose)
+	addressExistsColoring := logger.ResultColoring(validatorExists, true)
+	logger.StakingLog(fmt.Sprintf("Validator with address %s exists: %s", validatorAccount.Address, addressExistsColoring), testCase.Verbose)
 
 	return tx, blsKeys, validatorExists, nil
 }
@@ -123,8 +123,8 @@ func BasicEditValidator(testCase *testing.TestCase, validatorAccount *sdkAccount
 		return sdkTxs.Transaction{}, err
 	}
 	editTx := sdkTxs.ToTransaction(senderAccount.Address, testCase.StakingParameters.FromShardID, senderAccount.Address, testCase.StakingParameters.FromShardID, editRawTx, err)
-	editTxResultColoring := logger.ResultColoring(editTx.Success, true).Render(fmt.Sprintf("tx successful: %t", editTx.Success))
-	logger.TransactionLog(fmt.Sprintf("Performed edit validator - transaction hash: %s, %s", editTx.TransactionHash, editTxResultColoring), testCase.Verbose)
+	editTxResultColoring := logger.ResultColoring(editTx.Success, true)
+	logger.TransactionLog(fmt.Sprintf("Performed edit validator - transaction hash: %s, tx successful: %s", editTx.TransactionHash, editTxResultColoring), testCase.Verbose)
 
 	return editTx, nil
 }
@@ -139,8 +139,8 @@ func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.A
 		return sdkTxs.Transaction{}, false, err
 	}
 	tx := sdkTxs.ToTransaction(delegatorAccount.Address, testCase.StakingParameters.FromShardID, validatorAccount.Address, testCase.StakingParameters.FromShardID, rawTx, err)
-	txResultColoring := logger.ResultColoring(tx.Success, true).Render(fmt.Sprintf("tx successful: %t", tx.Success))
-	logger.TransactionLog(fmt.Sprintf("Performed delegation - transaction hash: %s, %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
+	txResultColoring := logger.ResultColoring(tx.Success, true)
+	logger.TransactionLog(fmt.Sprintf("Performed delegation - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
 
 	node := config.Configuration.Network.API.NodeAddress(testCase.StakingParameters.FromShardID)
 	delegations, err := sdkDelegation.ByDelegator(node, delegatorAccount.Address)
@@ -156,8 +156,8 @@ func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.A
 		}
 	}
 
-	delegationSucceededColoring := logger.ResultColoring(delegationSucceeded, true).Render(fmt.Sprintf("successful: %t", delegationSucceeded))
-	logger.StakingLog(fmt.Sprintf("Delegation from %s to %s of %f, %s", delegatorAccount.Address, validatorAccount.Address, testCase.StakingParameters.Delegation.Delegate.Amount, delegationSucceededColoring), testCase.Verbose)
+	delegationSucceededColoring := logger.ResultColoring(delegationSucceeded, true)
+	logger.StakingLog(fmt.Sprintf("Delegation from %s to %s of %f, successful: %s", delegatorAccount.Address, validatorAccount.Address, testCase.StakingParameters.Delegation.Delegate.Amount, delegationSucceededColoring), testCase.Verbose)
 
 	return tx, delegationSucceeded, nil
 }
@@ -172,8 +172,8 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 		return sdkTxs.Transaction{}, false, err
 	}
 	tx := sdkTxs.ToTransaction(delegatorAccount.Address, testCase.StakingParameters.FromShardID, validatorAccount.Address, testCase.StakingParameters.FromShardID, rawTx, err)
-	txResultColoring := logger.ResultColoring(tx.Success, true).Render(fmt.Sprintf("tx successful: %t", tx.Success))
-	logger.TransactionLog(fmt.Sprintf("Performed undelegation - transaction hash: %s, %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
+	txResultColoring := logger.ResultColoring(tx.Success, true)
+	logger.TransactionLog(fmt.Sprintf("Performed undelegation - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
 
 	node := config.Configuration.Network.API.NodeAddress(testCase.StakingParameters.FromShardID)
 	delegations, err := sdkDelegation.ByDelegator(node, delegatorAccount.Address)
@@ -189,8 +189,8 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 		}
 	}
 
-	undelegationSucceededColoring := logger.ResultColoring(undelegationSucceeded, true).Render(fmt.Sprintf("successful: %t", undelegationSucceeded))
-	logger.StakingLog(fmt.Sprintf("Performed undelegation from validator %s by delegator %s, amount: %f, %s", validatorAccount.Address, delegatorAccount.Address, testCase.StakingParameters.Delegation.Undelegate.Amount, undelegationSucceededColoring), testCase.Verbose)
+	undelegationSucceededColoring := logger.ResultColoring(undelegationSucceeded, true)
+	logger.StakingLog(fmt.Sprintf("Performed undelegation from validator %s by delegator %s, amount: %f, successful: %s", validatorAccount.Address, delegatorAccount.Address, testCase.StakingParameters.Delegation.Undelegate.Amount, undelegationSucceededColoring), testCase.Verbose)
 
 	return tx, true, nil
 }

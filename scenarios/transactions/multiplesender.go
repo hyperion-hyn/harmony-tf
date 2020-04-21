@@ -31,6 +31,7 @@ func MultipleSenderScenario(testCase *testing.TestCase) {
 
 	testCase.Executed = true
 	testCase.StartedAt = time.Now().UTC()
+
 	if testCase.ErrorOccurred(nil) {
 		return
 	}
@@ -142,8 +143,8 @@ func executeSenderTransaction(testCase *testing.TestCase, senderAccount sdkAccou
 		if testCaseTx.Error != nil {
 			logger.ErrorLog(fmt.Sprintf("Failed to send %f coins from %s (shard %d) to %s (shard %d) - error: %s", testCase.Parameters.Amount, senderAccount.Address, testCase.Parameters.FromShardID, receiverAccount.Address, testCase.Parameters.ToShardID, testCaseTx.Error.Error()), testCase.Verbose)
 		} else {
-			txResultColoring := logger.ResultColoring(testCaseTx.Success, true).Render(fmt.Sprintf("tx successful: %t", testCaseTx.Success))
-			logger.TransactionLog(fmt.Sprintf("Sent %f coins from %s (shard %d) to %s (shard %d) - transaction hash: %s, %s", testCase.Parameters.Amount, senderAccount.Address, testCase.Parameters.FromShardID, receiverAccount.Address, testCase.Parameters.ToShardID, testCaseTx.TransactionHash, txResultColoring), testCase.Verbose)
+			txResultColoring := logger.ResultColoring(testCaseTx.Success, true)
+			logger.TransactionLog(fmt.Sprintf("Sent %f coins from %s (shard %d) to %s (shard %d) - transaction hash: %s, tx successful: %s", testCase.Parameters.Amount, senderAccount.Address, testCase.Parameters.FromShardID, receiverAccount.Address, testCase.Parameters.ToShardID, testCaseTx.TransactionHash, txResultColoring), testCase.Verbose)
 		}
 	} else {
 		balanceRetrieved = false

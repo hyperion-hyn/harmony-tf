@@ -44,16 +44,41 @@ func SetupFundingAccount(accs []sdkAccounts.Account) (err error) {
 		}
 	}
 
-	totalBalance, err := config.Configuration.Network.API.GetTotalBalance(config.Configuration.Funding.Account.Address)
-	if err != nil {
-		return err
-	}
+	for shardID := range config.Configuration.Network.API.Shards {
+		shardBalance, err := config.Configuration.Network.API.GetShardBalance(config.Configuration.Funding.Account.Address, shardID)
+		if err != nil {
+			return err
+		}
 
-	if totalBalance.IsNil() || totalBalance.IsZero() || totalBalance.IsNegative() {
-		return fmt.Errorf("Somehow the funding account %s, address: %s wasn't funded properly - please make sure that you've added funded keystore files to keys/%s or that you've added funded private keys to keys/%s/private_keys.txt", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, config.Configuration.Network.Name, config.Configuration.Network.Name)
-	}
+		logger.BalanceLog(fmt.Sprintf("The current balance for the funding account %s / %s in shard %d is: %f", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, shardID, shardBalance), true)
 
-	logger.BalanceLog(fmt.Sprintf("The current total balance across all shards for the funding account %s / %s is: %f", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, totalBalance), true)
+		if shardID == 0 {
+			if shardBalance.IsNil() || shardBalance.IsZero() || shardBalance.IsNegative() {
+				return fmt.Errorf(
+					"Somehow the funding account %s, address: %s wasn't funded properly in shard %d - please make sure that you've added funded keystore files to keys/%s or that you've added funded private keys to keys/%s/private_keys.txt",
+					config.Configuration.Funding.Account.Name,
+					config.Configuration.Funding.Account.Address,
+					shardID, config.Configuration.Network.Name,
+					config.Configuration.Network.Name,
+				)
+			}
+		} else {
+			if config.Configuration.Framework.Test == "all" && InsufficientBalance(shardBalance, config.Configuration.Funding.MinimumFunds) {
+				logger.WarningLog(fmt.Sprintf("Funding account %s, address: %s wasn't funded properly in shard %d, attempting to fund it", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, shardID), true)
+				expectedBalance, err := fundFundingAccountInNonBeaconShard(shardID)
+				if err != nil {
+					return err
+				}
+
+				shardBalance, err = balances.GetExpectedShardBalance(config.Configuration.Funding.Account.Address, shardID, expectedBalance)
+				if err != nil {
+					return err
+				}
+				logger.BalanceLog(fmt.Sprintf("The current balance for the funding account %s / %s in shard %d is now: %f", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, shardID, shardBalance), true)
+			}
+		}
+
+	}
 
 	return nil
 }
@@ -110,6 +135,31 @@ func FundFundingAccountInShard(account sdkAccounts.Account, shard uint32, waitGr
 	}
 }
 
+func fundFundingAccountInNonBeaconShard(shardID uint32) (amount numeric.Dec, err error) {
+	amount, err = CalculateFundingAmount(config.Configuration.Funding.MinimumFunds, 1)
+	if err != nil {
+		return numeric.NewDec(0), err
+	}
+
+	err = PerformFundingTransaction(
+		&config.Configuration.Funding.Account,
+		0,
+		config.Configuration.Funding.Account.Address,
+		shardID,
+		amount,
+		-1,
+		config.Configuration.Funding.Gas.Limit,
+		config.Configuration.Funding.Gas.Price,
+		config.Configuration.Funding.Timeout,
+		config.Configuration.Funding.Retry.Attempts,
+	)
+	if err != nil {
+		return numeric.NewDec(0), err
+	}
+
+	return amount, nil
+}
+
 // GenerateAndFundAccounts - generate and fund a set of accounts
 func GenerateAndFundAccounts(count int64, nameTemplate string, amount numeric.Dec, fromShardID uint32, toShardID uint32) (accs []sdkAccounts.Account, err error) {
 	rpcClient, err := config.Configuration.Network.API.RPCClient(fromShardID)
@@ -124,12 +174,12 @@ func GenerateAndFundAccounts(count int64, nameTemplate string, amount numeric.De
 	}
 	nonce = int(receivedNonce)
 
-	balance, err := balances.GetShardBalance(config.Configuration.Funding.Account.Address, fromShardID)
+	_, err = balances.GetShardBalance(config.Configuration.Funding.Account.Address, fromShardID)
 	if err != nil {
 		return nil, errors.Wrapf(err, fmt.Sprintf("Shard Balance for %s on shard %d", config.Configuration.Funding.Account.Address, fromShardID))
 	}
 
-	amount, err = CalculateFundingAmount(amount, balance, 1)
+	amount, err = CalculateFundingAmount(amount, 1)
 	if err != nil {
 		return accs, errors.Wrapf(err, "Calculate Funding Amount")
 	}

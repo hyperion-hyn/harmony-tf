@@ -20,7 +20,7 @@ func GenerateAndFundAccount(testCase *TestCase, accountName string, amount numer
 		return sdkAccounts.Account{}, err
 	}
 
-	fundingAmount, err := funding.CalculateFundingAmount(amount, fundingAccountBalance, fundingMultiple)
+	fundingAmount, err := funding.CalculateFundingAmount(amount, fundingMultiple)
 	if err != nil {
 		return sdkAccounts.Account{}, err
 	}

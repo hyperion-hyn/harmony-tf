@@ -63,7 +63,7 @@ func ResultLog(result bool, expected bool, verbose bool) {
 	if verbose {
 		var formattedCategory string
 		message := fmt.Sprintf("Test successful: %t, Expected: %t", result, expected)
-		formattedMessage := ResultColoring(result, expected).Render(message)
+		formattedMessage := ResultColor(result, expected).Render(message)
 
 		if result == expected {
 			formattedCategory = color.Style{color.FgGreen, color.OpBold}.Render("RESULT")
@@ -75,13 +75,25 @@ func ResultLog(result bool, expected bool, verbose bool) {
 	}
 }
 
-// ResultColoring - generate a green or red color setup depending on if the result matches the expected result
-func ResultColoring(result bool, expected bool) *color.Style {
+// ResultColor - generate a green or red color setup depending on if the result matches the expected result
+func ResultColor(result bool, expected bool) *color.Style {
+
 	if result == expected {
 		return config.Configuration.Framework.Styling.Success
 	}
 
 	return config.Configuration.Framework.Styling.Error
+}
+
+// ResultColoring - generate a green or red colored status string
+func ResultColoring(result bool, expected bool) string {
+	c := ResultColor(result, expected)
+
+	return fmt.Sprintf(
+		"%s%s",
+		c.Render(fmt.Sprintf("%t", result)),
+		config.Configuration.Framework.Styling.Default.Render(" "),
+	)
 }
 
 // OutputLog - time stamped logging messages for test cases

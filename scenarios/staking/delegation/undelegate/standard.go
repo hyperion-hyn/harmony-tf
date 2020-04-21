@@ -6,6 +6,7 @@ import (
 
 	"github.com/harmony-one/harmony-tf/accounts"
 	"github.com/harmony-one/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/funding"
 	"github.com/harmony-one/harmony-tf/logger"
 	"github.com/harmony-one/harmony-tf/staking"
 	"github.com/harmony-one/harmony-tf/testing"
@@ -18,6 +19,13 @@ func StandardScenario(testCase *testing.TestCase) {
 	testCase.StartedAt = time.Now().UTC()
 
 	if testCase.ErrorOccurred(nil) {
+		return
+	}
+
+	requiredFunding := testCase.StakingParameters.Create.Validator.Amount.Add(testCase.StakingParameters.Delegation.Amount)
+	fundingMultiple := int64(1)
+	_, _, err := funding.CalculateFundingDetails(requiredFunding, fundingMultiple, 0)
+	if testCase.ErrorOccurred(err) {
 		return
 	}
 

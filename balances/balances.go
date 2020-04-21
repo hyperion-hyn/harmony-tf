@@ -5,7 +5,6 @@ import (
 	"time"
 
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"
-	"github.com/harmony-one/go-sdk/pkg/common"
 	"github.com/harmony-one/harmony-tf/config"
 	"github.com/harmony-one/harmony/numeric"
 )
@@ -37,8 +36,28 @@ func GetNonZeroShardBalance(address string, shardID uint32) (balance numeric.Dec
 	return balance, err
 }
 
+// GetExpectedShardBalance - retries to fetch the balance for a given address in a given shard until an expected balance exists
+func GetExpectedShardBalance(address string, shardID uint32, expectedBalance numeric.Dec) (balance numeric.Dec, err error) {
+	attempts := config.Configuration.Network.Balances.Retry.Attempts
+
+	for {
+		attempts--
+
+		balance, err = GetShardBalance(address, shardID)
+		if err == nil && !balance.IsNil() && !balance.IsZero() && balance.GTE(expectedBalance) {
+			return balance, nil
+		}
+
+		if attempts <= 0 {
+			return numeric.NewDec(0), fmt.Errorf("failed to retrieve expected balance %f for address %s in shard %d", expectedBalance, address, shardID)
+		}
+
+		time.Sleep(time.Duration(config.Configuration.Network.Balances.Retry.Wait) * time.Second)
+	}
+}
+
 // FilterMinimumBalanceAccounts - Filters out a list of accounts without any balance
-func FilterMinimumBalanceAccounts(accounts []sdkAccounts.Account, minimumBalance float64) (hasFunds []sdkAccounts.Account, missingFunds []sdkAccounts.Account, err error) {
+func FilterMinimumBalanceAccounts(accounts []sdkAccounts.Account, minimumBalance numeric.Dec) (hasFunds []sdkAccounts.Account, missingFunds []sdkAccounts.Account, err error) {
 	for _, account := range accounts {
 		totalBalance, err := config.Configuration.Network.API.GetTotalBalance(account.Address)
 
@@ -46,12 +65,7 @@ func FilterMinimumBalanceAccounts(accounts []sdkAccounts.Account, minimumBalance
 			return nil, nil, err
 		}
 
-		decMinimumBalance, err := common.NewDecFromString(fmt.Sprintf("%f", minimumBalance))
-		if err != nil {
-			return nil, nil, err
-		}
-
-		if totalBalance.GT(decMinimumBalance) {
+		if totalBalance.GT(minimumBalance) {
 			hasFunds = append(hasFunds, account)
 		} else {
 			missingFunds = append(missingFunds, account)
@@ -62,7 +76,7 @@ func FilterMinimumBalanceAccounts(accounts []sdkAccounts.Account, minimumBalance
 }
 
 // OutputBalanceStatusForAddresses - outputs balance status
-func OutputBalanceStatusForAddresses(accounts []sdkAccounts.Account, minimumBalance float64) {
+func OutputBalanceStatusForAddresses(accounts []sdkAccounts.Account, minimumBalance numeric.Dec) {
 	hasFunds, missingFunds, err := FilterMinimumBalanceAccounts(accounts, minimumBalance)
 
 	if err == nil {

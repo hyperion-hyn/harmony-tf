@@ -16,7 +16,7 @@ func CalculateFundingDetails(amount numeric.Dec, multiple int64, shardID uint32)
 		return numeric.NewDec(0), numeric.NewDec(0), err
 	}
 
-	requiredFunding, err = CalculateFundingAmount(amount, balance, multiple)
+	requiredFunding, err = CalculateFundingAmount(amount, multiple)
 	if err != nil {
 		return numeric.NewDec(0), numeric.NewDec(0), err
 	}
@@ -62,12 +62,12 @@ func RetrieveFundingAccountBalance(shardID uint32) (numeric.Dec, error) {
 }
 
 // CalculateFundingAmount - sets up the initial funding account
-func CalculateFundingAmount(amount numeric.Dec, balance numeric.Dec, count int64) (totalFundingAmount numeric.Dec, err error) {
+func CalculateFundingAmount(amount numeric.Dec, multiple int64) (totalFundingAmount numeric.Dec, err error) {
 	if amount.IsNil() || amount.IsNegative() {
 		return numeric.NewDec(-1), fmt.Errorf("amount %f can't be nil or negative", amount)
 	}
 
-	decCount := numeric.NewDec(count)
+	decCount := numeric.NewDec(multiple)
 	totalAmount := decCount.Mul(amount)
 	gasCostAmount := decCount.Mul(config.Configuration.Network.Gas.Cost)
 	totalFundingAmount = totalAmount.Add(gasCostAmount)
@@ -88,4 +88,9 @@ func VerifyFundingIsPossible(balance numeric.Dec, requiredFunding numeric.Dec) e
 	}
 
 	return nil
+}
+
+// InsufficientBalance - checks if a balance is insufficient compared to an expected balance
+func InsufficientBalance(balance numeric.Dec, expectedBalance numeric.Dec) bool {
+	return (balance.IsNil() || balance.IsZero() || balance.IsNegative() || balance.LT(expectedBalance))
 }

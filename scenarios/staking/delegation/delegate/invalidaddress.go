@@ -8,6 +8,7 @@ import (
 	tfAccounts "github.com/harmony-one/harmony-tf/accounts"
 	"github.com/harmony-one/harmony-tf/balances"
 	"github.com/harmony-one/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/funding"
 	"github.com/harmony-one/harmony-tf/logger"
 	"github.com/harmony-one/harmony-tf/staking"
 	"github.com/harmony-one/harmony-tf/testing"
@@ -23,6 +24,13 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 		return
 	}
 
+	requiredFunding := testCase.StakingParameters.Create.Validator.Amount.Add(testCase.StakingParameters.Delegation.Amount)
+	fundingMultiple := int64(1)
+	_, _, err := funding.CalculateFundingDetails(requiredFunding, fundingMultiple, 0)
+	if testCase.ErrorOccurred(err) {
+		return
+	}
+
 	accounts := map[string]sdkAccounts.Account{}
 	accountTypes := []string{
 		"validator",
@@ -32,7 +40,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 
 	for _, accountType := range accountTypes {
 		accountName := tfAccounts.GenerateTestCaseAccountName(testCase.Name, accountType)
-		account, err := testing.GenerateAndFundAccount(testCase, accountName, testCase.StakingParameters.Create.Validator.Amount, 1)
+		account, err := testing.GenerateAndFundAccount(testCase, accountName, testCase.StakingParameters.Create.Validator.Amount, fundingMultiple)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to generate and fund %s account %s", accountType, accountName)
 			testCase.HandleError(err, &account, msg)

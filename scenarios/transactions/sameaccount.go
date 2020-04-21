@@ -78,9 +78,9 @@ func SameAccountScenario(testCase *testing.TestCase) {
 
 	testCaseTx := sdkTxs.ToTransaction(account.Address, testCase.Parameters.FromShardID, account.Address, testCase.Parameters.ToShardID, rawTx, err)
 	testCase.Transactions = append(testCase.Transactions, testCaseTx)
-	txResultColoring := logger.ResultColoring(testCaseTx.Success, true).Render(fmt.Sprintf("tx successful: %t", testCaseTx.Success))
+	txResultColoring := logger.ResultColoring(testCaseTx.Success, true)
 
-	logger.TransactionLog(fmt.Sprintf("Sent %f token(s) from %s (shard %d) to %s (shard %d) - transaction hash: %s, %s", testCase.Parameters.Amount, account.Address, testCase.Parameters.FromShardID, account.Address, testCase.Parameters.ToShardID, testCaseTx.TransactionHash, txResultColoring), testCase.Verbose)
+	logger.TransactionLog(fmt.Sprintf("Sent %f token(s) from %s (shard %d) to %s (shard %d) - transaction hash: %s, tx successful: %s", testCase.Parameters.Amount, account.Address, testCase.Parameters.FromShardID, account.Address, testCase.Parameters.ToShardID, testCaseTx.TransactionHash, txResultColoring), testCase.Verbose)
 
 	/*if testCaseTx.Success && testCase.Parameters.FromShardID != testCase.Parameters.ToShardID {
 		logger.BalanceLog(fmt.Sprintf("Because this is a cross shard transaction we need to wait an extra %d seconds to correctly receive the ending balance of the receiver account %s in shard %d", config.Configuration.Network.CrossShardTxWaitTime, account.Address, testCase.Parameters.ToShardID), testCase.Verbose)

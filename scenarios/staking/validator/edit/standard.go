@@ -8,6 +8,7 @@ import (
 	sdkTxs "github.com/harmony-one/go-lib/transactions"
 	"github.com/harmony-one/harmony-tf/accounts"
 	"github.com/harmony-one/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/funding"
 	"github.com/harmony-one/harmony-tf/logger"
 	"github.com/harmony-one/harmony-tf/staking"
 	"github.com/harmony-one/harmony-tf/testing"
@@ -20,6 +21,11 @@ func StandardScenario(testCase *testing.TestCase) {
 	testCase.StartedAt = time.Now().UTC()
 
 	if testCase.ErrorOccurred(nil) {
+		return
+	}
+
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, 1, 0)
+	if testCase.ErrorOccurred(err) {
 		return
 	}
 
@@ -65,7 +71,7 @@ func StandardScenario(testCase *testing.TestCase) {
 				}
 
 				lastSuccessfullyUpdated = testCase.StakingParameters.Edit.EvaluateChanges(lastValidatorResult.Validator, testCase.Verbose)
-				editValidatorColoring := logger.ResultColoring(lastSuccessfullyUpdated, true).Render(fmt.Sprintf("%t", lastSuccessfullyUpdated))
+				editValidatorColoring := logger.ResultColoring(lastSuccessfullyUpdated, true)
 				logger.StakingLog(fmt.Sprintf("Validator successfully edited: %s", editValidatorColoring), testCase.Verbose)
 			}
 		}

@@ -23,7 +23,7 @@ type CommandArguments struct {
 	Export         string
 	ExportPath     string
 	FundingAddress string
-	MinimumFunds   float64
+	MinimumFunds   string
 	Passphrase     string
 	KeysPath       string
 	TestTarget     string
@@ -58,7 +58,7 @@ func init() {
 	RootCommand.PersistentFlags().StringVar(&Args.Export, "export", ".", "<path>")
 	RootCommand.PersistentFlags().StringVar(&Args.ExportPath, "export-path", "./export", "<path>")
 	RootCommand.PersistentFlags().StringVar(&Args.FundingAddress, "address", "", "--address <address>")
-	RootCommand.PersistentFlags().Float64Var(&Args.MinimumFunds, "minimum-funds", 10.0, "--minimum-funds <funds>")
+	RootCommand.PersistentFlags().StringVar(&Args.MinimumFunds, "minimum-funds", "100.0", "--minimum-funds <funds>")
 	RootCommand.PersistentFlags().StringVar(&Args.Passphrase, "passphrase", "", "--passphrase <passphrase>")
 	RootCommand.PersistentFlags().StringVar(&Args.KeysPath, "keys", "", "--keys <path>")
 	RootCommand.PersistentFlags().StringVar(&Args.TestTarget, "test", "", "--test <path>")

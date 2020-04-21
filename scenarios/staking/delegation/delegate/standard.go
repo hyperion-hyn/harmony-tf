@@ -6,6 +6,7 @@ import (
 
 	"github.com/harmony-one/harmony-tf/accounts"
 	"github.com/harmony-one/harmony-tf/config"
+	"github.com/harmony-one/harmony-tf/funding"
 	"github.com/harmony-one/harmony-tf/logger"
 	"github.com/harmony-one/harmony-tf/staking"
 	"github.com/harmony-one/harmony-tf/testing"
@@ -21,6 +22,13 @@ func StandardScenario(testCase *testing.TestCase) {
 		return
 	}
 
+	requiredFunding := testCase.StakingParameters.Create.Validator.Amount.Add(testCase.StakingParameters.Delegation.Amount)
+	fundingMultiple := int64(1)
+	_, _, err := funding.CalculateFundingDetails(requiredFunding, fundingMultiple, 0)
+	if testCase.ErrorOccurred(err) {
+		return
+	}
+
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
 	account, validator, err := staking.ReuseOrCreateValidator(testCase, validatorName)
 	if err != nil {
@@ -31,7 +39,7 @@ func StandardScenario(testCase *testing.TestCase) {
 
 	if validator.Exists {
 		delegatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Delegator")
-		delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.Delegation.Amount, 1)
+		delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.Delegation.Amount, fundingMultiple)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to fetch latest account balance for the account %s, address: %s", delegatorAccount.Name, delegatorAccount.Address)
 			testCase.HandleError(err, &delegatorAccount, msg)

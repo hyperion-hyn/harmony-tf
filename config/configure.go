@@ -206,11 +206,11 @@ func configureFundingConfig() error {
 		}
 	}
 
-	if Args.MinimumFunds != 0.0 && Args.MinimumFunds != Configuration.Funding.MinimumFunds {
-		Configuration.Funding.MinimumFunds = Args.MinimumFunds
+	if Args.MinimumFunds != "" && Args.MinimumFunds != Configuration.Funding.RawMinimumFunds {
+		Configuration.Funding.RawMinimumFunds = Args.MinimumFunds
 	}
 
-	if err := Configuration.Funding.Gas.Initialize(); err != nil {
+	if err := Configuration.Funding.Initialize(); err != nil {
 		return err
 	}
 

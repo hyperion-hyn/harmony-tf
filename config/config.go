@@ -7,6 +7,9 @@ import (
 	sdkAccounts "github.com/harmony-one/go-lib/accounts"
 	sdkNetworkTypes "github.com/harmony-one/go-lib/network/types/network"
 	sdkValidator "github.com/harmony-one/go-lib/staking/validator"
+	"github.com/harmony-one/go-sdk/pkg/common"
+	"github.com/harmony-one/harmony/numeric"
+	"github.com/pkg/errors"
 )
 
 // Config - represents the general configuration
@@ -76,13 +79,14 @@ type Account struct {
 
 // Funding - represents the funding settings group
 type Funding struct {
-	Account      sdkAccounts.Account `yaml:"account"`
-	MinimumFunds float64             `yaml:"minimum_funds"`
-	Timeout      int                 `yaml:"timeout"`
-	Retry        Retry               `yaml:"retry"`
-	Verbose      bool                `yaml:"verbose"`
-	Shards       string              `yaml:"shards"`
-	Gas          sdkNetworkTypes.Gas `yaml:"gas"`
+	Account         sdkAccounts.Account `yaml:"account"`
+	RawMinimumFunds string              `yaml:"minimum_funds"`
+	MinimumFunds    numeric.Dec         `yaml:"-"`
+	Timeout         int                 `yaml:"timeout"`
+	Retry           Retry               `yaml:"retry"`
+	Verbose         bool                `yaml:"verbose"`
+	Shards          string              `yaml:"shards"`
+	Gas             sdkNetworkTypes.Gas `yaml:"gas"`
 }
 
 // Retry - settings for RPC retries
@@ -112,4 +116,21 @@ func (framework *Framework) Initialize() {
 // CanExecuteMemoryIntensiveTestCase - whether or not certain test cases can be executed due to heavy memory consumption
 func (framework *Framework) CanExecuteMemoryIntensiveTestCase() bool {
 	return framework.SystemMemory >= framework.MinimumRequiredMemory
+}
+
+// Initialize - initializes basic funding settings
+func (funding *Funding) Initialize() error {
+	if funding.RawMinimumFunds != "" {
+		decMinimumFunds, err := common.NewDecFromString(funding.RawMinimumFunds)
+		if err != nil {
+			return errors.Wrapf(err, "Funding: Minimum funds")
+		}
+		funding.MinimumFunds = decMinimumFunds
+	}
+
+	if err := funding.Gas.Initialize(); err != nil {
+		return err
+	}
+
+	return nil
 }
