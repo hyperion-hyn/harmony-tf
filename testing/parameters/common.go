@@ -12,7 +12,9 @@ import (
 
 // GenerateUniqueDetails - generates new unique details to bypass uniqueness validation
 func GenerateUniqueDetails(details *sdkValidator.ValidatorDetails) {
-	details.Identity = generateUniqueProperty(details.Identity, harmonyTypes.MaxIdentityLength)
+	if len(details.Identity) <= harmonyTypes.MaxIdentityLength {
+		details.Identity = generateUniqueProperty(details.Identity, harmonyTypes.MaxIdentityLength)
+	}
 }
 
 func generateUniqueProperty(property string, maxLength int) string {
