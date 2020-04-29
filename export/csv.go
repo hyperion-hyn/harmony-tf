@@ -5,26 +5,19 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/harmony-one/harmony-tf/config"
 	"github.com/harmony-one/harmony-tf/testing"
+	"github.com/harmony-one/harmony-tf/utils"
 )
 
 var (
-	timeFormat         string = "2006-01-02 15:04:05 UTC"
-	filePathTimeFormat string = "2006-01-02-15-04-05"
+	timeFormat string = "2006-01-02 15:04:05 UTC"
 )
 
 func generateFileName(theTime time.Time, ext string) string {
-	timestamp := theTime.Format(filePathTimeFormat)
-	timestamp = strings.ReplaceAll(timestamp, "+", "")
-	timestamp = strings.ReplaceAll(timestamp, " ", "-")
-	timestamp = strings.ReplaceAll(timestamp, ":", "-")
-	filePath := fmt.Sprintf("%s-UTC.%s", timestamp, ext)
-
-	return filePath
+	return fmt.Sprintf("%s-UTC.%s", utils.FormattedTimeString(theTime), ext)
 }
 
 // ExportCSV - exports test suite results as csv

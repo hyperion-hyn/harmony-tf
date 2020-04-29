@@ -7,9 +7,10 @@ import (
 
 // CreateValidatorParameters - represents the validator details
 type CreateValidatorParameters struct {
-	Validator           sdkValidator.Validator `yaml:"validator"`
-	BLSKeyCount         int                    `yaml:"bls_key_count"`
-	BLSSignatureMessage string                 `yaml:"bls_signature_message"`
+	Validator             sdkValidator.Validator `yaml:"validator"`
+	BLSKeyCount           int                    `yaml:"bls_key_count"`
+	BLSSignatureMessage   string                 `yaml:"bls_signature_message"`
+	RandomizeUniqueFields bool                   `yaml:"randomize_unique_fields"`
 }
 
 // Initialize - initializes and converts values
@@ -31,6 +32,10 @@ func (params *CreateValidatorParameters) Initialize() error {
 
 			params.Validator.BLSKeys = append(params.Validator.BLSKeys, blsKey)
 		}
+	}
+
+	if params.RandomizeUniqueFields {
+		GenerateUniqueDetails(&params.Validator.Details)
 	}
 
 	return nil

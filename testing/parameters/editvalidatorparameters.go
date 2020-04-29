@@ -18,6 +18,8 @@ type EditValidatorParameters struct {
 	Gas sdkNetworkTypes.Gas `yaml:"gas"`
 
 	Changes EditValidatorChanges `yaml:"-"`
+
+	RandomizeUniqueFields bool `yaml:"randomize_unique_fields"`
 }
 
 // EditValidatorChanges - keeps track of what fields have changed
@@ -42,6 +44,10 @@ func (editParams *EditValidatorParameters) Initialize() error {
 
 	if err := editParams.Validator.Initialize(); err != nil {
 		return err
+	}
+
+	if editParams.RandomizeUniqueFields {
+		GenerateUniqueDetails(&editParams.Validator.Details)
 	}
 
 	if err := editParams.Gas.Initialize(); err != nil {
