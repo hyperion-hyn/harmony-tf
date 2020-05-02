@@ -6,9 +6,9 @@ require (
 	github.com/elliotchance/orderedmap v1.2.1
 	github.com/ethereum/go-ethereum v1.8.27
 	github.com/gookit/color v1.2.4
-	github.com/harmony-one/go-lib v0.0.0-20200430120351-5be96375a347
+	github.com/harmony-one/go-lib v0.0.0-20200502142012-eebae5a1eae0
 	github.com/harmony-one/go-sdk v1.1.1-0.20200421150312-4c244dda08e8
-	github.com/harmony-one/harmony v1.9.1-0.20200430040511-4b3b288d641f
+	github.com/harmony-one/harmony v1.9.1-0.20200501194240-cda9315585ed
 	github.com/mackerelio/go-osstat v0.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.0.0
