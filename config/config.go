@@ -62,6 +62,7 @@ type Network struct {
 	Nodes                []string                `yaml:"-"`
 	Endpoints            map[string][]string     `yaml:"endpoints"`
 	Shards               int                     `yaml:"-"`
+	Timeout              int                     `yaml:"timeout"`
 	CrossShardTxWaitTime uint32                  `yaml:"cross_shard_tx_wait_time"`
 	StakingWaitTime      uint32                  `yaml:"staking_wait_time"`
 	Gas                  sdkNetworkTypes.Gas     `yaml:"gas"`

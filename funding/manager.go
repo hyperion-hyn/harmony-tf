@@ -251,7 +251,7 @@ func FundAccounts(sources []sdkAccounts.Account, count int, amount numeric.Dec, 
 	return accounts, nil
 }
 
-func fundAccount(sourceAccount *sdkAccounts.Account, amount numeric.Dec, prefix string, index int, gasLimit int64, gasPrice numeric.Dec, confirmationWaitTime int) (account sdkAccounts.Account, err error) {
+func fundAccount(sourceAccount *sdkAccounts.Account, amount numeric.Dec, prefix string, index int, gasLimit int64, gasPrice numeric.Dec, timeout int) (account sdkAccounts.Account, err error) {
 	accountName := fmt.Sprintf("%s_%d", prefix, index)
 
 	// Remove the account just to make sure that we're starting using a clean slate
@@ -263,7 +263,7 @@ func fundAccount(sourceAccount *sdkAccounts.Account, amount numeric.Dec, prefix 
 	}
 
 	for shard := 0; shard < config.Configuration.Network.Shards; shard++ {
-		err := PerformFundingTransaction(sourceAccount, 0, account.Address, uint32(shard), amount, -1, gasLimit, gasPrice, confirmationWaitTime, 10)
+		err := PerformFundingTransaction(sourceAccount, 0, account.Address, uint32(shard), amount, -1, gasLimit, gasPrice, timeout, 10)
 
 		if err != nil {
 			return account, fmt.Errorf("failed to fund account %s in shard %d with amount %f using source account %s - error: %s", account.Address, shard, amount, sourceAccount.Address, err.Error())
@@ -274,7 +274,7 @@ func fundAccount(sourceAccount *sdkAccounts.Account, amount numeric.Dec, prefix 
 }
 
 // PerformFundingTransaction - performs a funding transaction including automatic retries
-func PerformFundingTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, amount numeric.Dec, nonce int, gasLimit int64, gasPrice numeric.Dec, confirmationWaitTime int, attempts int) error {
+func PerformFundingTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, amount numeric.Dec, nonce int, gasLimit int64, gasPrice numeric.Dec, timeout int, attempts int) error {
 	if amount.GT(numeric.NewDec(0)) {
 		for {
 			if attempts > 0 {

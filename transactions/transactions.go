@@ -12,7 +12,7 @@ import (
 )
 
 // SendTransaction - send transactions
-func SendTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, amount numeric.Dec, nonce int, gasLimit int64, gasPrice numeric.Dec, txData string, confirmationWaitTime int) (map[string]interface{}, error) {
+func SendTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, amount numeric.Dec, nonce int, gasLimit int64, gasPrice numeric.Dec, txData string, timeout int) (map[string]interface{}, error) {
 	account.Unlock()
 
 	rpcClient, currentNonce, err := TransactionPrerequisites(account, fromShardID, nonce)
@@ -24,7 +24,7 @@ func SendTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress
 		txData = base64.StdEncoding.EncodeToString([]byte(txData))
 	}
 
-	txResult, err := sdkTxs.SendTransaction(account.Keystore, account.Account, rpcClient, config.Configuration.Network.API.ChainID, account.Address, fromShardID, toAddress, toShardID, amount, gasLimit, gasPrice, currentNonce, txData, config.Configuration.Account.Passphrase, config.Configuration.Network.API.NodeAddress(fromShardID), confirmationWaitTime)
+	txResult, err := sdkTxs.SendTransaction(account.Keystore, account.Account, rpcClient, config.Configuration.Network.API.ChainID, account.Address, fromShardID, toAddress, toShardID, amount, gasLimit, gasPrice, currentNonce, txData, config.Configuration.Account.Passphrase, config.Configuration.Network.API.NodeAddress(fromShardID), timeout)
 
 	if err != nil {
 		return nil, err
@@ -34,8 +34,8 @@ func SendTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress
 }
 
 // SendSameShardTransaction - send a transaction using the same shard for both the receiver and the sender
-func SendSameShardTransaction(account *sdkAccounts.Account, toAddress string, shardID uint32, amount numeric.Dec, nonce int, gasLimit int64, gasPrice numeric.Dec, txData string, confirmationWaitTime int) (map[string]interface{}, error) {
-	return SendTransaction(account, shardID, toAddress, shardID, amount, nonce, gasLimit, gasPrice, txData, confirmationWaitTime)
+func SendSameShardTransaction(account *sdkAccounts.Account, toAddress string, shardID uint32, amount numeric.Dec, nonce int, gasLimit int64, gasPrice numeric.Dec, txData string, timeout int) (map[string]interface{}, error) {
+	return SendTransaction(account, shardID, toAddress, shardID, amount, nonce, gasLimit, gasPrice, txData, timeout)
 }
 
 // TransactionPrerequisites - resolves required clients to perform transactions

@@ -27,6 +27,7 @@ type CommandArguments struct {
 	Passphrase     string
 	KeysPath       string
 	TestTarget     string
+	Timeout        int
 	Verbose        bool
 	VerboseGoSDK   bool
 	PprofPort      int
@@ -62,6 +63,7 @@ func init() {
 	RootCommand.PersistentFlags().StringVar(&Args.Passphrase, "passphrase", "", "--passphrase <passphrase>")
 	RootCommand.PersistentFlags().StringVar(&Args.KeysPath, "keys", "", "--keys <path>")
 	RootCommand.PersistentFlags().StringVar(&Args.TestTarget, "test", "", "--test <path>")
+	RootCommand.PersistentFlags().IntVar(&Args.Timeout, "timeout", 0, "<timeout>")
 	RootCommand.PersistentFlags().BoolVar(&Args.Verbose, "verbose", false, "--verbose")
 	RootCommand.PersistentFlags().BoolVar(&Args.VerboseGoSDK, "verbose-go-sdk", false, "--verbose-go-sdk")
 	RootCommand.PersistentFlags().IntVar(&Args.PprofPort, "pprof-port", -1, "--pprof-port <port>")

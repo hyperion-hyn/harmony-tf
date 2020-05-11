@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -116,6 +117,10 @@ func configureNetworkConfig() error {
 		for _, shard := range shards {
 			Configuration.Network.Nodes = append(Configuration.Network.Nodes, shard.Node)
 		}
+
+		sort.Slice(Configuration.Network.Nodes, func(i, j int) bool {
+			return Configuration.Network.Nodes[i] < Configuration.Network.Nodes[j]
+		})
 	}
 
 	Configuration.Network.API = sdkNetworkTypes.Network{
@@ -139,6 +144,10 @@ func configureNetworkConfig() error {
 
 	if err := Configuration.Network.Gas.Initialize(); err != nil {
 		return err
+	}
+
+	if Args.Timeout > 0 && Args.Timeout > Configuration.Network.Timeout {
+		Configuration.Network.Timeout = Args.Timeout
 	}
 
 	return nil
@@ -212,6 +221,10 @@ func configureFundingConfig() error {
 
 	if err := Configuration.Funding.Initialize(); err != nil {
 		return err
+	}
+
+	if Configuration.Network.Timeout > 0 && Configuration.Network.Timeout > Configuration.Funding.Timeout {
+		Configuration.Funding.Timeout = Configuration.Network.Timeout
 	}
 
 	return nil

@@ -54,6 +54,11 @@ func (testCase *TestCase) Initialize() {
 			testCase.Result = false
 		}
 	}
+
+	if config.Configuration.Network.Timeout > 0 {
+		testCase.Parameters.Timeout = config.Configuration.Network.Timeout
+		testCase.StakingParameters.Timeout = config.Configuration.Network.Timeout
+	}
 }
 
 // Duration - how long it took to run the test case
