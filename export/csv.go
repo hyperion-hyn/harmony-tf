@@ -47,8 +47,8 @@ func ExportCSV(results []*testing.TestCase, dismissed []*testing.TestCase, succe
 		records = append(records, emptyRow())
 		records = append(records, emptyRow())
 		records = append(records, []string{"Dismissed:", "", "", "", "", "", "", "", "", ""})
-		for _, result := range results {
-			records = append(records, csvRow(result))
+		for _, skipped := range dismissed {
+			records = append(records, dismissedRow(skipped))
 		}
 	}
 
@@ -104,6 +104,21 @@ func csvRow(testCase *testing.TestCase) []string {
 		startedAtString,
 		finishedAtString,
 		durationString,
+	}
+}
+
+func dismissedRow(testCase *testing.TestCase) []string {
+	return []string{
+		testCase.Category,
+		testCase.Name,
+		testCase.Goal,
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
 	}
 }
 

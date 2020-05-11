@@ -159,6 +159,7 @@ func results() (successfulCount int, failedCount int, duration time.Duration) {
 	duration = config.Configuration.Framework.EndTime.Sub(config.Configuration.Framework.StartTime)
 	successfulCount = 0
 	failedCount = 0
+	dismissedCount := len(Dismissed)
 
 	for _, testCase := range Results {
 		if testCase.Result == testCase.Expected {
@@ -182,6 +183,7 @@ func results() (successfulCount int, failedCount int, duration time.Duration) {
 	fmt.Println(strings.Repeat("-", 50))
 	fmt.Println(fmt.Sprintf("%s %s", config.Configuration.Framework.Styling.Success.Render("Successful:"), color.Style{color.OpBold}.Sprintf("%d", successfulCount)))
 	fmt.Println(fmt.Sprintf("%s %s", config.Configuration.Framework.Styling.Error.Render("Failed:"), color.Style{color.OpBold}.Sprintf("%d", failedCount)))
+	fmt.Println(fmt.Sprintf("%s %s", config.Configuration.Framework.Styling.Warning.Render("Dismissed:"), color.Style{color.OpBold}.Sprintf("%d", dismissedCount)))
 	fmt.Println(strings.Repeat("-", 50))
 
 	if len(Results) > 0 {
