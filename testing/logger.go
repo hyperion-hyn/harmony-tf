@@ -20,7 +20,7 @@ func Title(testCase *TestCase, titleType string, verbose bool) {
 			executed = config.Configuration.Framework.Styling.TestCaseHeader.Render(" - Result: ")
 			resultMsg := ""
 
-			if testCase.Result == testCase.Expected {
+			if testCase.Successful() {
 				resultMsg = color.Style{color.FgLightWhite, color.BgGreen, color.OpBold}.Render(fmt.Sprintf(" %s ", testCase.ResultMessage()))
 			} else {
 				resultMsg = color.Style{color.FgLightWhite, color.BgRed, color.OpBold}.Render(fmt.Sprintf(" %s ", testCase.ResultMessage()))

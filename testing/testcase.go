@@ -84,6 +84,29 @@ func (testCase *TestCase) ReportMemoryDismissal() {
 	Title(testCase, "footer", testCase.Verbose)
 }
 
+// Successful - if the test case result matches the expected result
+func (testCase *TestCase) Successful() bool {
+	return testCase.Result == testCase.Expected
+}
+
+// Status - test case status represented as a string
+func (testCase *TestCase) Status() string {
+	if testCase.Successful() {
+		return "Success"
+	}
+
+	return "Failed"
+}
+
+// ErrorMessage - return an error message if an error occurred for the test case
+func (testCase *TestCase) ErrorMessage() string {
+	if testCase.Error != nil {
+		return testCase.Error.Error()
+	}
+
+	return ""
+}
+
 // ExpectedMessage - convert testCase.Expected to a string message
 func (testCase *TestCase) ExpectedMessage() string {
 	return statusMessage(testCase.Expected)

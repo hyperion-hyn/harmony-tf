@@ -27,6 +27,9 @@ var (
 
 	// Dismissed - contains all dismissed test cases
 	Dismissed []*testing.TestCase
+
+	// Failed - contains all failed test cases
+	Failed []*testing.TestCase
 )
 
 // Execute - executes all registered/identified test cases
@@ -43,7 +46,7 @@ func Execute() error {
 
 		switch strings.ToLower(config.Configuration.Export.Format) {
 		case "csv":
-			csvPath, err := export.ExportCSV(Results, Dismissed, successfulCount, failedCount, duration)
+			csvPath, err := export.ExportCSV(Results, Dismissed, Failed, successfulCount, failedCount, duration)
 			if err != nil {
 				fmt.Println("Failed to export test case results to CSV")
 			} else if csvPath != "" {
@@ -145,6 +148,9 @@ func execute() {
 
 			if testCase.Executed {
 				Results = append(Results, testCase)
+				if !testCase.Successful() {
+					Failed = append(Failed, testCase)
+				}
 			} else {
 				Dismissed = append(Dismissed, testCase)
 			}
@@ -162,7 +168,7 @@ func results() (successfulCount int, failedCount int, duration time.Duration) {
 	dismissedCount := len(Dismissed)
 
 	for _, testCase := range Results {
-		if testCase.Result == testCase.Expected {
+		if testCase.Successful() {
 			successfulCount++
 		} else {
 			failedCount++
@@ -191,7 +197,7 @@ func results() (successfulCount int, failedCount int, duration time.Duration) {
 		color.Style{color.OpBold}.Println("Executed test cases:")
 		fmt.Println(strings.Repeat("-", 50))
 		for _, testCase := range Results {
-			if testCase.Result == testCase.Expected {
+			if testCase.Successful() {
 				fmt.Println(fmt.Sprintf("%s %s", color.Style{color.OpItalic}.Sprintf("Testcase %s:", testCase.Name), config.Configuration.Framework.Styling.Success.Render("success")))
 			} else {
 				fmt.Println(fmt.Sprintf("%s %s", color.Style{color.OpItalic}.Sprintf("Testcase %s:", testCase.Name), config.Configuration.Framework.Styling.Error.Render("failed")))

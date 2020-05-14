@@ -13,7 +13,19 @@ import (
 )
 
 var (
-	timeFormat string = "2006-01-02 15:04:05 UTC"
+	timeFormat string   = "2006-01-02 15:04:05 UTC"
+	headerRow  []string = []string{
+		"Category",
+		"Name",
+		"Goal",
+		"Executed",
+		"Expected",
+		"Result",
+		"Status",
+		"Started At",
+		"Finished At",
+		"Duration",
+	}
 )
 
 func generateFileName(theTime time.Time, ext string) string {
@@ -21,21 +33,8 @@ func generateFileName(theTime time.Time, ext string) string {
 }
 
 // ExportCSV - exports test suite results as csv
-func ExportCSV(results []*testing.TestCase, dismissed []*testing.TestCase, successfulCount int, failedCount int, totalDuration time.Duration) (string, error) {
-	records := [][]string{
-		{
-			"Category",
-			"Name",
-			"Goal",
-			"Executed",
-			"Expected",
-			"Result",
-			"Status",
-			"Started At",
-			"Finished At",
-			"Duration",
-		},
-	}
+func ExportCSV(results []*testing.TestCase, dismissed []*testing.TestCase, failed []*testing.TestCase, successfulCount int, failedCount int, totalDuration time.Duration) (string, error) {
+	records := [][]string{headerRow}
 
 	if len(results) > 0 {
 		for _, result := range results {
@@ -46,20 +45,31 @@ func ExportCSV(results []*testing.TestCase, dismissed []*testing.TestCase, succe
 	if len(dismissed) > 0 {
 		records = append(records, emptyRow())
 		records = append(records, emptyRow())
-		records = append(records, []string{"Dismissed:", "", "", "", "", "", "", "", "", ""})
+		records = append(records, titleRow("Dismissed:"))
 		for _, skipped := range dismissed {
 			records = append(records, dismissedRow(skipped))
 		}
 	}
 
+	if len(failed) > 0 {
+		records = append(records, emptyRow())
+		records = append(records, emptyRow())
+		records = append(records, titleRow("Failed:"))
+		records = append(records, failedHeaders())
+
+		for _, fail := range failed {
+			records = append(records, failedRow(fail))
+		}
+	}
+
 	records = append(records, emptyRow())
 	records = append(records, emptyRow())
-	records = append(records, []string{"", "", "", "", "", "", "", "Summary:", ""})
-	records = append(records, []string{"", "", "", "", "", "", "", "Successful:", fmt.Sprintf("%d", successfulCount)})
-	records = append(records, []string{"", "", "", "", "", "", "", "Failed:", fmt.Sprintf("%d", failedCount)})
-	records = append(records, []string{"", "", "", "", "", "", "", "Dismissed:", fmt.Sprintf("%d", len(dismissed))})
+	records = append(records, summaryRow("Summary:", ""))
+	records = append(records, summaryRow("Successful:", fmt.Sprintf("%d", successfulCount)))
+	records = append(records, summaryRow("Failed:", fmt.Sprintf("%d", failedCount)))
+	records = append(records, summaryRow("Dismissed:", fmt.Sprintf("%d", len(dismissed))))
 	records = append(records, emptyRow())
-	records = append(records, []string{"", "", "", "", "", "", "", "Duration:", totalDuration.String()})
+	records = append(records, summaryRow("Duration:", totalDuration.String()))
 
 	filePath, err := writeCSVToFile(records)
 	if err != nil {
@@ -86,13 +96,6 @@ func csvRow(testCase *testing.TestCase) []string {
 		durationString = duration.String()
 	}
 
-	status := ""
-	if testCase.Result == testCase.Expected {
-		status = "Success"
-	} else {
-		status = "Failed"
-	}
-
 	return []string{
 		testCase.Category,
 		testCase.Name,
@@ -100,7 +103,7 @@ func csvRow(testCase *testing.TestCase) []string {
 		fmt.Sprintf("%t", testCase.Executed),
 		fmt.Sprintf("%t", testCase.Expected),
 		fmt.Sprintf("%t", testCase.Result),
-		status,
+		testCase.Status(),
 		startedAtString,
 		finishedAtString,
 		durationString,
@@ -108,22 +111,70 @@ func csvRow(testCase *testing.TestCase) []string {
 }
 
 func dismissedRow(testCase *testing.TestCase) []string {
-	return []string{
-		testCase.Category,
-		testCase.Name,
-		testCase.Goal,
-		"",
-		"",
-		"",
-		"",
-		"",
-		"",
-		"",
-	}
+	return padRow(
+		[]string{
+			testCase.Category,
+			testCase.Name,
+			testCase.Goal,
+		},
+		"append",
+	)
+}
+
+func failedHeaders() []string {
+	return padRow(
+		[]string{
+			"Category",
+			"Name",
+			"Goal",
+			"Error Message",
+		},
+		"append",
+	)
+}
+
+func failedRow(testCase *testing.TestCase) []string {
+	return padRow(
+		[]string{
+			testCase.Category,
+			testCase.Name,
+			testCase.Goal,
+			testCase.ErrorMessage(),
+		},
+		"append",
+	)
+}
+
+func titleRow(title string) []string {
+	return padRow([]string{title}, "append")
+}
+
+func summaryRow(label string, value string) []string {
+	return padRow([]string{label, value}, "prepend")
 }
 
 func emptyRow() []string {
-	return []string{"", "", "", "", "", "", "", "", "", ""}
+	return padRow([]string{}, "append")
+}
+
+func padRow(row []string, mode string) []string {
+	values := row
+	currentLength := len(row)
+	padLength := len(headerRow) - currentLength
+
+	if mode == "append" {
+		for i := 0; i < padLength; i++ {
+			values = append(values, "")
+		}
+	} else if mode == "prepend" {
+		values = []string{}
+		for i := 0; i < padLength; i++ {
+			values = append(values, "")
+		}
+		values = append(values, row...)
+	}
+
+	return values
 }
 
 func writeCSVToFile(records [][]string) (string, error) {
