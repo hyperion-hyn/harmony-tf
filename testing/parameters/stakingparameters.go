@@ -3,7 +3,7 @@ package parameters
 import (
 	"strings"
 
-	sdkNetworkTypes "github.com/harmony-one/go-lib/network/types/network"
+	sdkNetworkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
 )
 
 // StakingParameters - represents the test case staking tx parameters

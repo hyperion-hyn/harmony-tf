@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/gookit/color"
-	sdkNetwork "github.com/harmony-one/go-lib/network"
-	sdkCommonTypes "github.com/harmony-one/go-lib/network/types/common"
-	sdkNetworkTypes "github.com/harmony-one/go-lib/network/types/network"
-	sdkNetworkUtils "github.com/harmony-one/go-lib/network/utils"
-	goSdkCommon "github.com/harmony-one/go-sdk/pkg/common"
-	"github.com/harmony-one/harmony-tf/utils"
+	sdkNetwork "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network"
+	sdkCommonTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/common"
+	sdkNetworkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
+	sdkNetworkUtils "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/utils"
+	goSdkCommon "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
+	"github.com/hyperion-hyn/hyperion-tf/utils"
 	"github.com/mackerelio/go-osstat/memory"
 	"gopkg.in/yaml.v2"
 )

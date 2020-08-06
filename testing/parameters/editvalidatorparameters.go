@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	sdkNetworkTypes "github.com/harmony-one/go-lib/network/types/network"
-	sdkValidator "github.com/harmony-one/go-lib/staking/validator"
-	"github.com/harmony-one/harmony-tf/logger"
+	sdkNetworkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
+	sdkValidator "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/validator"
+	"github.com/hyperion-hyn/hyperion-tf/logger"
 )
 
 // EditValidatorParameters - the parameters for editing a validator

@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/harmony-one/harmony-tf/balances"
-	"github.com/harmony-one/harmony-tf/config"
-	"github.com/harmony-one/harmony-tf/crypto"
-	"github.com/harmony-one/harmony-tf/logger"
-	"github.com/harmony-one/harmony-tf/testing"
 	"github.com/harmony-one/harmony/numeric"
+	"github.com/hyperion-hyn/hyperion-tf/balances"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	"github.com/hyperion-hyn/hyperion-tf/crypto"
+	"github.com/hyperion-hyn/hyperion-tf/logger"
+	"github.com/hyperion-hyn/hyperion-tf/testing"
 
-	sdkAccounts "github.com/harmony-one/go-lib/accounts"
-	sdkCrypto "github.com/harmony-one/go-lib/crypto"
-	sdkDelegation "github.com/harmony-one/go-lib/staking/delegation"
-	sdkValidator "github.com/harmony-one/go-lib/staking/validator"
-	sdkTxs "github.com/harmony-one/go-lib/transactions"
+	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
+	sdkCrypto "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
+	sdkDelegation "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/delegation"
+	sdkValidator "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/validator"
+	sdkTxs "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/transactions"
 )
 
 // ReuseOrCreateValidator - reuse an existing validator or create a new one

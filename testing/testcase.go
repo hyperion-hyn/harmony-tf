@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	sdkAccounts "github.com/harmony-one/go-lib/accounts"
-	sdkTxs "github.com/harmony-one/go-lib/transactions"
-	"github.com/harmony-one/harmony-tf/config"
-	"github.com/harmony-one/harmony-tf/logger"
-	"github.com/harmony-one/harmony-tf/testing/parameters"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
+	sdkTxs "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/transactions"
+	"github.com/hyperion-hyn/hyperion-tf/logger"
+	"github.com/hyperion-hyn/hyperion-tf/testing/parameters"
 )
 
 // TestCase - represents a test case

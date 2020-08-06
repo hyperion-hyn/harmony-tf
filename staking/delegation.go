@@ -3,12 +3,12 @@ package staking
 import (
 	"errors"
 
-	sdkAccounts "github.com/harmony-one/go-lib/accounts"
-	sdkNetworkNonce "github.com/harmony-one/go-lib/network/rpc/nonces"
-	sdkDelegation "github.com/harmony-one/go-lib/staking/delegation"
-	"github.com/harmony-one/harmony-tf/config"
-	testParams "github.com/harmony-one/harmony-tf/testing/parameters"
 	"github.com/harmony-one/harmony/numeric"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
+	sdkNetworkNonce "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/rpc/nonces"
+	sdkDelegation "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/delegation"
+	testParams "github.com/hyperion-hyn/hyperion-tf/testing/parameters"
 )
 
 var (

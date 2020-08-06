@@ -1,8 +1,8 @@
 package parameters
 
 import (
-	"github.com/harmony-one/go-sdk/pkg/common"
 	"github.com/harmony-one/harmony/numeric"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
 	"github.com/pkg/errors"
 )
 

@@ -7,14 +7,14 @@ import (
 	"path/filepath"
 
 	"github.com/ethereum/go-ethereum/crypto"
-	sdkAccounts "github.com/harmony-one/go-lib/accounts"
-	goSdkAccount "github.com/harmony-one/go-sdk/pkg/account"
-	"github.com/harmony-one/go-sdk/pkg/address"
-	goSdkAddress "github.com/harmony-one/go-sdk/pkg/address"
-	"github.com/harmony-one/harmony-tf/accounts"
-	"github.com/harmony-one/harmony-tf/balances"
-	"github.com/harmony-one/harmony-tf/config"
-	"github.com/harmony-one/harmony-tf/utils"
+	"github.com/hyperion-hyn/hyperion-tf/accounts"
+	"github.com/hyperion-hyn/hyperion-tf/balances"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
+	goSdkAccount "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/account"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
+	goSdkAddress "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
+	"github.com/hyperion-hyn/hyperion-tf/utils"
 )
 
 var (

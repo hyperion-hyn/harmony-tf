@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"time"
 
-	sdkValidator "github.com/harmony-one/go-lib/staking/validator"
-	sdkTxs "github.com/harmony-one/go-lib/transactions"
-	"github.com/harmony-one/harmony-tf/accounts"
-	"github.com/harmony-one/harmony-tf/config"
-	"github.com/harmony-one/harmony-tf/funding"
-	"github.com/harmony-one/harmony-tf/logger"
-	"github.com/harmony-one/harmony-tf/staking"
-	"github.com/harmony-one/harmony-tf/testing"
+	"github.com/hyperion-hyn/hyperion-tf/accounts"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	sdkValidator "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/validator"
+	sdkTxs "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/transactions"
+	"github.com/hyperion-hyn/hyperion-tf/funding"
+	"github.com/hyperion-hyn/hyperion-tf/logger"
+	"github.com/hyperion-hyn/hyperion-tf/staking"
+	"github.com/hyperion-hyn/hyperion-tf/testing"
 )
 
 // StandardScenario - executes a standard edit validator test case

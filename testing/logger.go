@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gookit/color"
-	"github.com/harmony-one/harmony-tf/config"
+	"github.com/hyperion-hyn/hyperion-tf/config"
 )
 
 // Title - header/footer for test cases

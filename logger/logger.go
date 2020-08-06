@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gookit/color"
-	"github.com/harmony-one/harmony-tf/config"
+	"github.com/hyperion-hyn/hyperion-tf/config"
 )
 
 var (

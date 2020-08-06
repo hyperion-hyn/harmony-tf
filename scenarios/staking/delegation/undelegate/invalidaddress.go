@@ -5,14 +5,14 @@ import (
 	"strings"
 	"time"
 
-	sdkAccounts "github.com/harmony-one/go-lib/accounts"
-	tfAccounts "github.com/harmony-one/harmony-tf/accounts"
-	"github.com/harmony-one/harmony-tf/balances"
-	"github.com/harmony-one/harmony-tf/config"
-	"github.com/harmony-one/harmony-tf/funding"
-	"github.com/harmony-one/harmony-tf/logger"
-	"github.com/harmony-one/harmony-tf/staking"
-	"github.com/harmony-one/harmony-tf/testing"
+	tfAccounts "github.com/hyperion-hyn/hyperion-tf/accounts"
+	"github.com/hyperion-hyn/hyperion-tf/balances"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
+	"github.com/hyperion-hyn/hyperion-tf/funding"
+	"github.com/hyperion-hyn/hyperion-tf/logger"
+	"github.com/hyperion-hyn/hyperion-tf/staking"
+	"github.com/hyperion-hyn/hyperion-tf/testing"
 )
 
 // InvalidAddressScenario - executes an undelegation test case where the undelegator address isn't the sender address

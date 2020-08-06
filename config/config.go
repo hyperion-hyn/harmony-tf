@@ -4,11 +4,11 @@ import (
 	"time"
 
 	"github.com/gookit/color"
-	sdkAccounts "github.com/harmony-one/go-lib/accounts"
-	sdkNetworkTypes "github.com/harmony-one/go-lib/network/types/network"
-	sdkValidator "github.com/harmony-one/go-lib/staking/validator"
-	"github.com/harmony-one/go-sdk/pkg/common"
 	"github.com/harmony-one/harmony/numeric"
+	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
+	sdkNetworkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
+	sdkValidator "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/validator"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
 	"github.com/pkg/errors"
 )
 

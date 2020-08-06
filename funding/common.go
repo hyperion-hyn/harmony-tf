@@ -3,9 +3,9 @@ package funding
 import (
 	"fmt"
 
-	"github.com/harmony-one/harmony-tf/balances"
-	"github.com/harmony-one/harmony-tf/config"
 	"github.com/harmony-one/harmony/numeric"
+	"github.com/hyperion-hyn/hyperion-tf/balances"
+	"github.com/hyperion-hyn/hyperion-tf/config"
 	"github.com/pkg/errors"
 )
 

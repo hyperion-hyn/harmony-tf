@@ -1,8 +1,8 @@
 package parameters
 
 import (
-	sdkCrypto "github.com/harmony-one/go-lib/crypto"
-	sdkValidator "github.com/harmony-one/go-lib/staking/validator"
+	sdkCrypto "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
+	sdkValidator "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/validator"
 )
 
 // CreateValidatorParameters - represents the validator details

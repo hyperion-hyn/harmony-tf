@@ -3,8 +3,8 @@ package crypto
 import (
 	"math/big"
 
-	sdkCrypto "github.com/harmony-one/go-lib/crypto"
-	"github.com/harmony-one/harmony-tf/config"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	sdkCrypto "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 )
 
 // GenerateBlsKeys - generates a set of bls keys given a count

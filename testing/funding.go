@@ -3,14 +3,14 @@ package testing
 import (
 	"fmt"
 
-	"github.com/harmony-one/harmony-tf/accounts"
-	"github.com/harmony-one/harmony-tf/balances"
-	"github.com/harmony-one/harmony-tf/config"
-	"github.com/harmony-one/harmony-tf/funding"
-	"github.com/harmony-one/harmony-tf/logger"
 	"github.com/harmony-one/harmony/numeric"
+	"github.com/hyperion-hyn/hyperion-tf/accounts"
+	"github.com/hyperion-hyn/hyperion-tf/balances"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	"github.com/hyperion-hyn/hyperion-tf/funding"
+	"github.com/hyperion-hyn/hyperion-tf/logger"
 
-	sdkAccounts "github.com/harmony-one/go-lib/accounts"
+	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 )
 
 // GenerateAndFundAccount - generates an account and funds it from the core funding account

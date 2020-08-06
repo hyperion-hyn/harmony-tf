@@ -5,9 +5,9 @@ import (
 	"math/rand"
 	"time"
 
-	sdkValidator "github.com/harmony-one/go-lib/staking/validator"
-	"github.com/harmony-one/harmony-tf/utils"
 	harmonyTypes "github.com/harmony-one/harmony/staking/types"
+	sdkValidator "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/validator"
+	"github.com/hyperion-hyn/hyperion-tf/utils"
 )
 
 // GenerateUniqueDetails - generates new unique details to bypass uniqueness validation

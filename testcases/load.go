@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/elliotchance/orderedmap"
-	"github.com/harmony-one/harmony-tf/config"
-	"github.com/harmony-one/harmony-tf/testing"
-	"github.com/harmony-one/harmony-tf/utils"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	"github.com/hyperion-hyn/hyperion-tf/testing"
+	"github.com/hyperion-hyn/hyperion-tf/utils"
 )
 
 func loadTestCases() error {

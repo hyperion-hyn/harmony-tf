@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	sdkAccounts "github.com/harmony-one/go-lib/accounts"
-	"github.com/harmony-one/harmony-tf/config"
 	"github.com/harmony-one/harmony/numeric"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 )
 
 // GetShardBalance - gets the balance for a given address and shard

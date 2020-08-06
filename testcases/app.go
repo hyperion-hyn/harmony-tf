@@ -6,16 +6,16 @@ import (
 	"time"
 
 	"github.com/gookit/color"
-	"github.com/harmony-one/harmony-tf/config"
-	"github.com/harmony-one/harmony-tf/export"
-	"github.com/harmony-one/harmony-tf/funding"
-	"github.com/harmony-one/harmony-tf/keys"
-	stakingDelegationDelegateScenarios "github.com/harmony-one/harmony-tf/scenarios/staking/delegation/delegate"
-	stakingDelegationUndelegateScenarios "github.com/harmony-one/harmony-tf/scenarios/staking/delegation/undelegate"
-	stakingCreateValidatorScenarios "github.com/harmony-one/harmony-tf/scenarios/staking/validator/create"
-	stakingEditValidatorScenarios "github.com/harmony-one/harmony-tf/scenarios/staking/validator/edit"
-	transactionScenarios "github.com/harmony-one/harmony-tf/scenarios/transactions"
-	"github.com/harmony-one/harmony-tf/testing"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	"github.com/hyperion-hyn/hyperion-tf/export"
+	"github.com/hyperion-hyn/hyperion-tf/funding"
+	"github.com/hyperion-hyn/hyperion-tf/keys"
+	stakingDelegationDelegateScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/staking/delegation/delegate"
+	stakingDelegationUndelegateScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/staking/delegation/undelegate"
+	stakingCreateValidatorScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/staking/validator/create"
+	stakingEditValidatorScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/staking/validator/edit"
+	transactionScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/transactions"
+	"github.com/hyperion-hyn/hyperion-tf/testing"
 )
 
 var (

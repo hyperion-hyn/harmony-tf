@@ -5,9 +5,9 @@ import (
 	"strings"
 	"sync"
 
-	sdkAccounts "github.com/harmony-one/go-lib/accounts"
-	goSdkAccount "github.com/harmony-one/go-sdk/pkg/account"
-	"github.com/harmony-one/harmony-tf/config"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
+	goSdkAccount "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/account"
 )
 
 // GenerateTestCaseAccountName - generate a test case prefixed account name

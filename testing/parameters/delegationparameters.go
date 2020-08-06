@@ -1,9 +1,9 @@
 package parameters
 
 import (
-	sdkNetworkTypes "github.com/harmony-one/go-lib/network/types/network"
-	"github.com/harmony-one/go-sdk/pkg/common"
 	"github.com/harmony-one/harmony/numeric"
+	sdkNetworkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
 	"github.com/pkg/errors"
 )
 

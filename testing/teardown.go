@@ -3,12 +3,12 @@ package testing
 import (
 	"sync"
 
-	sdkAccounts "github.com/harmony-one/go-lib/accounts"
-	goSdkAccount "github.com/harmony-one/go-sdk/pkg/account"
-	"github.com/harmony-one/harmony-tf/balances"
-	"github.com/harmony-one/harmony-tf/config"
-	"github.com/harmony-one/harmony-tf/transactions"
 	"github.com/harmony-one/harmony/numeric"
+	"github.com/hyperion-hyn/hyperion-tf/balances"
+	"github.com/hyperion-hyn/hyperion-tf/config"
+	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
+	goSdkAccount "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/account"
+	"github.com/hyperion-hyn/hyperion-tf/transactions"
 )
 
 // Teardown - return any sent tokens (minus a gas cost) and remove the account from the keystore
