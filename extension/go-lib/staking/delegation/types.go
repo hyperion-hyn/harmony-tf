@@ -1,10 +1,9 @@
 package delegation
 
 import (
+	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/params"
 	"math/big"
-
-	"github.com/harmony-one/harmony/common/denominations"
-	"github.com/harmony-one/harmony/numeric"
 )
 
 // DelegationInfoWrapper - wrapper for the GetValidatorInformation RPC method
@@ -20,16 +19,16 @@ type DelegationInfo struct {
 	ValidatorAddress string             `json:"validator_address,omitempty" yaml:"validator_address,omitempty"`
 	DelegatorAddress string             `json:"delegator_address,omitempty" yaml:"delegator_address,omitempty"`
 	RawAmount        *big.Int           `json:"amount,omitempty" yaml:"amount,omitempty"`
-	Amount           numeric.Dec        `json:"-" yaml:"-"`
+	Amount           ethCommon.Dec      `json:"-" yaml:"-"`
 	RawReward        *big.Int           `json:"reward,omitempty" yaml:"reward,omitempty"`
-	Reward           numeric.Dec        `json:"-" yaml:"-"`
+	Reward           ethCommon.Dec      `json:"-" yaml:"-"`
 }
 
 // UndelegationInfo - represents the info for a given undelegation
 type UndelegationInfo struct {
-	RawAmount *big.Int    `json:"Amount" yaml:"Amount"`
-	Amount    numeric.Dec `json:"-" yaml:"-"`
-	Epoch     int         `json:"Epoch" yaml:"Epoch"`
+	RawAmount *big.Int      `json:"Amount" yaml:"Amount"`
+	Amount    ethCommon.Dec `json:"-" yaml:"-"`
+	Epoch     int           `json:"Epoch" yaml:"Epoch"`
 }
 
 // InitializeDelegationInfos - initializes a DelegationInfo slice
@@ -53,13 +52,13 @@ func InitializeDelegationInfos(delegations []DelegationInfo) ([]DelegationInfo, 
 // Initialize - initialize and convert values for a given ValidatorInfo struct
 func (delegationInfo *DelegationInfo) Initialize() error {
 	if delegationInfo.RawAmount != nil {
-		decAmount := numeric.NewDecFromBigInt(delegationInfo.RawAmount)
-		delegationInfo.Amount = decAmount.Quo(numeric.NewDec(denominations.One))
+		decAmount := ethCommon.NewDecFromBigInt(delegationInfo.RawAmount)
+		delegationInfo.Amount = decAmount.Quo(ethCommon.NewDec(params.Ether))
 	}
 
 	if delegationInfo.RawReward != nil {
-		decReward := numeric.NewDecFromBigInt(delegationInfo.RawReward)
-		delegationInfo.Reward = decReward.Quo(numeric.NewDec(denominations.One))
+		decReward := ethCommon.NewDecFromBigInt(delegationInfo.RawReward)
+		delegationInfo.Reward = decReward.Quo(ethCommon.NewDec(params.Ether))
 	}
 
 	undelegations, err := InitializeUndelegationInfos(delegationInfo.Undelegations)
@@ -92,8 +91,8 @@ func InitializeUndelegationInfos(undelegations []UndelegationInfo) ([]Undelegati
 // Initialize - initialize and convert values for a given ValidatorInfo struct
 func (undelegationInfo *UndelegationInfo) Initialize() error {
 	if undelegationInfo.RawAmount != nil {
-		decAmount := numeric.NewDecFromBigInt(undelegationInfo.RawAmount)
-		undelegationInfo.Amount = decAmount.Quo(numeric.NewDec(denominations.One))
+		decAmount := ethCommon.NewDecFromBigInt(undelegationInfo.RawAmount)
+		undelegationInfo.Amount = decAmount.Quo(ethCommon.NewDec(params.Ether))
 	}
 	return nil
 }

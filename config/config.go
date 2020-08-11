@@ -1,10 +1,11 @@
 package config
 
 import (
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"time"
 
 	"github.com/gookit/color"
-	"github.com/harmony-one/harmony/numeric"
+
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	sdkNetworkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
 	sdkValidator "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/validator"
@@ -82,7 +83,7 @@ type Account struct {
 type Funding struct {
 	Account         sdkAccounts.Account `yaml:"account"`
 	RawMinimumFunds string              `yaml:"minimum_funds"`
-	MinimumFunds    numeric.Dec         `yaml:"-"`
+	MinimumFunds    ethCommon.Dec       `yaml:"-"`
 	Timeout         int                 `yaml:"timeout"`
 	Retry           Retry               `yaml:"retry"`
 	Verbose         bool                `yaml:"verbose"`

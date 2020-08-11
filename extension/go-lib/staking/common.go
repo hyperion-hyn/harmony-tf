@@ -3,18 +3,19 @@ package staking
 import (
 	"encoding/base64"
 	"fmt"
+	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/staking/types/restaking"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
+	staking "github.com/hyperion-hyn/hyperion-tf/extension/types"
 	"math/big"
 	"time"
 
 	"github.com/pkg/errors"
 
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/harmony-one/harmony/accounts"
-	"github.com/harmony-one/harmony/accounts/keystore"
-	"github.com/harmony-one/harmony/crypto/bls"
-	"github.com/harmony-one/harmony/numeric"
-	hmyStaking "github.com/harmony-one/harmony/staking/types"
-	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/transactions"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
@@ -28,12 +29,12 @@ func SendTx(
 	rpcClient *rpc.HTTPMessenger,
 	chain *common.ChainID,
 	gasLimit int64,
-	gasPrice numeric.Dec,
+	gasPrice ethCommon.Dec,
 	nonce uint64,
 	keystorePassphrase string,
 	node string,
 	timeout int,
-	payloadGenerator hmyStaking.StakeMsgFulfiller,
+	payloadGenerator transactions.StakeMsgFulfiller,
 	logMessage string,
 ) (map[string]interface{}, error) {
 	if keystore == nil || account == nil {
@@ -87,9 +88,9 @@ func SendTx(
 }
 
 // GenerateStakingTransaction - generate a staking transaction
-func GenerateStakingTransaction(gasLimit int64, gasPrice numeric.Dec, nonce uint64, payloadGenerator hmyStaking.StakeMsgFulfiller) (*hmyStaking.StakingTransaction, uint64, error) {
+func GenerateStakingTransaction(gasLimit int64, gasPrice ethCommon.Dec, nonce uint64, payloadGenerator transactions.StakeMsgFulfiller) (*types.Transaction, uint64, error) {
 	directive, payload := payloadGenerator()
-	isCreateValidator := (directive == hmyStaking.DirectiveCreateValidator)
+	isCreateValidator := directive == types.StakeCreateVal
 
 	bytes, err := rlp.EncodeToBytes(payload)
 	if err != nil {
@@ -103,7 +104,7 @@ func GenerateStakingTransaction(gasLimit int64, gasPrice numeric.Dec, nonce uint
 		return nil, 0, err
 	}
 
-	stakingTx, err := hmyStaking.NewStakingTransaction(nonce, calculatedGasLimit, gasPrice.TruncateInt(), payloadGenerator)
+	stakingTx, err := staking.NewStakingTransaction(nonce, calculatedGasLimit, gasPrice.TruncateInt(), directive, bytes)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -112,21 +113,18 @@ func GenerateStakingTransaction(gasLimit int64, gasPrice numeric.Dec, nonce uint
 }
 
 // ProcessBlsKeys - separate bls keys to pub key and sig slices
-func ProcessBlsKeys(blsKeys []crypto.BLSKey) (blsPubKeys []bls.SerializedPublicKey, blsSigs []bls.SerializedSignature) {
-	blsPubKeys = make([]bls.SerializedPublicKey, len(blsKeys))
-	blsSigs = make([]bls.SerializedSignature, len(blsKeys))
-
-	for i, blsKey := range blsKeys {
-		blsPubKeys[i] = *blsKey.ShardPublicKey
-		blsSigs[i] = *blsKey.ShardSignature
+func ProcessBlsKeys(blsKeys []crypto.BLSKey) (blsPubKeys restaking.BLSPublicKeys_, blsSigs []restaking.BLSSignature) {
+	blsPubKeys = restaking.BLSPublicKeys_{
+		Keys: make([]*restaking.BLSPublicKey_, len(blsKeys)),
 	}
-
+	blsSigs = make([]restaking.BLSSignature, len(blsKeys))
 	return blsPubKeys, blsSigs
 }
 
 // SignStakingTransaction - sign a staking transaction
-func SignStakingTransaction(keystore *keystore.KeyStore, account *accounts.Account, stakingTx *hmyStaking.StakingTransaction, chainID *big.Int) (*hmyStaking.StakingTransaction, error) {
-	signedTransaction, err := keystore.SignStakingTx(*account, stakingTx, chainID)
+func SignStakingTransaction(keystore *keystore.KeyStore, account *accounts.Account, stakingTx *types.Transaction, chainID *big.Int) (*types.Transaction, error) {
+
+	signedTransaction, err := keystore.SignTx(*account, stakingTx, chainID)
 	if err != nil {
 		return nil, err
 	}
@@ -146,8 +144,8 @@ func SendRawStakingTransaction(rpcClient *rpc.HTTPMessenger, signature *string) 
 	return receiptHash, nil
 }
 
-// NumericDecToBigIntAmount - convert a numeric.Dec amount to a converted big.Int amount
-func NumericDecToBigIntAmount(amount numeric.Dec) (bigAmount *big.Int) {
+// NumericDecToBigIntAmount - convert a ethCommon.Dec amount to a converted big.Int amount
+func NumericDecToBigIntAmount(amount ethCommon.Dec) (bigAmount *big.Int) {
 	if !amount.IsNil() {
 		amount = amount.Mul(transactions.OneAsDec)
 		bigAmount = amount.RoundInt()

@@ -1,7 +1,7 @@
 package parameters
 
 import (
-	"github.com/harmony-one/harmony/numeric"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/hyperion-hyn/hyperion-tf/config"
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	sdkNetworkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
@@ -21,7 +21,7 @@ type Parameters struct {
 	Data          string              `yaml:"data"`
 	DataSize      int                 `yaml:"data_size,omitempty"`
 	RawAmount     string              `yaml:"amount"`
-	Amount        numeric.Dec         `yaml:"-"`
+	Amount        ethCommon.Dec       `yaml:"-"`
 	Gas           sdkNetworkTypes.Gas `yaml:"gas"`
 	Nonce         int                 `yaml:"nonce"`
 	Count         int                 `yaml:"count"`

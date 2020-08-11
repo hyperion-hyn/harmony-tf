@@ -1,12 +1,12 @@
 package validator
 
 import (
+	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/params"
 	"math/big"
 
 	"github.com/pkg/errors"
 
-	"github.com/harmony-one/harmony/common/denominations"
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/rpc"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/delegation"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
@@ -35,25 +35,25 @@ type RPCValidatorResult struct {
 	CurrentlyInCommittee    bool                       `json:"currently-in-committee,omitempty" yaml:"currently-in-committee,omitempty"`
 	EposStatus              string                     `json:"epos-status,omitempty" yaml:"epos-status,omitempty"`
 	RawTotalDelegation      *big.Int                   `json:"total-delegation,omitempty" yaml:"total-delegation,omitempty"`
-	TotalDelegation         numeric.Dec                `json:"-" yaml:"-"`
+	TotalDelegation         ethCommon.Dec              `json:"-" yaml:"-"`
 	Lifetime                RPCValidatorLifetime       `json:"lifetime,omitempty" yaml:"lifetime,omitempty"`
 }
 
 // RPCCurrentEpochPerformance - the current epoch performance
 type RPCCurrentEpochPerformance struct {
-	CurrentEpochSigned               uint32      `json:"current-epoch-signed,omitempty" yaml:"current-epoch-signed,omitempty"`
-	CurrentEpochToSign               uint32      `json:"current-epoch-to-sign,omitempty" yaml:"current-epoch-to-sign,omitempty"`
-	RawCurrentEpochSigningPercentage string      `json:"current-epoch-signing-percentage,omitempty" yaml:"current-epoch-signing-percentage,omitempty"`
-	CurrentEpochSigningPercentage    numeric.Dec `json:"-" yaml:"-"`
+	CurrentEpochSigned               uint32        `json:"current-epoch-signed,omitempty" yaml:"current-epoch-signed,omitempty"`
+	CurrentEpochToSign               uint32        `json:"current-epoch-to-sign,omitempty" yaml:"current-epoch-to-sign,omitempty"`
+	RawCurrentEpochSigningPercentage string        `json:"current-epoch-signing-percentage,omitempty" yaml:"current-epoch-signing-percentage,omitempty"`
+	CurrentEpochSigningPercentage    ethCommon.Dec `json:"-" yaml:"-"`
 }
 
 // RPCValidatorLifetime - validator lifetime rewards
 type RPCValidatorLifetime struct {
-	RawAPR string      `json:"apr,omitempty" yaml:"apr,omitempty"`
-	APR    numeric.Dec `json:"-" yaml:"-"`
+	RawAPR string        `json:"apr,omitempty" yaml:"apr,omitempty"`
+	APR    ethCommon.Dec `json:"-" yaml:"-"`
 
-	RawRewardAccumulated *big.Int    `json:"reward-accumulated,omitempty" yaml:"reward-accumulated,omitempty"`
-	RewardAccumulated    numeric.Dec `json:"-" yaml:"-"`
+	RawRewardAccumulated *big.Int      `json:"reward-accumulated,omitempty" yaml:"reward-accumulated,omitempty"`
+	RewardAccumulated    ethCommon.Dec `json:"-" yaml:"-"`
 
 	Blocks RPCValidatorBlockStatistics `json:"blocks,omitempty" yaml:"blocks,omitempty"`
 }
@@ -71,20 +71,20 @@ type RPCValidator struct {
 	CreationHeight        uint32                      `json:"creation-height,omitempty" yaml:"creation-height,omitempty"`
 	UpdateHeight          uint32                      `json:"update-height,omitempty" yaml:"update-height,omitempty"`
 	RawMaxTotalDelegation *big.Int                    `json:"max-total-delegation,omitempty" yaml:"max-total-delegation,omitempty"`
-	MaxTotalDelegation    numeric.Dec                 `json:"-" yaml:"-"`
+	MaxTotalDelegation    ethCommon.Dec               `json:"-" yaml:"-"`
 	RawMinSelfDelegation  *big.Int                    `json:"min-self-delegation,omitempty" yaml:"min-self-delegation,omitempty"`
-	MinSelfDelegation     numeric.Dec                 `json:"-" yaml:"-"`
+	MinSelfDelegation     ethCommon.Dec               `json:"-" yaml:"-"`
 	Name                  string                      `json:"name,omitempty" yaml:"name,omitempty"`                         // name
 	Identity              string                      `json:"identity,omitempty" yaml:"identity,omitempty"`                 // optional identity signature (ex. UPort or Keybase)
 	Website               string                      `json:"website,omitempty" yaml:"website,omitempty"`                   // optional website link
 	SecurityContact       string                      `json:"security-contact,omitempty" yaml:"security-contact,omitempty"` // optional security contact info
 	Details               string                      `json:"details,omitempty" yaml:"details,omitempty"`                   // optional details
 	RawRate               string                      `json:"rate,omitempty" yaml:"rate,omitempty"`
-	Rate                  numeric.Dec                 `json:"-" yaml:"-"`
+	Rate                  ethCommon.Dec               `json:"-" yaml:"-"`
 	RawMaxChangeRate      string                      `json:"max-change-rate,omitempty" yaml:"max-change-rate,omitempty"`
-	MaxChangeRate         numeric.Dec                 `json:"-" yaml:"-"`
+	MaxChangeRate         ethCommon.Dec               `json:"-" yaml:"-"`
 	RawMaxRate            string                      `json:"max-rate,omitempty" yaml:"max-rate,omitempty"`
-	MaxRate               numeric.Dec                 `json:"-" yaml:"-"`
+	MaxRate               ethCommon.Dec               `json:"-" yaml:"-"`
 	EligibilityStatus     string                      `json:"epos-eligibility-status,omitempty" yaml:"epos-eligibility-status,omitempty"`
 	LastEpochInCommittee  uint32                      `json:"last-epoch-in-committee,omitempty" yaml:"last-epoch-in-committee,omitempty"`
 	Availability          RPCValidatorAvailability    `json:"availability,omitempty" yaml:"availability,omitempty"`
@@ -100,8 +100,8 @@ type RPCValidatorAvailability struct {
 // Initialize - initialize and convert values for a given RPCValidatorResult struct
 func (validatorResult *RPCValidatorResult) Initialize() error {
 	if validatorResult.RawTotalDelegation != nil {
-		decTotalDelegation := numeric.NewDecFromBigInt(validatorResult.RawTotalDelegation)
-		validatorResult.TotalDelegation = decTotalDelegation.Quo(numeric.NewDec(denominations.One))
+		decTotalDelegation := ethCommon.NewDecFromBigInt(validatorResult.RawTotalDelegation)
+		validatorResult.TotalDelegation = decTotalDelegation.Quo(ethCommon.NewDec(params.Ether))
 	}
 
 	if err := validatorResult.Validator.Initialize(); err != nil {
@@ -122,13 +122,13 @@ func (validatorResult *RPCValidatorResult) Initialize() error {
 // Initialize - initialize and convert values for a given ValidatorInfo struct
 func (validatorInfo *RPCValidator) Initialize() error {
 	if validatorInfo.RawMaxTotalDelegation != nil {
-		decMaxTotalDelegation := numeric.NewDecFromBigInt(validatorInfo.RawMaxTotalDelegation)
-		validatorInfo.MaxTotalDelegation = decMaxTotalDelegation.Quo(numeric.NewDec(denominations.One))
+		decMaxTotalDelegation := ethCommon.NewDecFromBigInt(validatorInfo.RawMaxTotalDelegation)
+		validatorInfo.MaxTotalDelegation = decMaxTotalDelegation.Quo(ethCommon.NewDec(params.Ether))
 	}
 
 	if validatorInfo.RawMinSelfDelegation != nil {
-		decMinSelfDelegation := numeric.NewDecFromBigInt(validatorInfo.RawMinSelfDelegation)
-		validatorInfo.MinSelfDelegation = decMinSelfDelegation.Quo(numeric.NewDec(denominations.One))
+		decMinSelfDelegation := ethCommon.NewDecFromBigInt(validatorInfo.RawMinSelfDelegation)
+		validatorInfo.MinSelfDelegation = decMinSelfDelegation.Quo(ethCommon.NewDec(params.Ether))
 	}
 
 	if validatorInfo.RawRate != "" {
@@ -188,8 +188,8 @@ func (lifetime *RPCValidatorLifetime) Initialize() error {
 	}
 
 	if lifetime.RawRewardAccumulated != nil {
-		decRewardAccumulated := numeric.NewDecFromBigInt(lifetime.RawRewardAccumulated)
-		lifetime.RewardAccumulated = decRewardAccumulated.Quo(numeric.NewDec(denominations.One))
+		decRewardAccumulated := ethCommon.NewDecFromBigInt(lifetime.RawRewardAccumulated)
+		lifetime.RewardAccumulated = decRewardAccumulated.Quo(ethCommon.NewDec(params.Ether))
 	}
 
 	return nil

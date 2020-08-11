@@ -4,16 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/params"
 
-	"github.com/harmony-one/harmony/common/denominations"
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/rpc"
 )
 
 var (
-	nanoAsDec = numeric.NewDec(denominations.Nano)
-	oneAsDec  = numeric.NewDec(denominations.One)
+	nanoAsDec = ethCommon.NewDec(params.GWei)
+	oneAsDec  = ethCommon.NewDec(params.Ether)
 )
 
 // RPCRoutes reflects the RPC endpoints of the target network across shards

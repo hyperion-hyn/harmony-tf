@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/harmony-one/harmony/accounts/keystore"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 )
 
 const (

@@ -1,7 +1,6 @@
 package ledger
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/sha3"
@@ -10,10 +9,9 @@ import (
 	"os"
 	"sync"
 
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/harmony-one/harmony/core/types"
-	staking "github.com/harmony-one/harmony/staking/types"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 )
 
@@ -71,8 +69,6 @@ func SignTx(tx *types.Transaction, chainID *big.Int) ([]byte, string, error) {
 				tx.Nonce(),
 				tx.GasPrice(),
 				tx.Gas(),
-				tx.ShardID(),
-				tx.ToShardID(),
 				tx.To(),
 				tx.Value(),
 				tx.Data(),
@@ -84,8 +80,6 @@ func SignTx(tx *types.Transaction, chainID *big.Int) ([]byte, string, error) {
 				tx.Nonce(),
 				tx.GasPrice(),
 				tx.Gas(),
-				tx.ShardID(),
-				tx.ToShardID(),
 				tx.To(),
 				tx.Value(),
 				tx.Data(),
@@ -136,8 +130,6 @@ func SignTx(tx *types.Transaction, chainID *big.Int) ([]byte, string, error) {
 			tx.Nonce(),
 			tx.GasPrice(),
 			tx.Gas(),
-			tx.ShardID(),
-			tx.ToShardID(),
 			tx.To(),
 			tx.Value(),
 			tx.Data(),
@@ -171,54 +163,4 @@ func eip155SignerSignatureValues(chainID *big.Int, sig []byte) (R, S, V *big.Int
 		V.Add(V, chainIDMul)
 	}
 	return R, S, V, nil
-}
-
-// SignTx signs the given transaction with ledger.
-func SignStakingTx(tx *staking.StakingTransaction, chainID *big.Int) (*staking.StakingTransaction, string, error) {
-	//get the RLP encoding of raw staking with R,S,V = 0
-	w := &bytes.Buffer{}
-	err := tx.EncodeRLP(w)
-	if err != nil {
-		return nil, "", err
-	}
-	rlpEncodedTx := w.Bytes()
-
-	//get the RLP encoding of chain data
-	chainData, _ := rlp.EncodeToBytes([]interface{}{
-		chainID, uint(0), uint(0),
-	})
-
-	//replace R,S,V with RLP encoded (chainID, 0, 0)
-	rlpEncodedTx = append(rlpEncodedTx[0:len(rlpEncodedTx)-3], chainData[1:]...)
-
-	//send the RLP encoded staking tx to ledger
-	n := getLedger()
-	sig, err := n.SignStaking(rlpEncodedTx)
-	if err != nil {
-		log.Println("Couldn't sign staking transaction, error:", err)
-		return nil, "", err
-	}
-
-	var hashBytes [32]byte
-	hw := sha3.NewLegacyKeccak256()
-	hw.Write(rlpEncodedTx[:])
-	hw.Sum(hashBytes[:0])
-
-	pubkey, err := crypto.Ecrecover(hashBytes[:], sig[:])
-	if err != nil {
-		log.Println("Ecrecover failed :", err)
-		return nil, "", err
-	}
-
-	if len(pubkey) == 0 || pubkey[0] != 4 {
-		log.Println("invalid public key")
-		return nil, "", err
-	}
-
-	pubBytes := crypto.Keccak256(pubkey[1:65])[12:]
-	signerAddr, _ := address.ConvertAndEncode("one", pubBytes)
-
-	// WithSignature returns a new transaction with the given signature.
-	rawTx, err := tx.WithSignature(staking.NewEIP155Signer(chainID), sig[:])
-	return rawTx, signerAddr, err
 }

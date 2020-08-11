@@ -1,12 +1,12 @@
 package accounts
 
 import (
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"regexp"
 
 	"github.com/btcsuite/btcd/btcec"
-	hmyAccounts "github.com/harmony-one/harmony/accounts"
-	hmyKeystore "github.com/harmony-one/harmony/accounts/keystore"
-	"github.com/harmony-one/harmony/numeric"
+	hmyAccounts "github.com/ethereum/go-ethereum/accounts"
+	hmyKeystore "github.com/ethereum/go-ethereum/accounts/keystore"
 	networkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
 	goSDKAccount "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/account"
 	goSDKAddress "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
@@ -24,7 +24,7 @@ type Account struct {
 	Address    string `json:"address" yaml:"address"`
 	Passphrase string `json:"passphrase" yaml:"passphrase"`
 	Nonce      uint64
-	Balance    numeric.Dec
+	Balance    ethCommon.Dec
 	Keystore   *hmyKeystore.KeyStore
 	Account    *hmyAccounts.Account
 	PrivateKey *btcec.PrivateKey
@@ -72,17 +72,17 @@ func (account *Account) ExportKeystore(passphrase string) ([]byte, error) {
 }
 
 // GetAllShardBalances - checks the balances in all shards for a given network, mode and address
-func (account *Account) GetAllShardBalances(net *networkTypes.Network) (map[uint32]numeric.Dec, error) {
+func (account *Account) GetAllShardBalances(net *networkTypes.Network) (map[uint32]ethCommon.Dec, error) {
 	return net.GetAllShardBalances(account.Address)
 }
 
 // GetShardBalance - gets the balance for a given network, mode, address and shard
-func (account *Account) GetShardBalance(net *networkTypes.Network, shardID uint32) (numeric.Dec, error) {
+func (account *Account) GetShardBalance(net *networkTypes.Network, shardID uint32) (ethCommon.Dec, error) {
 	return net.GetShardBalance(account.Address, shardID)
 }
 
 // GetTotalBalance - gets the total balance across all shards for a given network, mode and address
-func (account *Account) GetTotalBalance(net *networkTypes.Network) (numeric.Dec, error) {
+func (account *Account) GetTotalBalance(net *networkTypes.Network) (ethCommon.Dec, error) {
 	return net.GetTotalBalance(account.Address)
 }
 

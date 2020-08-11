@@ -2,8 +2,8 @@ package testing
 
 import (
 	"fmt"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/hyperion-hyn/hyperion-tf/accounts"
 	"github.com/hyperion-hyn/hyperion-tf/balances"
 	"github.com/hyperion-hyn/hyperion-tf/config"
@@ -14,7 +14,7 @@ import (
 )
 
 // GenerateAndFundAccount - generates an account and funds it from the core funding account
-func GenerateAndFundAccount(testCase *TestCase, accountName string, amount numeric.Dec, fundingMultiple int64) (sdkAccounts.Account, error) {
+func GenerateAndFundAccount(testCase *TestCase, accountName string, amount ethCommon.Dec, fundingMultiple int64) (sdkAccounts.Account, error) {
 	fundingAccountBalance, err := balances.GetShardBalance(config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
 	if err != nil {
 		return sdkAccounts.Account{}, err

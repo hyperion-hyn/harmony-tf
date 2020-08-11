@@ -2,11 +2,12 @@ package rewards
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/transactions"
 
-	"github.com/harmony-one/harmony/accounts"
-	"github.com/harmony-one/harmony/accounts/keystore"
-	"github.com/harmony-one/harmony/numeric"
-	hmyStaking "github.com/harmony-one/harmony/staking/types"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
+	hmyStaking "github.com/ethereum/go-ethereum/staking/types"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
@@ -21,14 +22,15 @@ func CollectRewards(
 	rpcClient *rpc.HTTPMessenger,
 	chain *common.ChainID,
 	delegatorAddress string,
+	validatorAddress string,
 	gasLimit int64,
-	gasPrice numeric.Dec,
+	gasPrice ethCommon.Dec,
 	nonce uint64,
 	keystorePassphrase string,
 	node string,
 	timeout int,
 ) (map[string]interface{}, error) {
-	payloadGenerator, err := createCollectRewardsTransactionGenerator(delegatorAddress)
+	payloadGenerator, err := createCollectRewardsTransactionGenerator(delegatorAddress, validatorAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -43,10 +45,11 @@ func CollectRewards(
 	return staking.SendTx(keystore, account, rpcClient, chain, gasLimit, gasPrice, nonce, keystorePassphrase, node, timeout, payloadGenerator, logMessage)
 }
 
-func createCollectRewardsTransactionGenerator(delegatorAddress string) (hmyStaking.StakeMsgFulfiller, error) {
-	payloadGenerator := func() (hmyStaking.Directive, interface{}) {
-		return hmyStaking.DirectiveCollectRewards, hmyStaking.CollectRewards{
+func createCollectRewardsTransactionGenerator(delegatorAddress string, validatorAddress string) (transactions.StakeMsgFulfiller, error) {
+	payloadGenerator := func() (types.TransactionType, interface{}) {
+		return types.CollectRedelRewards, hmyStaking.CollectRedelegationRewards{
 			address.Parse(delegatorAddress),
+			address.Parse(validatorAddress),
 		}
 	}
 

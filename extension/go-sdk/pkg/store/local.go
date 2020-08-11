@@ -6,8 +6,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/harmony-one/harmony/accounts"
-	"github.com/harmony-one/harmony/accounts/keystore"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
 	c "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"

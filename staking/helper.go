@@ -2,9 +2,9 @@ package staking
 
 import (
 	"fmt"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"time"
 
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/hyperion-hyn/hyperion-tf/balances"
 	"github.com/hyperion-hyn/hyperion-tf/config"
 	"github.com/hyperion-hyn/hyperion-tf/crypto"
@@ -80,7 +80,7 @@ func BasicCreateValidator(testCase *testing.TestCase, validatorAccount *sdkAccou
 	case "duplicate_bls_key", "duplicateblskey":
 		blsKeys = append(blsKeys, blsKeys[0])
 	case "amount_larger_than_balance", "amountlargerthanbalance":
-		testCase.StakingParameters.Create.Validator.Amount = testCase.StakingParameters.Create.Validator.Amount.Mul(numeric.NewDec(2))
+		testCase.StakingParameters.Create.Validator.Amount = testCase.StakingParameters.Create.Validator.Amount.Mul(ethCommon.NewDec(2))
 	}
 
 	if len(blsKeys) > 0 {
@@ -96,7 +96,7 @@ func BasicCreateValidator(testCase *testing.TestCase, validatorAccount *sdkAccou
 		return sdkTxs.Transaction{}, nil, false, err
 	}
 
-	tx := sdkTxs.ToTransaction(senderAccount.Address, testCase.StakingParameters.FromShardID, senderAccount.Address, testCase.StakingParameters.FromShardID, rawTx, err)
+	tx := sdkTxs.ToTransaction(senderAccount.Address, senderAccount.Address, rawTx, err)
 	txResultColoring := logger.ResultColoring(tx.Success, true)
 	logger.TransactionLog(fmt.Sprintf("Performed create validator - address: %s - transaction hash: %s, tx successful: %s", validatorAccount.Address, tx.TransactionHash, txResultColoring), testCase.Verbose)
 
@@ -122,7 +122,7 @@ func BasicEditValidator(testCase *testing.TestCase, validatorAccount *sdkAccount
 	if err != nil {
 		return sdkTxs.Transaction{}, err
 	}
-	editTx := sdkTxs.ToTransaction(senderAccount.Address, testCase.StakingParameters.FromShardID, senderAccount.Address, testCase.StakingParameters.FromShardID, editRawTx, err)
+	editTx := sdkTxs.ToTransaction(senderAccount.Address, senderAccount.Address, editRawTx, err)
 	editTxResultColoring := logger.ResultColoring(editTx.Success, true)
 	logger.TransactionLog(fmt.Sprintf("Performed edit validator - transaction hash: %s, tx successful: %s", editTx.TransactionHash, editTxResultColoring), testCase.Verbose)
 
@@ -138,7 +138,7 @@ func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.A
 	if err != nil {
 		return sdkTxs.Transaction{}, false, err
 	}
-	tx := sdkTxs.ToTransaction(delegatorAccount.Address, testCase.StakingParameters.FromShardID, validatorAccount.Address, testCase.StakingParameters.FromShardID, rawTx, err)
+	tx := sdkTxs.ToTransaction(delegatorAccount.Address, validatorAccount.Address, rawTx, err)
 	txResultColoring := logger.ResultColoring(tx.Success, true)
 	logger.TransactionLog(fmt.Sprintf("Performed delegation - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
 
@@ -171,7 +171,7 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 	if err != nil {
 		return sdkTxs.Transaction{}, false, err
 	}
-	tx := sdkTxs.ToTransaction(delegatorAccount.Address, testCase.StakingParameters.FromShardID, validatorAccount.Address, testCase.StakingParameters.FromShardID, rawTx, err)
+	tx := sdkTxs.ToTransaction(delegatorAccount.Address, validatorAccount.Address, rawTx, err)
 	txResultColoring := logger.ResultColoring(tx.Success, true)
 	logger.TransactionLog(fmt.Sprintf("Performed undelegation - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
 

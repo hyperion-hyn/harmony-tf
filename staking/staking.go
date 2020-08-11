@@ -2,8 +2,8 @@ package staking
 
 import (
 	"errors"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/hyperion-hyn/hyperion-tf/config"
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	sdkCrypto "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
@@ -56,10 +56,8 @@ func CreateValidator(validatorAccount *sdkAccounts.Account, senderAccount *sdkAc
 		validatorAccount.Address,
 		params.Create.Validator.ToStakingDescription(),
 		params.Create.Validator.ToCommissionRates(),
-		params.Create.Validator.MinimumSelfDelegation,
 		params.Create.Validator.MaximumTotalDelegation,
 		blsKeys,
-		params.Create.Validator.Amount,
 		params.Gas.Limit,
 		params.Gas.Price,
 		currentNonce,
@@ -101,7 +99,7 @@ func EditValidator(validatorAccount *sdkAccounts.Account, senderAccount *sdkAcco
 		currentNonce = uint64(params.Nonce)
 	}
 
-	var commissionRate *numeric.Dec
+	var commissionRate *ethCommon.Dec
 	if !params.Edit.Validator.Commission.Rate.IsNil() {
 		commissionRate = &params.Edit.Validator.Commission.Rate
 	}

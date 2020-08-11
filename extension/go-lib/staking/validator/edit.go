@@ -2,20 +2,21 @@ package validator
 
 import (
 	"fmt"
-	"strings"
-
-	"github.com/harmony-one/harmony/accounts"
-	"github.com/harmony-one/harmony/accounts/keystore"
-	"github.com/harmony-one/harmony/crypto/bls"
-	"github.com/harmony-one/harmony/numeric"
-	"github.com/harmony-one/harmony/staking/effective"
-	hmyStaking "github.com/harmony-one/harmony/staking/types"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
+	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/staking/effective"
+	hmyStaking "github.com/ethereum/go-ethereum/staking/types"
+	hmyRestaking "github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/transactions"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/rpc"
+	"strings"
 )
 
 // Edit - edits the details for an existing validator
@@ -25,15 +26,15 @@ func Edit(
 	rpcClient *rpc.HTTPMessenger,
 	chain *common.ChainID,
 	validatorAddress string,
-	description hmyStaking.Description,
-	commissionRate *numeric.Dec,
-	minimumSelfDelegation numeric.Dec,
-	maximumTotalDelegation numeric.Dec,
+	description hmyRestaking.Description_,
+	commissionRate *ethCommon.Dec,
+	minimumSelfDelegation ethCommon.Dec,
+	maximumTotalDelegation ethCommon.Dec,
 	blsKeyToRemove *crypto.BLSKey,
 	blsKeyToAdd *crypto.BLSKey,
 	status string,
 	gasLimit int64,
-	gasPrice numeric.Dec,
+	gasPrice ethCommon.Dec,
 	nonce uint64,
 	keystorePassphrase string,
 	node string,
@@ -41,7 +42,7 @@ func Edit(
 ) (map[string]interface{}, error) {
 	statusEnum := determineEposStatus(status)
 
-	payloadGenerator, err := editTransactionGenerator(validatorAddress, description, commissionRate, minimumSelfDelegation, maximumTotalDelegation, blsKeyToRemove, blsKeyToAdd, statusEnum)
+	payloadGenerator, err := editTransactionGenerator(validatorAddress, description, *commissionRate, maximumTotalDelegation, blsKeyToRemove, blsKeyToAdd, statusEnum)
 	if err != nil {
 		return nil, err
 	}
@@ -80,40 +81,39 @@ func determineEposStatus(status string) (statusEnum effective.Eligibility) {
 
 func editTransactionGenerator(
 	validatorAddress string,
-	stakingDescription hmyStaking.Description,
-	commissionRate *numeric.Dec,
-	minimumSelfDelegation numeric.Dec,
-	maximumTotalDelegation numeric.Dec,
+	stakingDescription hmyRestaking.Description_,
+	commissionRate ethCommon.Dec,
+	maximumTotalDelegation ethCommon.Dec,
 	blsKeyToRemove *crypto.BLSKey,
 	blsKeyToAdd *crypto.BLSKey,
 	statusEnum effective.Eligibility,
-) (hmyStaking.StakeMsgFulfiller, error) {
-	var shardBlsKeyToRemove *bls.SerializedPublicKey
+) (transactions.StakeMsgFulfiller, error) {
+	var shardBlsKeyToRemove *hmyRestaking.BLSPublicKey_
 	if blsKeyToRemove != nil {
 		shardBlsKeyToRemove = blsKeyToRemove.ShardPublicKey
 	}
 
-	var shardBlsKeyToAdd *bls.SerializedPublicKey
-	var shardBlsKeyToAddSig *bls.SerializedSignature
+	var shardBlsKeyToAdd *hmyRestaking.BLSPublicKey_
+	var shardBlsKeyToAddSig *hmyRestaking.BLSSignature
 	if blsKeyToAdd != nil {
 		shardBlsKeyToAdd = blsKeyToAdd.ShardPublicKey
 		shardBlsKeyToAddSig = blsKeyToAdd.ShardSignature
 	}
 
-	bigMinimumSelfDelegation := staking.NumericDecToBigIntAmount(minimumSelfDelegation)
 	bigMaximumTotalDelegation := staking.NumericDecToBigIntAmount(maximumTotalDelegation)
 
-	payloadGenerator := func() (hmyStaking.Directive, interface{}) {
-		return hmyStaking.DirectiveEditValidator, hmyStaking.EditValidator{
+	println(shardBlsKeyToAddSig) // todo need remove
+	payloadGenerator := func() (types.TransactionType, interface{}) {
+		return types.StakeEditVal, hmyStaking.EditValidator{
 			ValidatorAddress:   address.Parse(validatorAddress),
-			Description:        stakingDescription,
-			CommissionRate:     commissionRate,
-			MinSelfDelegation:  bigMinimumSelfDelegation,
+			Description:        &stakingDescription,
+			CommissionRate:     &commissionRate,
 			MaxTotalDelegation: bigMaximumTotalDelegation,
 			SlotKeyToRemove:    shardBlsKeyToRemove,
 			SlotKeyToAdd:       shardBlsKeyToAdd,
-			SlotKeyToAddSig:    shardBlsKeyToAddSig,
-			EPOSStatus:         statusEnum,
+			//SlotKeyToAddSig:    shardBlsKeyToAddSig,
+			SlotKeyToAddSig: nil, // todo need remove
+			EPOSStatus:      statusEnum,
 		}
 	}
 

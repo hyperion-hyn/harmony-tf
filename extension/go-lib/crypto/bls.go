@@ -7,12 +7,13 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"github.com/ethereum/go-ethereum/crypto/bls"
+	"github.com/hyperion-hyn/hyperion-tf/extension/crypto/hash"
 	"io"
 
+	staking "github.com/ethereum/go-ethereum/staking/types"
+	hmyRestaking "github.com/ethereum/go-ethereum/staking/types/restaking"
 	bls_core "github.com/harmony-one/bls/ffi/go/bls"
-	"github.com/harmony-one/harmony/crypto/bls"
-	"github.com/harmony-one/harmony/crypto/hash"
-	"github.com/harmony-one/harmony/staking/types"
 )
 
 // BLSKey - represents a BLS key
@@ -22,8 +23,8 @@ type BLSKey struct {
 	PublicKey     *bls_core.PublicKey
 	PublicKeyHex  string
 
-	ShardPublicKey *bls.SerializedPublicKey
-	ShardSignature *bls.SerializedSignature
+	ShardPublicKey *hmyRestaking.BLSPublicKey_
+	ShardSignature *hmyRestaking.BLSSignature
 }
 
 // GenerateBlsKey - generates a new bls key and returns its private and public keys as hex strings
@@ -64,17 +65,17 @@ func (blsKey *BLSKey) Initialize(message string) error {
 
 // AssignShardSignature - signs a given message using the BLSKey and assigns ShardSignature
 func (blsKey *BLSKey) AssignShardSignature(message string) error {
-	var sig bls.SerializedSignature
+	var sig hmyRestaking.BLSSignature
 
 	if message == "" {
-		message = types.BLSVerificationStr
+		message = staking.BLSVerificationStr
 	}
 
 	msgHash := hash.Keccak256([]byte(message))
 	signature := blsKey.PrivateKey.SignHash(msgHash[:])
 
 	bytes := signature.Serialize()
-	if len(bytes) != bls.BLSSignatureSizeInBytes {
+	if len(bytes) != staking.BLSSignatureSizeInBytes {
 		return errors.New("bls key length is not 96 bytes")
 	}
 
@@ -86,7 +87,7 @@ func (blsKey *BLSKey) AssignShardSignature(message string) error {
 
 // AssignShardPublicKey - converts a regular pub key to a shardPubKey and assigns ShardPublicKey
 func (blsKey *BLSKey) AssignShardPublicKey() error {
-	shardPubKey := new(bls.SerializedPublicKey)
+	shardPubKey := new(hmyRestaking.BLSPublicKey_)
 	err := shardPubKey.FromLibBLSPublicKey(blsKey.PublicKey)
 	if err != nil {
 		return errors.New("couldn't convert bls.PublicKey -> shard.BLSPublicKey")

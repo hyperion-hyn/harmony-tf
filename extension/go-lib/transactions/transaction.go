@@ -1,17 +1,16 @@
 package transactions
 
 import (
-	"github.com/harmony-one/harmony/numeric"
+	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 // Transaction - represents an executed test case transaction
 type Transaction struct {
 	FromAddress     string
-	FromShardID     uint32
 	ToAddress       string
-	ToShardID       uint32
 	Data            string
-	Amount          numeric.Dec
+	Amount          ethCommon.Dec
 	GasPrice        int64
 	Timeout         int
 	TransactionHash string
@@ -20,8 +19,10 @@ type Transaction struct {
 	Error           error
 }
 
+type StakeMsgFulfiller func() (types.TransactionType, interface{})
+
 // ToTransaction - converts a raw tx response map to a typed Transaction type
-func ToTransaction(fromAddress string, fromShardID uint32, toAddress string, toShardID uint32, rawTx map[string]interface{}, err error) Transaction {
+func ToTransaction(fromAddress string, toAddress string, rawTx map[string]interface{}, err error) Transaction {
 	if err != nil {
 		return Transaction{Error: err}
 	}
@@ -35,9 +36,7 @@ func ToTransaction(fromAddress string, fromShardID uint32, toAddress string, toS
 
 		tx = Transaction{
 			FromAddress:     fromAddress,
-			FromShardID:     fromShardID,
 			ToAddress:       toAddress,
-			ToShardID:       toShardID,
 			TransactionHash: txHash,
 			Success:         success,
 			Response:        rawTx,

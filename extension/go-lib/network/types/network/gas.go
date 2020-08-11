@@ -1,21 +1,21 @@
 package network
 
 import (
-	"github.com/harmony-one/harmony/numeric"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
 	"github.com/pkg/errors"
 )
 
 // Gas - represents the gas settings
 type Gas struct {
-	RawCost  string      `json:"cost" yaml:"cost"`
-	Cost     numeric.Dec `json:"-" yaml:"-"`
-	Limit    int64       `json:"limit" yaml:"limit"`
-	RawPrice string      `json:"price" yaml:"price"`
-	Price    numeric.Dec `json:"-" yaml:"-"`
+	RawCost  string        `json:"cost" yaml:"cost"`
+	Cost     ethCommon.Dec `json:"-" yaml:"-"`
+	Limit    int64         `json:"limit" yaml:"limit"`
+	RawPrice string        `json:"price" yaml:"price"`
+	Price    ethCommon.Dec `json:"-" yaml:"-"`
 }
 
-// Initialize - convert the raw values to their appropriate numeric.Dec values
+// Initialize - convert the raw values to their appropriate ethCommon.Dec values
 func (gas *Gas) Initialize() error {
 	if gas.RawCost != "" {
 		decCost, err := common.NewDecFromString(gas.RawCost)
@@ -38,7 +38,7 @@ func (gas *Gas) Initialize() error {
 	}
 
 	if gas.Price.IsNil() || gas.Price.IsZero() || gas.Price.IsNegative() {
-		gas.Price = numeric.NewDec(1)
+		gas.Price = ethCommon.NewDec(1)
 	}
 
 	return nil

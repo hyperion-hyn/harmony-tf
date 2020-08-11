@@ -2,11 +2,14 @@ package validator
 
 import (
 	"fmt"
+	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/transactions"
 
-	"github.com/harmony-one/harmony/accounts"
-	"github.com/harmony-one/harmony/accounts/keystore"
-	"github.com/harmony-one/harmony/numeric"
-	hmyStaking "github.com/harmony-one/harmony/staking/types"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
+	hmyStaking "github.com/ethereum/go-ethereum/staking/types"
+	hmyRestaking "github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking"
@@ -21,29 +24,27 @@ func Create(
 	account *accounts.Account,
 	rpcClient *rpc.HTTPMessenger,
 	chain *common.ChainID,
-	validatorAddress string,
-	description hmyStaking.Description,
-	commissionRates hmyStaking.CommissionRates,
-	minimumSelfDelegation numeric.Dec,
-	maximumTotalDelegation numeric.Dec,
+	operatorAddress string,
+	description hmyRestaking.Description_,
+	commissionRates hmyRestaking.CommissionRates_,
+	maximumTotalDelegation ethCommon.Dec,
 	blsKeys []crypto.BLSKey,
-	amount numeric.Dec,
 	gasLimit int64,
-	gasPrice numeric.Dec,
+	gasPrice ethCommon.Dec,
 	nonce uint64,
 	keystorePassphrase string,
 	node string,
 	timeout int,
 ) (map[string]interface{}, error) {
-	payloadGenerator, err := createTransactionGenerator(validatorAddress, description, commissionRates, minimumSelfDelegation, maximumTotalDelegation, blsKeys, amount)
+	payloadGenerator, err := createTransactionGenerator(operatorAddress, description, commissionRates, maximumTotalDelegation, blsKeys)
 	if err != nil {
 		return nil, err
 	}
 
 	var logMessage string
 	if network.Verbose {
-		logMessage = fmt.Sprintf("Generating a new create validator transaction:\n\tValidator Address: %s\n\tValidator Name: %s\n\tValidator Identity: %s\n\tValidator Website: %s\n\tValidator Security Contact: %s\n\tValidator Details: %s\n\tCommission Rate: %f\n\tCommission Max Rate: %f\n\tCommission Max Change Rate: %d\n\tMinimum Self Delegation: %f\n\tMaximum Total Delegation: %f\n\tBls Public Keys: %v\n\tAmount: %f",
-			validatorAddress,
+		logMessage = fmt.Sprintf("Generating a new create validator transaction:\n\tValidator Address: %s\n\tValidator Name: %s\n\tValidator Identity: %s\n\tValidator Website: %s\n\tValidator Security Contact: %s\n\tValidator Details: %s\n\tCommission Rate: %f\n\tCommission Max Rate: %f\n\tCommission Max Change Rate: %d\n\tMaximum Total Delegation: %f\n\tBls Public Keys: %v",
+			operatorAddress,
 			description.Name,
 			description.Identity,
 			description.Website,
@@ -52,10 +53,8 @@ func Create(
 			commissionRates.Rate,
 			commissionRates.MaxRate,
 			commissionRates.MaxChangeRate,
-			minimumSelfDelegation,
 			maximumTotalDelegation,
 			blsKeys,
-			amount,
 		)
 	}
 
@@ -64,29 +63,24 @@ func Create(
 
 func createTransactionGenerator(
 	validatorAddress string,
-	stakingDescription hmyStaking.Description,
-	stakingCommissionRates hmyStaking.CommissionRates,
-	minimumSelfDelegation numeric.Dec,
-	maximumTotalDelegation numeric.Dec,
+	stakingDescription hmyRestaking.Description_,
+	stakingCommissionRates hmyRestaking.CommissionRates_,
+	maximumTotalDelegation ethCommon.Dec,
 	blsKeys []crypto.BLSKey,
-	amount numeric.Dec,
-) (hmyStaking.StakeMsgFulfiller, error) {
+) (transactions.StakeMsgFulfiller, error) {
 	blsPubKeys, blsSigs := staking.ProcessBlsKeys(blsKeys)
-
-	bigAmount := staking.NumericDecToBigIntAmount(amount)
-	bigMinimumSelfDelegation := staking.NumericDecToBigIntAmount(minimumSelfDelegation)
 	bigMaximumTotalDelegation := staking.NumericDecToBigIntAmount(maximumTotalDelegation)
 
-	payloadGenerator := func() (hmyStaking.Directive, interface{}) {
-		return hmyStaking.DirectiveCreateValidator, hmyStaking.CreateValidator{
-			ValidatorAddress:   address.Parse(validatorAddress),
+	println(blsSigs) // todo need remove
+	payloadGenerator := func() (types.TransactionType, interface{}) {
+		return types.StakeCreateVal, hmyStaking.CreateValidator{
+			OperatorAddress:    address.Parse(validatorAddress),
 			Description:        stakingDescription,
 			CommissionRates:    stakingCommissionRates,
-			MinSelfDelegation:  bigMinimumSelfDelegation,
 			MaxTotalDelegation: bigMaximumTotalDelegation,
 			SlotPubKeys:        blsPubKeys,
-			SlotKeySigs:        blsSigs,
-			Amount:             bigAmount,
+			//SlotKeySigs:        blsSigs,
+			SlotKeySigs: nil, // todo need revert
 		}
 	}
 

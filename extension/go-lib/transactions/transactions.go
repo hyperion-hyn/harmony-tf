@@ -5,17 +5,17 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/params"
 	"math/big"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	eth_hexutil "github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/types"
 	eth_rlp "github.com/ethereum/go-ethereum/rlp"
-	"github.com/harmony-one/harmony/accounts"
-	"github.com/harmony-one/harmony/accounts/keystore"
-	"github.com/harmony-one/harmony/common/denominations"
-	"github.com/harmony-one/harmony/core"
-	"github.com/harmony-one/harmony/core/types"
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/rpc"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
@@ -36,14 +36,14 @@ const (
 
 // Copied from harmony-one/go-sdk/pkg/sharding/structure.go
 var (
-	// NanoAsDec - Nano denomination in numeric.Dec
-	NanoAsDec = numeric.NewDec(denominations.Nano)
-	// OneAsDec - One denomination in numeric.Dec
-	OneAsDec = numeric.NewDec(denominations.One)
+	// NanoAsDec - Nano denomination in ethCommon.Dec
+	NanoAsDec = ethCommon.NewDec(params.GWei)
+	// OneAsDec - One denomination in ethCommon.Dec
+	OneAsDec = ethCommon.NewDec(params.Ether)
 )
 
 // SendTransaction - send transactions
-func SendTransaction(keystore *keystore.KeyStore, account *accounts.Account, rpcClient *goSdkRPC.HTTPMessenger, chain *common.ChainID, fromAddress string, fromShardID uint32, toAddress string, toShardID uint32, amount numeric.Dec, gasLimit int64, gasPrice numeric.Dec, nonce uint64, inputData string, keystorePassphrase string, node string, timeout int) (map[string]interface{}, error) {
+func SendTransaction(keystore *keystore.KeyStore, account *accounts.Account, rpcClient *goSdkRPC.HTTPMessenger, chain *common.ChainID, fromAddress string, fromShardID uint32, toAddress string, toShardID uint32, amount ethCommon.Dec, gasLimit int64, gasPrice ethCommon.Dec, nonce uint64, inputData string, keystorePassphrase string, node string, timeout int) (map[string]interface{}, error) {
 	if keystore == nil || account == nil {
 		return nil, errors.New("keystore account can't be nil - please make sure the account you want to use exists in the keystore")
 	}
@@ -110,9 +110,9 @@ func GenerateAndSignTransaction(
 	fromShardID uint32,
 	toAddress string,
 	toShardID uint32,
-	amount numeric.Dec,
+	amount ethCommon.Dec,
 	gasLimit int64,
-	gasPrice numeric.Dec,
+	gasPrice ethCommon.Dec,
 	nonce uint64,
 	inputData string,
 ) (tx *types.Transaction, err error) {
@@ -135,9 +135,9 @@ func GenerateTransaction(
 	fromShardID uint32,
 	toAddress string,
 	toShardID uint32,
-	amount numeric.Dec,
+	amount ethCommon.Dec,
 	gasLimit int64,
-	gasPrice numeric.Dec,
+	gasPrice ethCommon.Dec,
 	nonce uint64,
 	inputData string,
 ) (tx *transaction.Transaction, err error) {
@@ -164,8 +164,6 @@ func GenerateTransaction(
 		nonce,
 		calculatedGasLimit,
 		address.Parse(toAddress),
-		fromShardID,
-		toShardID,
 		amount.Mul(OneAsDec),
 		gasPrice.Mul(NanoAsDec),
 		[]byte(inputData),
@@ -306,9 +304,9 @@ func CalculateGasLimit(gasLimit int64, inputData string, isValidatorCreation boo
 }
 
 // BumpGasPrice - bumps the gas price by the required percentage, as defined by core.DefaultTxPoolConfig.PriceBump
-func BumpGasPrice(gasPrice numeric.Dec) numeric.Dec {
-	//return gasPrice.Add(numeric.NewDec(1).Quo(OneAsDec))
-	return gasPrice.Mul(numeric.NewDec(100 + int64(core.DefaultTxPoolConfig.PriceBump)).Quo(numeric.NewDec(100)))
+func BumpGasPrice(gasPrice ethCommon.Dec) ethCommon.Dec {
+	//return gasPrice.Add(ethCommon.NewDec(1).Quo(OneAsDec))
+	return gasPrice.Mul(ethCommon.NewDec(100 + int64(core.DefaultTxPoolConfig.PriceBump)).Quo(ethCommon.NewDec(100)))
 }
 
 // GetTransactionReceipt - retrieves the transaction info/data for a transaction

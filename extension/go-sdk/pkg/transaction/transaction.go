@@ -1,10 +1,10 @@
 package transaction
 
 import (
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"math/big"
 
-	"github.com/harmony-one/harmony/core/types"
-	"github.com/harmony-one/harmony/numeric"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/rpc"
 )
@@ -14,10 +14,9 @@ type Transaction = types.Transaction
 func NewTransaction(
 	nonce, gasLimit uint64,
 	to address.T,
-	shardID, toShardID uint32,
-	amount, gasPrice numeric.Dec,
+	amount, gasPrice ethCommon.Dec,
 	data []byte) *Transaction {
-	return types.NewCrossShardTransaction(nonce, &to, shardID, toShardID, amount.TruncateInt(), gasLimit, gasPrice.TruncateInt(), data[:])
+	return types.NewTransaction(nonce, to, amount.TruncateInt(), gasLimit, gasPrice.TruncateInt(), data[:])
 }
 
 // GetNextNonce returns the nonce on-chain (finalized transactions)

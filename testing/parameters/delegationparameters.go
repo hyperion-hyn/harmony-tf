@@ -1,7 +1,7 @@
 package parameters
 
 import (
-	"github.com/harmony-one/harmony/numeric"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	sdkNetworkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
 	"github.com/pkg/errors"
@@ -10,8 +10,8 @@ import (
 // DelegationParameters - the parameters for performing delegation
 type DelegationParameters struct {
 	// Represents the amount an account will be funded with (if omitted, this will be set to the delegation amount)
-	RawAmount string      `yaml:"amount"`
-	Amount    numeric.Dec `yaml:"-"`
+	RawAmount string        `yaml:"amount"`
+	Amount    ethCommon.Dec `yaml:"-"`
 
 	Delegate   DelegationInstruction `yaml:"delegate"`
 	Undelegate DelegationInstruction `yaml:"undelegate"`
@@ -20,7 +20,7 @@ type DelegationParameters struct {
 // DelegationInstruction - represents a delegation or undelegation instruction
 type DelegationInstruction struct {
 	RawAmount string              `yaml:"amount"`
-	Amount    numeric.Dec         `yaml:"-"`
+	Amount    ethCommon.Dec       `yaml:"-"`
 	Gas       sdkNetworkTypes.Gas `yaml:"gas"`
 }
 

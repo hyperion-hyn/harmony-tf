@@ -76,7 +76,7 @@ func SameAccountScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	testCaseTx := sdkTxs.ToTransaction(account.Address, testCase.Parameters.FromShardID, account.Address, testCase.Parameters.ToShardID, rawTx, err)
+	testCaseTx := sdkTxs.ToTransaction(account.Address, account.Address, rawTx, err)
 	testCase.Transactions = append(testCase.Transactions, testCaseTx)
 	txResultColoring := logger.ResultColoring(testCaseTx.Success, true)
 

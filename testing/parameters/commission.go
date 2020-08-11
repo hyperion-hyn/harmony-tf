@@ -1,21 +1,21 @@
 package parameters
 
 import (
-	"github.com/harmony-one/harmony/numeric"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
 	"github.com/pkg/errors"
 )
 
 // Commission - represents the commission parameters
 type Commission struct {
-	RawRate string      `yaml:"rate"`
-	Rate    numeric.Dec `yaml:"-"`
+	RawRate string        `yaml:"rate"`
+	Rate    ethCommon.Dec `yaml:"-"`
 
-	RawMaxRate string      `yaml:"max_rate"`
-	MaxRate    numeric.Dec `yaml:"-"`
+	RawMaxRate string        `yaml:"max_rate"`
+	MaxRate    ethCommon.Dec `yaml:"-"`
 
-	RawMaxChangeRate string      `yaml:"max_change_rate"`
-	MaxChangeRate    numeric.Dec `yaml:"-"`
+	RawMaxChangeRate string        `yaml:"max_change_rate"`
+	MaxChangeRate    ethCommon.Dec `yaml:"-"`
 }
 
 // Initialize - initializes and converts values for a given test case

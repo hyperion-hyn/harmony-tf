@@ -2,11 +2,12 @@ package funding
 
 import (
 	"fmt"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"strconv"
 	"sync"
 
-	"github.com/harmony-one/harmony/core"
-	"github.com/harmony-one/harmony/numeric"
+	"github.com/ethereum/go-ethereum/core"
+
 	"github.com/hyperion-hyn/hyperion-tf/accounts"
 	"github.com/hyperion-hyn/hyperion-tf/balances"
 	"github.com/hyperion-hyn/hyperion-tf/config"
@@ -135,10 +136,10 @@ func FundFundingAccountInShard(account sdkAccounts.Account, shard uint32, waitGr
 	}
 }
 
-func fundFundingAccountInNonBeaconShard(shardID uint32) (amount numeric.Dec, err error) {
+func fundFundingAccountInNonBeaconShard(shardID uint32) (amount ethCommon.Dec, err error) {
 	amount, err = CalculateFundingAmount(config.Configuration.Funding.MinimumFunds, 1)
 	if err != nil {
-		return numeric.NewDec(0), err
+		return ethCommon.NewDec(0), err
 	}
 
 	err = PerformFundingTransaction(
@@ -154,14 +155,14 @@ func fundFundingAccountInNonBeaconShard(shardID uint32) (amount numeric.Dec, err
 		config.Configuration.Funding.Retry.Attempts,
 	)
 	if err != nil {
-		return numeric.NewDec(0), err
+		return ethCommon.NewDec(0), err
 	}
 
 	return amount, nil
 }
 
 // GenerateAndFundAccounts - generate and fund a set of accounts
-func GenerateAndFundAccounts(count int64, nameTemplate string, amount numeric.Dec, fromShardID uint32, toShardID uint32) (accs []sdkAccounts.Account, err error) {
+func GenerateAndFundAccounts(count int64, nameTemplate string, amount ethCommon.Dec, fromShardID uint32, toShardID uint32) (accs []sdkAccounts.Account, err error) {
 	rpcClient, err := config.Configuration.Network.API.RPCClient(fromShardID)
 	if err != nil {
 		return nil, errors.Wrapf(err, "RPC Client")
@@ -203,7 +204,7 @@ func GenerateAndFundAccounts(count int64, nameTemplate string, amount numeric.De
 	return accs, nil
 }
 
-func generateAndFundAccount(index int64, nameTemplate string, fromShardID uint32, toShardID uint32, amount numeric.Dec, nonce int, accountsChannel chan<- sdkAccounts.Account, waitGroup *sync.WaitGroup) {
+func generateAndFundAccount(index int64, nameTemplate string, fromShardID uint32, toShardID uint32, amount ethCommon.Dec, nonce int, accountsChannel chan<- sdkAccounts.Account, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 
 	accountName := fmt.Sprintf("%s%d", nameTemplate, index)
@@ -227,14 +228,14 @@ func generateAndFundAccount(index int64, nameTemplate string, fromShardID uint32
 }
 
 // AsyncPerformFundingTransaction - performs an asynchronous call to PerformFundingTransaction and calls Done() on the waitGroup
-func AsyncPerformFundingTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, amount numeric.Dec, nonce int, gasLimit int64, gasPrice numeric.Dec, timeout int, attempts int, waitGroup *sync.WaitGroup) {
+func AsyncPerformFundingTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, amount ethCommon.Dec, nonce int, gasLimit int64, gasPrice ethCommon.Dec, timeout int, attempts int, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 
 	PerformFundingTransaction(account, fromShardID, toAddress, toShardID, amount, nonce, gasLimit, gasPrice, timeout, attempts)
 }
 
 // FundAccounts - funds a given set of accounts in a given set of shards using a set of source accounts
-func FundAccounts(sources []sdkAccounts.Account, count int, amount numeric.Dec, prefix string, gasLimit int64, gasPrice numeric.Dec, timeout int) (accounts []sdkAccounts.Account, err error) {
+func FundAccounts(sources []sdkAccounts.Account, count int, amount ethCommon.Dec, prefix string, gasLimit int64, gasPrice ethCommon.Dec, timeout int) (accounts []sdkAccounts.Account, err error) {
 	for _, sourceAccount := range sources {
 		for i := 0; i < count; i++ {
 			account, err := fundAccount(&sourceAccount, amount, prefix, i, gasLimit, gasPrice, timeout)
@@ -251,7 +252,7 @@ func FundAccounts(sources []sdkAccounts.Account, count int, amount numeric.Dec, 
 	return accounts, nil
 }
 
-func fundAccount(sourceAccount *sdkAccounts.Account, amount numeric.Dec, prefix string, index int, gasLimit int64, gasPrice numeric.Dec, timeout int) (account sdkAccounts.Account, err error) {
+func fundAccount(sourceAccount *sdkAccounts.Account, amount ethCommon.Dec, prefix string, index int, gasLimit int64, gasPrice ethCommon.Dec, timeout int) (account sdkAccounts.Account, err error) {
 	accountName := fmt.Sprintf("%s_%d", prefix, index)
 
 	// Remove the account just to make sure that we're starting using a clean slate
@@ -274,8 +275,8 @@ func fundAccount(sourceAccount *sdkAccounts.Account, amount numeric.Dec, prefix 
 }
 
 // PerformFundingTransaction - performs a funding transaction including automatic retries
-func PerformFundingTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, amount numeric.Dec, nonce int, gasLimit int64, gasPrice numeric.Dec, timeout int, attempts int) error {
-	if amount.GT(numeric.NewDec(0)) {
+func PerformFundingTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, amount ethCommon.Dec, nonce int, gasLimit int64, gasPrice ethCommon.Dec, timeout int, attempts int) error {
+	if amount.GT(ethCommon.NewDec(0)) {
 		for {
 			if attempts > 0 {
 				logger.FundingLog(fmt.Sprintf("Attempting funding transaction from %s (shard: %d) to %s (shard: %d) of amount %f!", account.Address, fromShardID, toAddress, toShardID, amount), config.Configuration.Funding.Verbose)

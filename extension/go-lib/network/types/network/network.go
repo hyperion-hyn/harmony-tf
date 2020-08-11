@@ -2,9 +2,9 @@ package network
 
 import (
 	"fmt"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"sync"
 
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/rpc/balances"
 	commonRPC "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/rpc/common"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/rpc/nonces"
@@ -85,17 +85,17 @@ func (network *Network) IdentifyChainID() (chain *goSDK_common.ChainID, err erro
 }
 
 // GetAllShardBalances - checks the balances in all shards for a given network, mode and address
-func (network *Network) GetAllShardBalances(address string) (map[uint32]numeric.Dec, error) {
+func (network *Network) GetAllShardBalances(address string) (map[uint32]ethCommon.Dec, error) {
 	return balances.GetAllShardBalances(address, network.ShardsToMap(), &network.Retry)
 }
 
 // GetShardBalance - gets the balance for a given network, mode, address and shard
-func (network *Network) GetShardBalance(address string, shardID uint32) (numeric.Dec, error) {
+func (network *Network) GetShardBalance(address string, shardID uint32) (ethCommon.Dec, error) {
 	return balances.GetShardBalance(address, shardID, network.ShardsToMap(), &network.Retry)
 }
 
 // GetTotalBalance - gets the total balance across all shards for a given network, mode and address
-func (network *Network) GetTotalBalance(address string) (numeric.Dec, error) {
+func (network *Network) GetTotalBalance(address string) (ethCommon.Dec, error) {
 	return balances.GetTotalBalance(address, network.ShardsToMap(), &network.Retry)
 }
 

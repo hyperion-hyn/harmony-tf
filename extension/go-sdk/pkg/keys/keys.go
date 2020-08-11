@@ -6,8 +6,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	ethCommon "github.com/ethereum/go-ethereum/common"
-	"github.com/harmony-one/harmony/accounts/keystore"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 
 	// "github.com/ethereum/go-ethereum/crypto"

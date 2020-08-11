@@ -2,10 +2,10 @@ package transactions
 
 import (
 	"fmt"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"sync"
 	"time"
 
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/hyperion-hyn/hyperion-tf/accounts"
 	"github.com/hyperion-hyn/hyperion-tf/balances"
 	"github.com/hyperion-hyn/hyperion-tf/config"
@@ -76,13 +76,13 @@ func MultipleSenderScenario(testCase *testing.TestCase) {
 		if testCase.ErrorOccurred(err) {
 			return
 		}
-		decSenderCount := numeric.NewDec(testCase.Parameters.SenderCount)
-		var expectedBalance numeric.Dec
+		decSenderCount := ethCommon.NewDec(testCase.Parameters.SenderCount)
+		var expectedBalance ethCommon.Dec
 
 		if testCase.Expected {
 			expectedBalance = testCase.Parameters.Amount.Mul(decSenderCount)
 		} else {
-			expectedBalance = numeric.NewDec(0)
+			expectedBalance = ethCommon.NewDec(0)
 		}
 
 		testCase.Result = (txsSuccessful && receiverEndingBalance.Equal(expectedBalance))
@@ -139,7 +139,7 @@ func executeSenderTransaction(testCase *testing.TestCase, senderAccount sdkAccou
 		logger.TransactionLog(fmt.Sprintf("Will wait up to %d seconds to let the transaction get finalized", testCase.Parameters.Timeout), testCase.Verbose)
 
 		rawTx, err := transactions.SendTransaction(&senderAccount, testCase.Parameters.FromShardID, receiverAccount.Address, testCase.Parameters.ToShardID, testCase.Parameters.Amount, testCase.Parameters.Nonce, testCase.Parameters.Gas.Limit, testCase.Parameters.Gas.Price, txData, testCase.Parameters.Timeout)
-		testCaseTx = sdkTxs.ToTransaction(senderAccount.Address, testCase.Parameters.FromShardID, receiverAccount.Address, testCase.Parameters.ToShardID, rawTx, err)
+		testCaseTx = sdkTxs.ToTransaction(senderAccount.Address, receiverAccount.Address, rawTx, err)
 		if testCaseTx.Error != nil {
 			logger.ErrorLog(fmt.Sprintf("Failed to send %f coins from %s (shard %d) to %s (shard %d) - error: %s", testCase.Parameters.Amount, senderAccount.Address, testCase.Parameters.FromShardID, receiverAccount.Address, testCase.Parameters.ToShardID, testCaseTx.Error.Error()), testCase.Verbose)
 		} else {

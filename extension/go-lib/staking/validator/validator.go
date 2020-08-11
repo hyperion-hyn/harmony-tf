@@ -1,10 +1,10 @@
 package validator
 
 import (
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"strconv"
 
-	"github.com/harmony-one/harmony/numeric"
-	hmyStaking "github.com/harmony-one/harmony/staking/types"
+	hmyRestaking "github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
@@ -21,14 +21,14 @@ type Validator struct {
 	BLSKeys    []crypto.BLSKey  `yaml:"-"`
 	Exists     bool
 
-	RawMinimumSelfDelegation string      `yaml:"minimum_self_delegation"`
-	MinimumSelfDelegation    numeric.Dec `yaml:"-"`
+	RawMinimumSelfDelegation string        `yaml:"minimum_self_delegation"`
+	MinimumSelfDelegation    ethCommon.Dec `yaml:"-"`
 
-	RawMaximumTotalDelegation string      `yaml:"maximum_total_delegation"`
-	MaximumTotalDelegation    numeric.Dec `yaml:"-"`
+	RawMaximumTotalDelegation string        `yaml:"maximum_total_delegation"`
+	MaximumTotalDelegation    ethCommon.Dec `yaml:"-"`
 
-	RawAmount string      `yaml:"amount"`
-	Amount    numeric.Dec `yaml:"-"`
+	RawAmount string        `yaml:"amount"`
+	Amount    ethCommon.Dec `yaml:"-"`
 
 	EligibilityStatus string `yaml:"eligibility-status"`
 }
@@ -44,14 +44,14 @@ type ValidatorDetails struct {
 
 // Commission - represents the validator commission settings
 type Commission struct {
-	RawRate string      `yaml:"rate"`
-	Rate    numeric.Dec `yaml:"-"`
+	RawRate string        `yaml:"rate"`
+	Rate    ethCommon.Dec `yaml:"-"`
 
-	RawMaxRate string      `yaml:"max_rate"`
-	MaxRate    numeric.Dec `yaml:"-"`
+	RawMaxRate string        `yaml:"max_rate"`
+	MaxRate    ethCommon.Dec `yaml:"-"`
 
-	RawMaxChangeRate string      `yaml:"max_change_rate"`
-	MaxChangeRate    numeric.Dec `yaml:"-"`
+	RawMaxChangeRate string        `yaml:"max_change_rate"`
+	MaxChangeRate    ethCommon.Dec `yaml:"-"`
 }
 
 // Initialize - initializes and converts values for a given validator
@@ -129,8 +129,8 @@ func (commission *Commission) Initialize() error {
 }
 
 // ToStakingDescription - convert validator details to a suitable format for staking txs
-func (validator *Validator) ToStakingDescription() hmyStaking.Description {
-	return hmyStaking.Description{
+func (validator *Validator) ToStakingDescription() hmyRestaking.Description_ {
+	return hmyRestaking.Description_{
 		Name:            validator.Details.Name,
 		Identity:        validator.Details.Identity,
 		Website:         validator.Details.Website,
@@ -140,8 +140,8 @@ func (validator *Validator) ToStakingDescription() hmyStaking.Description {
 }
 
 // ToCommissionRates - convert validator commission rates to a suitable format for staking txs
-func (validator *Validator) ToCommissionRates() hmyStaking.CommissionRates {
-	return hmyStaking.CommissionRates{
+func (validator *Validator) ToCommissionRates() hmyRestaking.CommissionRates_ {
+	return hmyRestaking.CommissionRates_{
 		Rate:          validator.Commission.Rate,
 		MaxRate:       validator.Commission.MaxRate,
 		MaxChangeRate: validator.Commission.MaxChangeRate,

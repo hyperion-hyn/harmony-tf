@@ -68,7 +68,7 @@ func StandardScenario(testCase *testing.TestCase) {
 	logger.TransactionLog(fmt.Sprintf("Will wait up to %d seconds to let the transaction get finalized", testCase.Parameters.Timeout), testCase.Verbose)
 
 	rawTx, err := transactions.SendTransaction(&senderAccount, testCase.Parameters.FromShardID, receiverAccount.Address, testCase.Parameters.ToShardID, testCase.Parameters.Amount, testCase.Parameters.Nonce, testCase.Parameters.Gas.Limit, testCase.Parameters.Gas.Price, txData, testCase.Parameters.Timeout)
-	testCaseTx := sdkTxs.ToTransaction(senderAccount.Address, testCase.Parameters.FromShardID, receiverAccount.Address, testCase.Parameters.ToShardID, rawTx, err)
+	testCaseTx := sdkTxs.ToTransaction(senderAccount.Address, receiverAccount.Address, rawTx, err)
 	testCase.Transactions = append(testCase.Transactions, testCaseTx)
 	txResultColoring := logger.ResultColoring(testCaseTx.Success, true)
 

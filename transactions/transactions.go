@@ -2,8 +2,8 @@ package transactions
 
 import (
 	"encoding/base64"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/hyperion-hyn/hyperion-tf/config"
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	sdkNetworkNonce "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/rpc/nonces"
@@ -12,7 +12,7 @@ import (
 )
 
 // SendTransaction - send transactions
-func SendTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, amount numeric.Dec, nonce int, gasLimit int64, gasPrice numeric.Dec, txData string, timeout int) (map[string]interface{}, error) {
+func SendTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, amount ethCommon.Dec, nonce int, gasLimit int64, gasPrice ethCommon.Dec, txData string, timeout int) (map[string]interface{}, error) {
 	account.Unlock()
 
 	rpcClient, currentNonce, err := TransactionPrerequisites(account, fromShardID, nonce)
@@ -34,7 +34,7 @@ func SendTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress
 }
 
 // SendSameShardTransaction - send a transaction using the same shard for both the receiver and the sender
-func SendSameShardTransaction(account *sdkAccounts.Account, toAddress string, shardID uint32, amount numeric.Dec, nonce int, gasLimit int64, gasPrice numeric.Dec, txData string, timeout int) (map[string]interface{}, error) {
+func SendSameShardTransaction(account *sdkAccounts.Account, toAddress string, shardID uint32, amount ethCommon.Dec, nonce int, gasLimit int64, gasPrice ethCommon.Dec, txData string, timeout int) (map[string]interface{}, error) {
 	return SendTransaction(account, shardID, toAddress, shardID, amount, nonce, gasLimit, gasPrice, txData, timeout)
 }
 

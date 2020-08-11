@@ -1,9 +1,9 @@
 package testing
 
 import (
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"sync"
 
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/hyperion-hyn/hyperion-tf/balances"
 	"github.com/hyperion-hyn/hyperion-tf/config"
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
@@ -16,11 +16,11 @@ func Teardown(account *sdkAccounts.Account, fromShardID uint32, toAddress string
 	amount, err := balances.GetShardBalance(account.Address, fromShardID)
 
 	if err == nil && !amount.IsNil() {
-		if amount.GT(numeric.NewDec(0)) {
+		if amount.GT(ethCommon.NewDec(0)) {
 			amount = amount.Sub(config.Configuration.Funding.Gas.Cost)
 		}
 
-		if amount.GT(numeric.NewDec(0)) {
+		if amount.GT(ethCommon.NewDec(0)) {
 			transactions.SendTransaction(account, fromShardID, toAddress, toShardID, amount, -1, config.Configuration.Funding.Gas.Limit, config.Configuration.Funding.Gas.Price, "", 0)
 		}
 	}

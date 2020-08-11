@@ -11,7 +11,6 @@ require (
 	github.com/ethereum/go-ethereum v1.8.27
 	github.com/gookit/color v1.2.4
 	github.com/harmony-one/bls v0.0.6
-	github.com/harmony-one/harmony v1.9.1-0.20200722170829-a354b93676e9
 	github.com/karalabe/hid v1.0.0
 	github.com/mackerelio/go-osstat v0.1.0
 	github.com/mitchellh/go-homedir v1.1.0

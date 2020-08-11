@@ -13,7 +13,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcec"
 	mapset "github.com/deckarep/golang-set"
-	"github.com/harmony-one/harmony/accounts/keystore"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	goSDKAccount "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/account"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 	goSDKAddress "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"

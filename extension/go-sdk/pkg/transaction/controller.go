@@ -3,16 +3,16 @@ package transaction
 import (
 	"errors"
 	"fmt"
+	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/params"
 	"math/big"
 	"strings"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/harmony-one/harmony/accounts"
-	"github.com/harmony-one/harmony/accounts/keystore"
-	"github.com/harmony-one/harmony/common/denominations"
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/ledger"
@@ -20,8 +20,8 @@ import (
 )
 
 var (
-	nanoAsDec = numeric.NewDec(denominations.Nano)
-	oneAsDec  = numeric.NewDec(denominations.One)
+	nanoAsDec = ethCommon.NewDec(params.GWei)
+	oneAsDec  = ethCommon.NewDec(params.Ether)
 
 	// ErrBadTransactionParam is returned when invalid params are given to the
 	// controller upon execution of a transaction.
@@ -59,35 +59,6 @@ type behavior struct {
 	DryRun               bool
 	SigningImpl          SignerImpl
 	ConfirmationWaitTime uint32
-}
-
-// NewController initializes a Controller, caller can control behavior via options
-func NewController(
-	handler rpc.T, senderKs *keystore.KeyStore,
-	senderAcct *accounts.Account, chain common.ChainID,
-	options ...func(*Controller),
-) *Controller {
-	txParams := make(map[string]interface{})
-	ctrlr := &Controller{
-		executionError: nil,
-		messenger:      handler,
-		sender: sender{
-			ks:      senderKs,
-			account: senderAcct,
-		},
-		transactionForRPC: transactionForRPC{
-			params:          txParams,
-			signature:       nil,
-			transactionHash: nil,
-			receipt:         nil,
-		},
-		chain:    chain,
-		Behavior: behavior{false, Software, 0},
-	}
-	for _, option := range options {
-		option(ctrlr)
-	}
-	return ctrlr
 }
 
 // TransactionToJSON dumps JSON representation
@@ -131,11 +102,11 @@ func (C *Controller) setIntrinsicGas(gasLimit uint64) {
 	C.transactionForRPC.params["gas-limit"] = gasLimit
 }
 
-func (C *Controller) setGasPrice(gasPrice numeric.Dec) {
+func (C *Controller) setGasPrice(gasPrice ethCommon.Dec) {
 	if C.executionError != nil {
 		return
 	}
-	if gasPrice.Sign() == -1 {
+	if gasPrice.IsNegative() {
 		C.executionError = ErrBadTransactionParam
 		errorMsg := fmt.Sprintf(
 			"can't set negative gas price: %d", gasPrice,
@@ -149,11 +120,11 @@ func (C *Controller) setGasPrice(gasPrice numeric.Dec) {
 	C.transactionForRPC.params["gas-price"] = gasPrice.Mul(nanoAsDec)
 }
 
-func (C *Controller) setAmount(amount numeric.Dec) {
+func (C *Controller) setAmount(amount ethCommon.Dec) {
 	if C.executionError != nil {
 		return
 	}
-	if amount.Sign() == -1 {
+	if amount.IsNegative() {
 		C.executionError = ErrBadTransactionParam
 		errorMsg := fmt.Sprintf(
 			"can't set negative amount: %d", amount,
@@ -174,9 +145,9 @@ func (C *Controller) setAmount(amount numeric.Dec) {
 	}
 	currentBalance, _ := balanceRPCReply["result"].(string)
 	bal, _ := new(big.Int).SetString(currentBalance[2:], 16)
-	balance := numeric.NewDecFromBigInt(bal)
-	gasAsDec := C.transactionForRPC.params["gas-price"].(numeric.Dec)
-	gasAsDec = gasAsDec.Mul(numeric.NewDec(int64(C.transactionForRPC.params["gas-limit"].(uint64))))
+	balance := ethCommon.NewDecFromBigInt(bal)
+	gasAsDec := C.transactionForRPC.params["gas-price"].(ethCommon.Dec)
+	gasAsDec = gasAsDec.Mul(ethCommon.NewDec(int64(C.transactionForRPC.params["gas-limit"].(uint64))))
 	amountInAtto := amount.Mul(oneAsDec)
 	total := amountInAtto.Add(gasAsDec)
 
@@ -200,22 +171,6 @@ func (C *Controller) setReceiver(receiver string) {
 	C.transactionForRPC.params["receiver"] = address.Parse(receiver)
 }
 
-func (C *Controller) setNewTransactionWithDataAndGas(data []byte) {
-	if C.executionError != nil {
-		return
-	}
-	C.transactionForRPC.transaction = NewTransaction(
-		C.transactionForRPC.params["nonce"].(uint64),
-		C.transactionForRPC.params["gas-limit"].(uint64),
-		C.transactionForRPC.params["receiver"].(address.T),
-		C.transactionForRPC.params["from-shard"].(uint32),
-		C.transactionForRPC.params["to-shard"].(uint32),
-		C.transactionForRPC.params["transfer-amount"].(numeric.Dec),
-		C.transactionForRPC.params["gas-price"].(numeric.Dec),
-		data,
-	)
-}
-
 func (C *Controller) signAndPrepareTxEncodedForSending() {
 	if C.executionError != nil {
 		return
@@ -232,7 +187,7 @@ func (C *Controller) signAndPrepareTxEncodedForSending() {
 	C.transactionForRPC.signature = &hexSignature
 	if common.DebugTransaction {
 		r, _ := signedTransaction.MarshalJSON()
-		fmt.Println("Signed with ChainID:", C.transactionForRPC.transaction.ChainID())
+		//fmt.Println("Signed with ChainID:", C.transactionForRPC.transaction.ChainID())
 		fmt.Println(common.JSONPrettyFormat(string(r)))
 	}
 }
@@ -307,35 +262,6 @@ func (C *Controller) txConfirmation() {
 			start -= 1
 		}
 	}
-}
-
-// ExecuteTransaction is the single entrypoint to execute a plain transaction.
-// Each step in transaction creation, execution probably includes a mutation
-// Each becomes a no-op if executionError occurred in any previous step
-func (C *Controller) ExecuteTransaction(
-	nonce, gasLimit uint64,
-	to string,
-	shardID, toShardID uint32,
-	amount, gasPrice numeric.Dec,
-	inputData []byte,
-) error {
-	// WARNING Order of execution matters
-	C.setShardIDs(shardID, toShardID)
-	C.setIntrinsicGas(gasLimit)
-	C.setGasPrice(gasPrice)
-	C.setAmount(amount)
-	C.setReceiver(to)
-	C.transactionForRPC.params["nonce"] = nonce
-	C.setNewTransactionWithDataAndGas(inputData)
-	switch C.Behavior.SigningImpl {
-	case Software:
-		C.signAndPrepareTxEncodedForSending()
-	case Ledger:
-		C.hardwareSignAndPrepareTxEncodedForSending()
-	}
-	C.sendSignedTx()
-	C.txConfirmation()
-	return C.executionError
 }
 
 // TODO: add logic to create staking transactions in the SDK.

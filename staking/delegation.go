@@ -2,8 +2,8 @@ package staking
 
 import (
 	"errors"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/hyperion-hyn/hyperion-tf/config"
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	sdkNetworkNonce "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/rpc/nonces"
@@ -63,7 +63,6 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, vali
 			config.Configuration.Network.API.ChainID,
 			delegator.Address,
 			validator.Address,
-			params.Delegation.Delegate.Amount,
 			params.Delegation.Delegate.Gas.Limit,
 			params.Delegation.Delegate.Gas.Price,
 			currentNonce,
@@ -79,7 +78,6 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, vali
 			config.Configuration.Network.API.ChainID,
 			delegator.Address,
 			validator.Address,
-			params.Delegation.Undelegate.Amount,
 			params.Delegation.Undelegate.Gas.Limit,
 			params.Delegation.Undelegate.Gas.Price,
 			currentNonce,
@@ -97,11 +95,11 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, vali
 }
 
 func validateDelegationValues(params *testParams.StakingParameters) error {
-	if params.Delegation.Delegate.RawAmount != "" && (params.Delegation.Delegate.Amount.IsNil() || params.Delegation.Delegate.Amount.LT(numeric.NewDec(0))) {
+	if params.Delegation.Delegate.RawAmount != "" && (params.Delegation.Delegate.Amount.IsNil() || params.Delegation.Delegate.Amount.LT(ethCommon.NewDec(0))) {
 		return errNilDelegate
 	}
 
-	if params.Delegation.Undelegate.RawAmount != "" && (params.Delegation.Undelegate.Amount.IsNil() || params.Delegation.Undelegate.Amount.LT(numeric.NewDec(0))) {
+	if params.Delegation.Undelegate.RawAmount != "" && (params.Delegation.Undelegate.Amount.IsNil() || params.Delegation.Undelegate.Amount.LT(ethCommon.NewDec(0))) {
 		return errNilUndelegate
 	}
 
