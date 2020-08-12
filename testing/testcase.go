@@ -157,7 +157,7 @@ func (testCase *TestCase) HandleError(err error, account *sdkAccounts.Account, m
 
 		if account != nil {
 			logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
-			Teardown(account, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+			Teardown(account, config.Configuration.Funding.Account.Address)
 		}
 
 		logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)

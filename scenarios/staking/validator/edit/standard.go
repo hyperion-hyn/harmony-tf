@@ -24,7 +24,7 @@ func StandardScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, 1, 0)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, 1)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -44,7 +44,7 @@ func StandardScenario(testCase *testing.TestCase) {
 			lastSuccessfullyUpdated bool
 			lastEditTxErr           error
 		)
-		node := config.Configuration.Network.API.NodeAddress(testCase.StakingParameters.FromShardID)
+		node := config.Configuration.Network.API.NodeAddress()
 
 		for i := uint32(0); i < testCase.StakingParameters.Edit.Repeat; i++ {
 			if i == 0 || (lastEditTxErr == nil && lastEditTx.Success && lastSuccessfullyUpdated) {
@@ -81,7 +81,7 @@ func StandardScenario(testCase *testing.TestCase) {
 
 	if !testCase.StakingParameters.ReuseExistingValidator {
 		logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
-		testing.Teardown(validator.Account, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+		testing.Teardown(validator.Account, config.Configuration.Funding.Account.Address)
 	}
 
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)

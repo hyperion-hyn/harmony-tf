@@ -23,7 +23,7 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, fundingMultiple, 0)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -66,14 +66,14 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 		testCase.Transactions = append(testCase.Transactions, duplicateTx)
 
 		testCase.Result = duplicateTx.Success && duplicateValidatorExists
-		testing.Teardown(&duplicateAccount, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+		testing.Teardown(&duplicateAccount, config.Configuration.Funding.Account.Address)
 	}
 
 	logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
 	testing.Title(testCase, "footer", testCase.Verbose)
 
-	testing.Teardown(&account, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+	testing.Teardown(&account, config.Configuration.Funding.Account.Address)
 
 	testCase.FinishedAt = time.Now().UTC()
 }

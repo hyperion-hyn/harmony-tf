@@ -24,7 +24,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, fundingMultiple, 0)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -58,9 +58,9 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	testCase.Transactions = append(testCase.Transactions, tx)
 
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
-	accountEndingBalance, _ := balances.GetShardBalance(senderAccount.Address, testCase.StakingParameters.FromShardID)
+	accountEndingBalance, _ := balances.GetBalance(senderAccount.Address)
 	expectedAccountEndingBalance := senderAccount.Balance
-	logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f in shard %d after the test - expected value: %f (or less)", senderAccount.Name, senderAccount.Address, accountEndingBalance, testCase.StakingParameters.FromShardID, expectedAccountEndingBalance), testCase.Verbose)
+	logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f  after the test - expected value: %f (or less)", senderAccount.Name, senderAccount.Address, accountEndingBalance, expectedAccountEndingBalance), testCase.Verbose)
 
 	testCase.Result = tx.Success && accountEndingBalance.LT(expectedAccountEndingBalance) && validatorExists
 
@@ -68,7 +68,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
 	testing.Title(testCase, "footer", testCase.Verbose)
 
-	testing.Teardown(&senderAccount, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+	testing.Teardown(&senderAccount, config.Configuration.Funding.Account.Address)
 
 	testCase.FinishedAt = time.Now().UTC()
 }

@@ -10,8 +10,8 @@ import (
 )
 
 // CalculateFundingDetails - retrieves the funding account balance and calculates the required funding amount
-func CalculateFundingDetails(amount ethCommon.Dec, multiple int64, shardID uint32) (balance ethCommon.Dec, requiredFunding ethCommon.Dec, err error) {
-	balance, err = RetrieveFundingAccountBalance(shardID)
+func CalculateFundingDetails(amount ethCommon.Dec, multiple int64) (balance ethCommon.Dec, requiredFunding ethCommon.Dec, err error) {
+	balance, err = RetrieveFundingAccountBalance()
 	if err != nil {
 		return ethCommon.NewDec(0), ethCommon.NewDec(0), err
 	}
@@ -30,8 +30,8 @@ func CalculateFundingDetails(amount ethCommon.Dec, multiple int64, shardID uint3
 }
 
 // RetrieveFundingAccountBalance - retrieves the balance of the funding account in a specific shard
-func RetrieveFundingAccountBalance(shardID uint32) (ethCommon.Dec, error) {
-	fundingAccountBalance, err := balances.GetShardBalance(config.Configuration.Funding.Account.Address, shardID)
+func RetrieveFundingAccountBalance() (ethCommon.Dec, error) {
+	fundingAccountBalance, err := balances.GetBalance(config.Configuration.Funding.Account.Address)
 	if err != nil {
 		err = errors.Wrapf(
 			err,
@@ -47,10 +47,9 @@ func RetrieveFundingAccountBalance(shardID uint32) (ethCommon.Dec, error) {
 	if fundingAccountBalance.IsNil() || fundingAccountBalance.IsZero() {
 		err = errors.Wrapf(
 			err,
-			fmt.Sprintf("Funding account %s, address: %s doesn't have a sufficient balance in shard %d - balance: %f",
+			fmt.Sprintf("Funding account %s, address: %s doesn't have a sufficient balance - balance: %f",
 				config.Configuration.Funding.Account.Name,
 				config.Configuration.Funding.Account.Address,
-				shardID,
 				fundingAccountBalance,
 			),
 		)

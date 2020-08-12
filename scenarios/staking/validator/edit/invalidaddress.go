@@ -23,7 +23,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, fundingMultiple, 0)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -57,9 +57,9 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 
 		logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
 
-		testing.Teardown(&invalidAccount, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+		testing.Teardown(&invalidAccount, config.Configuration.Funding.Account.Address)
 		if !testCase.StakingParameters.ReuseExistingValidator {
-			testing.Teardown(validator.Account, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+			testing.Teardown(validator.Account, config.Configuration.Funding.Account.Address)
 		}
 	}
 

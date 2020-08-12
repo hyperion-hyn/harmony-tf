@@ -3,7 +3,6 @@ package funding
 import (
 	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
-	"strconv"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/core"
@@ -45,40 +44,34 @@ func SetupFundingAccount(accs []sdkAccounts.Account) (err error) {
 		}
 	}
 
-	for shardID := range config.Configuration.Network.API.Shards {
-		shardBalance, err := config.Configuration.Network.API.GetShardBalance(config.Configuration.Funding.Account.Address, shardID)
+	shardBalance, err := config.Configuration.Network.API.GetBalances(config.Configuration.Funding.Account.Address)
+	if err != nil {
+		return err
+	}
+
+	logger.BalanceLog(fmt.Sprintf("The current balance for the funding account %s / %s  is: %f", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, shardBalance), true)
+
+	if shardBalance.IsNil() || shardBalance.IsZero() || shardBalance.IsNegative() {
+		return fmt.Errorf(
+			"Somehow the funding account %s, address: %s wasn't funded properly  - please make sure that you've added funded keystore files to keys/%s or that you've added funded private keys to keys/%s/private_keys.txt",
+			config.Configuration.Funding.Account.Name,
+			config.Configuration.Funding.Account.Address, config.Configuration.Network.Name,
+			config.Configuration.Network.Name,
+		)
+	}
+
+	if config.Configuration.Framework.Test == "all" && InsufficientBalance(shardBalance, config.Configuration.Funding.MinimumFunds) {
+		logger.WarningLog(fmt.Sprintf("Funding account %s, address: %s wasn't funded properly , attempting to fund it", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address), true)
+		expectedBalance, err := fundFundingAccountInNonBeaconShard()
 		if err != nil {
 			return err
 		}
 
-		logger.BalanceLog(fmt.Sprintf("The current balance for the funding account %s / %s in shard %d is: %f", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, shardID, shardBalance), true)
-
-		if shardID == 0 {
-			if shardBalance.IsNil() || shardBalance.IsZero() || shardBalance.IsNegative() {
-				return fmt.Errorf(
-					"Somehow the funding account %s, address: %s wasn't funded properly in shard %d - please make sure that you've added funded keystore files to keys/%s or that you've added funded private keys to keys/%s/private_keys.txt",
-					config.Configuration.Funding.Account.Name,
-					config.Configuration.Funding.Account.Address,
-					shardID, config.Configuration.Network.Name,
-					config.Configuration.Network.Name,
-				)
-			}
-		} else {
-			if config.Configuration.Framework.Test == "all" && InsufficientBalance(shardBalance, config.Configuration.Funding.MinimumFunds) {
-				logger.WarningLog(fmt.Sprintf("Funding account %s, address: %s wasn't funded properly in shard %d, attempting to fund it", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, shardID), true)
-				expectedBalance, err := fundFundingAccountInNonBeaconShard(shardID)
-				if err != nil {
-					return err
-				}
-
-				shardBalance, err = balances.GetExpectedShardBalance(config.Configuration.Funding.Account.Address, shardID, expectedBalance)
-				if err != nil {
-					return err
-				}
-				logger.BalanceLog(fmt.Sprintf("The current balance for the funding account %s / %s in shard %d is now: %f", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, shardID, shardBalance), true)
-			}
+		shardBalance, err = balances.GetExpectedShardBalance(config.Configuration.Funding.Account.Address, expectedBalance)
+		if err != nil {
+			return err
 		}
-
+		logger.BalanceLog(fmt.Sprintf("The current balance for the funding account %s / %s  is now: %f", config.Configuration.Funding.Account.Name, config.Configuration.Funding.Account.Address, shardBalance), true)
 	}
 
 	return nil
@@ -90,16 +83,14 @@ func FundFundingAccount(accs []sdkAccounts.Account) error {
 
 	for _, account := range accs {
 		if config.Configuration.Funding.Shards == "all" {
-			for shard := 0; shard < config.Configuration.Network.Shards; shard++ {
-				FundFundingAccountInShard(account, uint32(shard), &waitGroup)
-			}
+			FundFundingAccountInShard(account, &waitGroup)
 		} else {
-			shard, err := strconv.ParseUint(config.Configuration.Funding.Shards, 10, 32)
-			if err != nil {
-				return err
-			}
+			//shard, err := strconv.ParseUint(config.Configuration.Funding.Shards, 10, 32)
+			//if err != nil {
+			//	return err
+			//}
 
-			FundFundingAccountInShard(account, uint32(shard), &waitGroup)
+			FundFundingAccountInShard(account, &waitGroup)
 		}
 	}
 
@@ -109,8 +100,8 @@ func FundFundingAccount(accs []sdkAccounts.Account) error {
 }
 
 // FundFundingAccountInShard - fund the funding account in a given shard
-func FundFundingAccountInShard(account sdkAccounts.Account, shard uint32, waitGroup *sync.WaitGroup) {
-	availableShardBalance, err := balances.GetShardBalance(account.Address, shard)
+func FundFundingAccountInShard(account sdkAccounts.Account, waitGroup *sync.WaitGroup) {
+	availableShardBalance, err := balances.GetBalance(account.Address)
 
 	if err == nil && !availableShardBalance.IsNil() && !availableShardBalance.IsZero() {
 		amount := availableShardBalance.Sub(config.Configuration.Network.Gas.Cost)
@@ -119,9 +110,7 @@ func FundFundingAccountInShard(account sdkAccounts.Account, shard uint32, waitGr
 			waitGroup.Add(1)
 			go AsyncPerformFundingTransaction(
 				&account,
-				uint32(shard),
 				config.Configuration.Funding.Account.Address,
-				shard,
 				amount,
 				-1,
 				config.Configuration.Funding.Gas.Limit,
@@ -132,11 +121,11 @@ func FundFundingAccountInShard(account sdkAccounts.Account, shard uint32, waitGr
 			)
 		}
 	} else if err != nil {
-		fmt.Println(fmt.Sprintf("Failed to retrieve the shard balance for the address %s on shard %d - balance: %f, error: %s", account.Address, shard, availableShardBalance, err.Error()))
+		fmt.Println(fmt.Sprintf("Failed to retrieve the shard balance for the address %s  - balance: %f, error: %s", account.Address, availableShardBalance, err.Error()))
 	}
 }
 
-func fundFundingAccountInNonBeaconShard(shardID uint32) (amount ethCommon.Dec, err error) {
+func fundFundingAccountInNonBeaconShard() (amount ethCommon.Dec, err error) {
 	amount, err = CalculateFundingAmount(config.Configuration.Funding.MinimumFunds, 1)
 	if err != nil {
 		return ethCommon.NewDec(0), err
@@ -144,9 +133,7 @@ func fundFundingAccountInNonBeaconShard(shardID uint32) (amount ethCommon.Dec, e
 
 	err = PerformFundingTransaction(
 		&config.Configuration.Funding.Account,
-		0,
 		config.Configuration.Funding.Account.Address,
-		shardID,
 		amount,
 		-1,
 		config.Configuration.Funding.Gas.Limit,
@@ -162,8 +149,8 @@ func fundFundingAccountInNonBeaconShard(shardID uint32) (amount ethCommon.Dec, e
 }
 
 // GenerateAndFundAccounts - generate and fund a set of accounts
-func GenerateAndFundAccounts(count int64, nameTemplate string, amount ethCommon.Dec, fromShardID uint32, toShardID uint32) (accs []sdkAccounts.Account, err error) {
-	rpcClient, err := config.Configuration.Network.API.RPCClient(fromShardID)
+func GenerateAndFundAccounts(count int64, nameTemplate string, amount ethCommon.Dec) (accs []sdkAccounts.Account, err error) {
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
 	if err != nil {
 		return nil, errors.Wrapf(err, "RPC Client")
 	}
@@ -175,9 +162,9 @@ func GenerateAndFundAccounts(count int64, nameTemplate string, amount ethCommon.
 	}
 	nonce = int(receivedNonce)
 
-	_, err = balances.GetShardBalance(config.Configuration.Funding.Account.Address, fromShardID)
+	_, err = balances.GetBalance(config.Configuration.Funding.Account.Address)
 	if err != nil {
-		return nil, errors.Wrapf(err, fmt.Sprintf("Shard Balance for %s on shard %d", config.Configuration.Funding.Account.Address, fromShardID))
+		return nil, errors.Wrapf(err, fmt.Sprintf("Shard Balance for %s ", config.Configuration.Funding.Account.Address))
 	}
 
 	amount, err = CalculateFundingAmount(amount, 1)
@@ -190,7 +177,7 @@ func GenerateAndFundAccounts(count int64, nameTemplate string, amount ethCommon.
 
 	for i := int64(0); i < count; i++ {
 		waitGroup.Add(1)
-		go generateAndFundAccount(i, nameTemplate, fromShardID, toShardID, amount, nonce, accountsChannel, &waitGroup)
+		go generateAndFundAccount(i, nameTemplate, amount, nonce, accountsChannel, &waitGroup)
 		nonce++
 	}
 
@@ -204,7 +191,7 @@ func GenerateAndFundAccounts(count int64, nameTemplate string, amount ethCommon.
 	return accs, nil
 }
 
-func generateAndFundAccount(index int64, nameTemplate string, fromShardID uint32, toShardID uint32, amount ethCommon.Dec, nonce int, accountsChannel chan<- sdkAccounts.Account, waitGroup *sync.WaitGroup) {
+func generateAndFundAccount(index int64, nameTemplate string, amount ethCommon.Dec, nonce int, accountsChannel chan<- sdkAccounts.Account, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 
 	accountName := fmt.Sprintf("%s%d", nameTemplate, index)
@@ -213,9 +200,7 @@ func generateAndFundAccount(index int64, nameTemplate string, fromShardID uint32
 	if err == nil {
 		PerformFundingTransaction(
 			&config.Configuration.Funding.Account,
-			fromShardID,
 			account.Address,
-			toShardID,
 			amount,
 			nonce,
 			config.Configuration.Funding.Gas.Limit,
@@ -228,10 +213,10 @@ func generateAndFundAccount(index int64, nameTemplate string, fromShardID uint32
 }
 
 // AsyncPerformFundingTransaction - performs an asynchronous call to PerformFundingTransaction and calls Done() on the waitGroup
-func AsyncPerformFundingTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, amount ethCommon.Dec, nonce int, gasLimit int64, gasPrice ethCommon.Dec, timeout int, attempts int, waitGroup *sync.WaitGroup) {
+func AsyncPerformFundingTransaction(account *sdkAccounts.Account, toAddress string, amount ethCommon.Dec, nonce int, gasLimit int64, gasPrice ethCommon.Dec, timeout int, attempts int, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 
-	PerformFundingTransaction(account, fromShardID, toAddress, toShardID, amount, nonce, gasLimit, gasPrice, timeout, attempts)
+	PerformFundingTransaction(account, toAddress, amount, nonce, gasLimit, gasPrice, timeout, attempts)
 }
 
 // FundAccounts - funds a given set of accounts in a given set of shards using a set of source accounts
@@ -263,41 +248,39 @@ func fundAccount(sourceAccount *sdkAccounts.Account, amount ethCommon.Dec, prefi
 		return account, errors.Wrapf(err, "Generate Account")
 	}
 
-	for shard := 0; shard < config.Configuration.Network.Shards; shard++ {
-		err := PerformFundingTransaction(sourceAccount, 0, account.Address, uint32(shard), amount, -1, gasLimit, gasPrice, timeout, 10)
+	err = PerformFundingTransaction(sourceAccount, account.Address, amount, -1, gasLimit, gasPrice, timeout, 10)
 
-		if err != nil {
-			return account, fmt.Errorf("failed to fund account %s in shard %d with amount %f using source account %s - error: %s", account.Address, shard, amount, sourceAccount.Address, err.Error())
-		}
+	if err != nil {
+		return account, fmt.Errorf("failed to fund account %s  with amount %f using source account %s - error: %s", account.Address, amount, sourceAccount.Address, err.Error())
 	}
 
 	return account, nil
 }
 
 // PerformFundingTransaction - performs a funding transaction including automatic retries
-func PerformFundingTransaction(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, amount ethCommon.Dec, nonce int, gasLimit int64, gasPrice ethCommon.Dec, timeout int, attempts int) error {
+func PerformFundingTransaction(account *sdkAccounts.Account, toAddress string, amount ethCommon.Dec, nonce int, gasLimit int64, gasPrice ethCommon.Dec, timeout int, attempts int) error {
 	if amount.GT(ethCommon.NewDec(0)) {
 		for {
 			if attempts > 0 {
-				logger.FundingLog(fmt.Sprintf("Attempting funding transaction from %s (shard: %d) to %s (shard: %d) of amount %f!", account.Address, fromShardID, toAddress, toShardID, amount), config.Configuration.Funding.Verbose)
+				logger.FundingLog(fmt.Sprintf("Attempting funding transaction from %s  to %s  of amount %f!", account.Address, toAddress, amount), config.Configuration.Funding.Verbose)
 
-				rawTx, err := transactions.SendTransaction(account, fromShardID, toAddress, toShardID, amount, nonce, gasLimit, gasPrice, "", config.Configuration.Funding.Timeout)
+				rawTx, err := transactions.SendTransaction(account, toAddress, amount, nonce, gasLimit, gasPrice, "", config.Configuration.Funding.Timeout)
 
 				if err != nil {
 					if errors.Is(err, core.ErrUnderpriced) || errors.Is(err, core.ErrReplaceUnderpriced) || errors.Is(err, core.ErrIntrinsicGas) {
 						gasPrice = sdkTransactions.BumpGasPrice(gasPrice)
-						logger.ErrorLog(fmt.Sprintf("Failed to perform funding transaction from %s (shard: %d) to %s (shard: %d) of amount %f - error: %s", account.Address, fromShardID, toAddress, toShardID, amount, err.Error()), config.Configuration.Funding.Verbose)
+						logger.ErrorLog(fmt.Sprintf("Failed to perform funding transaction from %s  to %s  of amount %f - error: %s", account.Address, toAddress, amount, err.Error()), config.Configuration.Funding.Verbose)
 					} else if errors.Is(err, core.ErrInsufficientFunds) {
 						return err
 					}
 				} else {
 					success := sdkTransactions.IsTransactionSuccessful(rawTx)
 					if success {
-						logger.FundingLog(fmt.Sprintf("Successfully performed funding transaction (%s) from %s (shard: %d) to %s (shard: %d) of amount %f", rawTx["transactionHash"].(string), account.Address, fromShardID, toAddress, toShardID, amount), config.Configuration.Funding.Verbose)
+						logger.FundingLog(fmt.Sprintf("Successfully performed funding transaction (%s) from %s  to %s  of amount %f", rawTx["transactionHash"].(string), account.Address, toAddress, amount), config.Configuration.Funding.Verbose)
 						break
 					} else {
 						gasPrice = sdkTransactions.BumpGasPrice(gasPrice)
-						logger.FundingLog(fmt.Sprintf("Failed to perform funding transaction from %s (shard: %d) to %s (shard: %d) of amount %f - retrying with new gas price: %f", account.Address, fromShardID, toAddress, toShardID, amount, gasPrice), config.Configuration.Funding.Verbose)
+						logger.FundingLog(fmt.Sprintf("Failed to perform funding transaction from %s  to %s of amount %f - retrying with new gas price: %f", account.Address, toAddress, amount, gasPrice), config.Configuration.Funding.Verbose)
 					}
 				}
 			} else {

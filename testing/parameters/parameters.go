@@ -2,7 +2,6 @@ package parameters
 
 import (
 	ethCommon "github.com/ethereum/go-ethereum/common"
-	"github.com/hyperion-hyn/hyperion-tf/config"
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	sdkNetworkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
 	sdkTxs "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/transactions"
@@ -16,8 +15,6 @@ type Parameters struct {
 	Senders       []sdkAccounts.Account
 	ReceiverCount int64 `yaml:"receiver_count"`
 	Receivers     []sdkAccounts.Account
-	FromShardID   uint32              `yaml:"from_shard_id"`
-	ToShardID     uint32              `yaml:"to_shard_id"`
 	Data          string              `yaml:"data"`
 	DataSize      int                 `yaml:"data_size,omitempty"`
 	RawAmount     string              `yaml:"amount"`
@@ -40,15 +37,6 @@ func (params *Parameters) Initialize() error {
 	/*if params.DataSize > 0 {
 		params.Data = sdkTxs.GenerateTxData(params.Data, params.DataSize)
 	}*/
-
-	//Some test cases target shards that aren't available on localnet - switch those test cases to use the highest available shard on localnet (typically 1)
-	if params.FromShardID > uint32(config.Configuration.Network.Shards-1) {
-		params.FromShardID = uint32(config.Configuration.Network.Shards - 1)
-	}
-
-	if params.ToShardID > uint32(config.Configuration.Network.Shards-1) {
-		params.ToShardID = uint32(config.Configuration.Network.Shards - 1)
-	}
 
 	// Setup gas values
 	if err := params.Gas.Initialize(); err != nil {

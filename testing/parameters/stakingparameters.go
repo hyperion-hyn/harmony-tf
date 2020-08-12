@@ -8,9 +8,7 @@ import (
 
 // StakingParameters - represents the test case staking tx parameters
 type StakingParameters struct {
-	FromShardID uint32 `yaml:"-"`
-	ToShardID   uint32 `yaml:"-"`
-	Count       int    `yaml:"count"`
+	Count int `yaml:"count"`
 
 	Create     CreateValidatorParameters `yaml:"create"`
 	Edit       EditValidatorParameters   `yaml:"edit"`
@@ -26,8 +24,6 @@ type StakingParameters struct {
 
 // Initialize - initializes and converts values for a given test case
 func (params *StakingParameters) Initialize() (err error) {
-	params.FromShardID = uint32(0)
-	params.ToShardID = uint32(0)
 
 	if len(params.Mode) > 0 {
 		params.Mode = strings.ToLower(params.Mode)

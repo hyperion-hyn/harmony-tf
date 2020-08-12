@@ -24,7 +24,7 @@ func AlreadyExistsScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(2)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, fundingMultiple, 0)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -47,7 +47,7 @@ func AlreadyExistsScenario(testCase *testing.TestCase) {
 	testCase.Transactions = append(testCase.Transactions, tx)
 
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
-	accountEndingBalance, err := balances.GetShardBalance(account.Address, testCase.StakingParameters.FromShardID)
+	accountEndingBalance, err := balances.GetBalance(account.Address)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to check ending account balance for account %s, address: %s", account.Name, account.Address)
 		testCase.HandleError(err, &account, msg)
@@ -55,7 +55,7 @@ func AlreadyExistsScenario(testCase *testing.TestCase) {
 	}
 
 	expectedAccountEndingBalance := account.Balance.Sub(testCase.StakingParameters.Create.Validator.Amount)
-	logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f in shard %d after the test - expected value: %f (or less)", account.Name, account.Address, accountEndingBalance, testCase.StakingParameters.FromShardID, expectedAccountEndingBalance), testCase.Verbose)
+	logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f  after the test - expected value: %f (or less)", account.Name, account.Address, accountEndingBalance, expectedAccountEndingBalance), testCase.Verbose)
 
 	testCase.Result = tx.Success && accountEndingBalance.LT(expectedAccountEndingBalance) && validatorExists
 
@@ -74,7 +74,7 @@ func AlreadyExistsScenario(testCase *testing.TestCase) {
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
 	testing.Title(testCase, "footer", testCase.Verbose)
 
-	testing.Teardown(&account, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+	testing.Teardown(&account, config.Configuration.Funding.Account.Address)
 
 	testCase.FinishedAt = time.Now().UTC()
 }

@@ -29,7 +29,8 @@ func IdentifyNetworkChainID(network string) (chain *common.ChainID, err error) {
 }
 
 // GenerateNodeAddress - generates a node address given a network, mode and a shardID
-func GenerateNodeAddress(network string, mode string, shardID uint32) (node string) {
+func GenerateNodeAddress(network string, mode string) (node string) {
+	var shardID uint32 = 0
 	node = ToNodeAddress(network, shardID)
 
 	if strings.ToLower(mode) == "local" {
@@ -92,19 +93,19 @@ func ToNodeAddress(network string, shardID uint32) (node string) {
 }
 
 // ResolveStartingNode - resolve the starting node to use for resolving the sharding structure
-func ResolveStartingNode(network string, mode string, shardID uint32, nodes []string) string {
+func ResolveStartingNode(network string, mode string, nodes []string) string {
 	node := ""
 	switch mode {
 	case "api":
-		node = GenerateNodeAddress(network, mode, shardID)
+		node = GenerateNodeAddress(network, mode)
 	case "custom":
 		if len(nodes) > 0 {
 			node = nodes[0]
 		} else {
-			node = GenerateNodeAddress(network, mode, shardID)
+			node = GenerateNodeAddress(network, mode)
 		}
 	default:
-		node = GenerateNodeAddress(network, mode, shardID)
+		node = GenerateNodeAddress(network, mode)
 	}
 
 	return node

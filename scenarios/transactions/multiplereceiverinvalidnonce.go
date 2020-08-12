@@ -36,7 +36,7 @@ func MultipleReceiverInvalidNonceScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	_, requiredFunding, err := funding.CalculateFundingDetails(testCase.Parameters.Amount, testCase.Parameters.ReceiverCount, testCase.Parameters.FromShardID)
+	_, requiredFunding, err := funding.CalculateFundingDetails(testCase.Parameters.Amount, testCase.Parameters.ReceiverCount)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -53,9 +53,7 @@ func MultipleReceiverInvalidNonceScenario(testCase *testing.TestCase) {
 	logger.FundingLog(fmt.Sprintf("Funding sender account: %s, address: %s", senderAccount.Name, senderAccount.Address), testCase.Verbose)
 	funding.PerformFundingTransaction(
 		&config.Configuration.Funding.Account,
-		testCase.Parameters.FromShardID,
 		senderAccount.Address,
-		testCase.Parameters.ToShardID,
 		requiredFunding, -1,
 		config.Configuration.Funding.Gas.Limit,
 		config.Configuration.Funding.Gas.Price,
@@ -82,7 +80,7 @@ func MultipleReceiverInvalidNonceScenario(testCase *testing.TestCase) {
 }
 
 func executeMultiInvalidNonceTransactions(testCase *testing.TestCase, senderAccount sdkAccounts.Account, receiverAccounts []sdkAccounts.Account) {
-	rpcClient, _ := config.Configuration.Network.API.RPCClient(testCase.Parameters.FromShardID)
+	rpcClient, _ := config.Configuration.Network.API.RPCClient()
 	nonce := -1
 	receivedNonce := sdkNetworkNonce.CurrentNonce(rpcClient, senderAccount.Address)
 	nonce = int(receivedNonce)
@@ -113,7 +111,7 @@ func executeInvalidNonceTransaction(testCase *testing.TestCase, senderAccount sd
 	defer waitGroup.Done()
 	var testCaseTx sdkTxs.Transaction
 	balanceRetrieved := true
-	senderStartingBalance, err := balances.GetNonZeroShardBalance(senderAccount.Address, testCase.Parameters.FromShardID)
+	senderStartingBalance, err := balances.GetNonZeroShardBalance(senderAccount.Address)
 	if testCase.ErrorOccurred(err) {
 		balanceRetrieved = false
 	}
@@ -121,13 +119,13 @@ func executeInvalidNonceTransaction(testCase *testing.TestCase, senderAccount sd
 	if !senderStartingBalance.IsNil() && !senderStartingBalance.IsZero() {
 		logger.AccountLog(fmt.Sprintf("Generated a new receiver account: %s, address: %s", receiverAccount.Name, receiverAccount.Address), testCase.Verbose)
 		logger.AccountLog(fmt.Sprintf("Using sender account %s (address: %s) and receiver account %s (address : %s)", senderAccount.Name, senderAccount.Address, receiverAccount.Name, receiverAccount.Address), testCase.Verbose)
-		logger.BalanceLog(fmt.Sprintf("Sender account %s (address: %s) has a starting balance of %f in shard %d before the test", senderAccount.Name, senderAccount.Address, senderStartingBalance, testCase.Parameters.FromShardID), testCase.Verbose)
+		logger.BalanceLog(fmt.Sprintf("Sender account %s (address: %s) has a starting balance of %f  before the test", senderAccount.Name, senderAccount.Address, senderStartingBalance), testCase.Verbose)
 		logger.BalanceLog(fmt.Sprintf("Will wait up to %d seconds to let the transaction get finalized", testCase.Parameters.Timeout), testCase.Verbose)
 
 		txData := testCase.Parameters.GenerateTxData()
-		logger.TransactionLog(fmt.Sprintf("Sending transaction of %f token(s) from %s (shard %d) to %s (shard %d), tx data size: %d byte(s)", testCase.Parameters.Amount, senderAccount.Address, testCase.Parameters.FromShardID, receiverAccount.Address, testCase.Parameters.ToShardID, len(txData)), testCase.Verbose)
+		logger.TransactionLog(fmt.Sprintf("Sending transaction of %f token(s) from %s  to %s , tx data size: %d byte(s)", testCase.Parameters.Amount, senderAccount.Address, receiverAccount.Address, len(txData)), testCase.Verbose)
 
-		rawTx, err := transactions.SendTransaction(&senderAccount, testCase.Parameters.FromShardID, receiverAccount.Address, testCase.Parameters.ToShardID, testCase.Parameters.Amount, nonce, testCase.Parameters.Gas.Limit, testCase.Parameters.Gas.Price, txData, testCase.Parameters.Timeout)
+		rawTx, err := transactions.SendTransaction(&senderAccount, receiverAccount.Address, testCase.Parameters.Amount, nonce, testCase.Parameters.Gas.Limit, testCase.Parameters.Gas.Price, txData, testCase.Parameters.Timeout)
 		testCaseTx = sdkTxs.ToTransaction(senderAccount.Address, receiverAccount.Address, rawTx, err)
 		txResultColoring := logger.ResultColoring(testCaseTx.Success, true)
 
@@ -152,9 +150,9 @@ func multipleReceiversTeardown(testCase *testing.TestCase, senderAccount sdkAcco
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(1 + len(receiverAccounts))
 
-	go testing.AsyncTeardown(&senderAccount, testCase.Parameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.Parameters.ToShardID, &waitGroup)
+	go testing.AsyncTeardown(&senderAccount, config.Configuration.Funding.Account.Address, &waitGroup)
 	for _, receiverAccount := range receiverAccounts {
-		go testing.AsyncTeardown(&receiverAccount, testCase.Parameters.ToShardID, config.Configuration.Funding.Account.Address, testCase.Parameters.FromShardID, &waitGroup)
+		go testing.AsyncTeardown(&receiverAccount, config.Configuration.Funding.Account.Address, &waitGroup)
 	}
 
 	waitGroup.Wait()

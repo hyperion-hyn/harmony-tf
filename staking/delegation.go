@@ -40,7 +40,7 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, vali
 
 	account.Unlock()
 
-	rpcClient, err := config.Configuration.Network.API.RPCClient(params.FromShardID)
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, vali
 			params.Delegation.Delegate.Gas.Price,
 			currentNonce,
 			config.Configuration.Account.Passphrase,
-			config.Configuration.Network.API.NodeAddress(params.FromShardID),
+			config.Configuration.Network.API.NodeAddress(),
 			params.Timeout,
 		)
 	} else if method == "undelegate" {
@@ -82,7 +82,7 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, vali
 			params.Delegation.Undelegate.Gas.Price,
 			currentNonce,
 			config.Configuration.Account.Passphrase,
-			config.Configuration.Network.API.NodeAddress(params.FromShardID),
+			config.Configuration.Network.API.NodeAddress(),
 			params.Timeout,
 		)
 	}

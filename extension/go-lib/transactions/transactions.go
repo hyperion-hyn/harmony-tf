@@ -45,7 +45,7 @@ var (
 )
 
 // SendTransaction - send transactions
-func SendTransaction(keystore *keystore.KeyStore, account *accounts.Account, rpcClient *goSdkRPC.HTTPMessenger, chain *common.ChainID, fromAddress string, fromShardID uint32, toAddress string, toShardID uint32, amount ethCommon.Dec, gasLimit int64, gasPrice ethCommon.Dec, nonce uint64, inputData string, keystorePassphrase string, node string, timeout int) (map[string]interface{}, error) {
+func SendTransaction(keystore *keystore.KeyStore, account *accounts.Account, rpcClient *goSdkRPC.HTTPMessenger, chain *common.ChainID, fromAddress string, toAddress string, amount ethCommon.Dec, gasLimit int64, gasPrice ethCommon.Dec, nonce uint64, inputData string, keystorePassphrase string, node string, timeout int) (map[string]interface{}, error) {
 	if keystore == nil || account == nil {
 		return nil, errors.New("keystore account can't be nil - please make sure the account you want to use exists in the keystore")
 	}
@@ -55,9 +55,7 @@ func SendTransaction(keystore *keystore.KeyStore, account *accounts.Account, rpc
 		account,
 		chain,
 		fromAddress,
-		fromShardID,
 		toAddress,
-		toShardID,
 		amount,
 		gasLimit,
 		gasPrice,
@@ -109,16 +107,14 @@ func GenerateAndSignTransaction(
 	account *accounts.Account,
 	chain *common.ChainID,
 	fromAddress string,
-	fromShardID uint32,
 	toAddress string,
-	toShardID uint32,
 	amount ethCommon.Dec,
 	gasLimit int64,
 	gasPrice ethCommon.Dec,
 	nonce uint64,
 	inputData string,
 ) (tx *types.Transaction, err error) {
-	generatedTx, err := GenerateTransaction(fromAddress, fromShardID, toAddress, toShardID, amount, gasLimit, gasPrice, nonce, inputData)
+	generatedTx, err := GenerateTransaction(fromAddress, toAddress, amount, gasLimit, gasPrice, nonce, inputData)
 	if err != nil {
 		return nil, err
 	}
@@ -134,9 +130,7 @@ func GenerateAndSignTransaction(
 // GenerateTransaction - generate a new transaction
 func GenerateTransaction(
 	fromAddress string,
-	fromShardID uint32,
 	toAddress string,
-	toShardID uint32,
 	amount ethCommon.Dec,
 	gasLimit int64,
 	gasPrice ethCommon.Dec,
@@ -149,11 +143,9 @@ func GenerateTransaction(
 	}
 
 	if network.Verbose {
-		fmt.Println(fmt.Sprintf("\n[Harmony SDK]: %s - Generating a new transaction:\n\tReceiver address: %s\n\tFrom shard: %d\n\tTo shard: %d\n\tAmount: %f\n\tNonce: %d\n\tGas limit: %d\n\tGas price: %f\n\tData length (bytes): %d\n",
+		fmt.Println(fmt.Sprintf("\n[Harmony SDK]: %s - Generating a new transaction:\n\tReceiver address: %s\n\tAmount: %f\n\tNonce: %d\n\tGas limit: %d\n\tGas price: %f\n\tData length (bytes): %d\n",
 			time.Now().Format(network.LoggingTimeFormat),
 			toAddress,
-			fromShardID,
-			toShardID,
 			amount,
 			nonce,
 			calculatedGasLimit,

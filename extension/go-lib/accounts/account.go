@@ -71,19 +71,9 @@ func (account *Account) ExportKeystore(passphrase string) ([]byte, error) {
 	return nil, nil
 }
 
-// GetAllShardBalances - checks the balances in all shards for a given network, mode and address
-func (account *Account) GetAllShardBalances(net *networkTypes.Network) (map[uint32]ethCommon.Dec, error) {
-	return net.GetAllShardBalances(account.Address)
-}
-
 // GetShardBalance - gets the balance for a given network, mode, address and shard
-func (account *Account) GetShardBalance(net *networkTypes.Network, shardID uint32) (ethCommon.Dec, error) {
-	return net.GetShardBalance(account.Address, shardID)
-}
-
-// GetTotalBalance - gets the total balance across all shards for a given network, mode and address
-func (account *Account) GetTotalBalance(net *networkTypes.Network) (ethCommon.Dec, error) {
-	return net.GetTotalBalance(account.Address)
+func (account *Account) GetBalance(net *networkTypes.Network) (ethCommon.Dec, error) {
+	return net.GetBalances(account.Address)
 }
 
 // DoesNamedAccountExist - wrapper around store.DoesNamedAccountExist(name)

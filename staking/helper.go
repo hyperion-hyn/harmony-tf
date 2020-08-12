@@ -49,13 +49,13 @@ func ReuseOrCreateValidator(testCase *testing.TestCase, validatorName string) (a
 	validator.BLSKeys = createdBlsKeys
 
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
-	accountEndingBalance, _ := balances.GetShardBalance(validator.Account.Address, testCase.StakingParameters.FromShardID)
+	accountEndingBalance, _ := balances.GetBalance(validator.Account.Address)
 	expectedAccountEndingBalance := account.Balance.Sub(testCase.StakingParameters.Create.Validator.Amount)
 
 	if testCase.Expected {
-		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f in shard %d after creating the validator - expected value: %f (or less)", validator.Account.Name, validator.Account.Address, accountEndingBalance, testCase.StakingParameters.FromShardID, expectedAccountEndingBalance), testCase.Verbose)
+		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f after creating the validator - expected value: %f (or less)", validator.Account.Name, validator.Account.Address, accountEndingBalance, expectedAccountEndingBalance), testCase.Verbose)
 	} else {
-		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f in shard %d after creating the validator", validator.Account.Name, validator.Account.Address, accountEndingBalance, testCase.StakingParameters.FromShardID), testCase.Verbose)
+		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f after creating the validator", validator.Account.Name, validator.Account.Address, accountEndingBalance), testCase.Verbose)
 	}
 
 	if testCase.StakingParameters.ReuseExistingValidator && config.Configuration.Framework.CurrentValidator == nil && validatorExists {
@@ -73,7 +73,7 @@ func BasicCreateValidator(testCase *testing.TestCase, validatorAccount *sdkAccou
 	}
 
 	if blsKeys == nil || len(blsKeys) == 0 {
-		blsKeys = crypto.GenerateBlsKeys(testCase.StakingParameters.Create.BLSKeyCount, testCase.StakingParameters.Create.Validator.ShardID, testCase.StakingParameters.Create.BLSSignatureMessage)
+		blsKeys = crypto.GenerateBlsKeys(testCase.StakingParameters.Create.BLSKeyCount, testCase.StakingParameters.Create.BLSSignatureMessage)
 	}
 
 	switch testCase.StakingParameters.Mode {
@@ -100,7 +100,7 @@ func BasicCreateValidator(testCase *testing.TestCase, validatorAccount *sdkAccou
 	txResultColoring := logger.ResultColoring(tx.Success, true)
 	logger.TransactionLog(fmt.Sprintf("Performed create validator - address: %s - transaction hash: %s, tx successful: %s", validatorAccount.Address, tx.TransactionHash, txResultColoring), testCase.Verbose)
 
-	rpcClient, err := config.Configuration.Network.API.RPCClient(testCase.StakingParameters.FromShardID)
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
 	validatorExists := sdkValidator.Exists(rpcClient, validatorAccount.Address)
 	addressExistsColoring := logger.ResultColoring(validatorExists, true)
 	logger.StakingLog(fmt.Sprintf("Validator with address %s exists: %s", validatorAccount.Address, addressExistsColoring), testCase.Verbose)
@@ -142,7 +142,7 @@ func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.A
 	txResultColoring := logger.ResultColoring(tx.Success, true)
 	logger.TransactionLog(fmt.Sprintf("Performed delegation - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
 
-	node := config.Configuration.Network.API.NodeAddress(testCase.StakingParameters.FromShardID)
+	node := config.Configuration.Network.API.NodeAddress()
 	delegations, err := sdkDelegation.ByDelegator(node, delegatorAccount.Address)
 	if err != nil {
 		return sdkTxs.Transaction{}, false, err
@@ -175,7 +175,7 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 	txResultColoring := logger.ResultColoring(tx.Success, true)
 	logger.TransactionLog(fmt.Sprintf("Performed undelegation - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
 
-	node := config.Configuration.Network.API.NodeAddress(testCase.StakingParameters.FromShardID)
+	node := config.Configuration.Network.API.NodeAddress()
 	delegations, err := sdkDelegation.ByDelegator(node, delegatorAccount.Address)
 	if err != nil {
 		return sdkTxs.Transaction{}, false, err
@@ -199,7 +199,7 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 func ManageBLSKeys(validator *sdkValidator.Validator, mode string, blsSignatureMessage string, verbose bool) (blsKeyToRemove *sdkCrypto.BLSKey, blsKeyToAdd *sdkCrypto.BLSKey, err error) {
 	switch mode {
 	case "add_bls_key":
-		keyToAdd, err := crypto.GenerateBlsKey(validator.ShardID, blsSignatureMessage)
+		keyToAdd, err := crypto.GenerateBlsKey(blsSignatureMessage)
 		if err != nil {
 			fmt.Printf("\n\nStakingParameters.ManageBLSKeys - err: %+v\n\n", err)
 			return nil, nil, err
@@ -216,7 +216,7 @@ func ManageBLSKeys(validator *sdkValidator.Validator, mode string, blsSignatureM
 		logger.StakingLog(fmt.Sprintf("Removing bls key %v from validator: %s", blsKeyToRemove.PublicKeyHex, validator.Account.Address), verbose)
 
 	case "remove_non_existing_bls_key":
-		nonExistingKey, err := crypto.GenerateBlsKey(validator.ShardID, blsSignatureMessage)
+		nonExistingKey, err := crypto.GenerateBlsKey(blsSignatureMessage)
 		if err != nil {
 			return nil, nil, err
 		}

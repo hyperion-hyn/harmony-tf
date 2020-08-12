@@ -24,7 +24,7 @@ func StandardScenario(testCase *testing.TestCase) {
 
 	requiredFunding := testCase.StakingParameters.Create.Validator.Amount.Add(testCase.StakingParameters.Delegation.Amount)
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(requiredFunding, fundingMultiple, 0)
+	_, _, err := funding.CalculateFundingDetails(requiredFunding, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -69,11 +69,11 @@ func StandardScenario(testCase *testing.TestCase) {
 		}
 
 		logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
-		testing.Teardown(&delegatorAccount, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+		testing.Teardown(&delegatorAccount, config.Configuration.Funding.Account.Address)
 	}
 
 	if !testCase.StakingParameters.ReuseExistingValidator {
-		testing.Teardown(validator.Account, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+		testing.Teardown(validator.Account, config.Configuration.Funding.Account.Address)
 	}
 
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)

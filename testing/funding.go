@@ -15,7 +15,7 @@ import (
 
 // GenerateAndFundAccount - generates an account and funds it from the core funding account
 func GenerateAndFundAccount(testCase *TestCase, accountName string, amount ethCommon.Dec, fundingMultiple int64) (sdkAccounts.Account, error) {
-	fundingAccountBalance, err := balances.GetShardBalance(config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+	fundingAccountBalance, err := balances.GetBalance(config.Configuration.Funding.Account.Address)
 	if err != nil {
 		return sdkAccounts.Account{}, err
 	}
@@ -29,13 +29,13 @@ func GenerateAndFundAccount(testCase *TestCase, accountName string, amount ethCo
 	logger.AccountLog(fmt.Sprintf("Generating a new account: %s", accountName), testCase.Verbose)
 	account, err := accounts.GenerateAccount(accountName)
 	logger.AccountLog(fmt.Sprintf("Generated account: %s, address: %s", account.Name, account.Address), testCase.Verbose)
-	accountStartingBalance, err := balances.GetShardBalance(account.Address, testCase.StakingParameters.FromShardID)
+	accountStartingBalance, err := balances.GetBalance(account.Address)
 	if err != nil {
 		return sdkAccounts.Account{}, err
 	}
 
 	if accountStartingBalance.IsNil() {
-		return sdkAccounts.Account{}, fmt.Errorf("Can't fetch starting balance for account %s, address: %s in shard %d", account.Name, account.Address, testCase.StakingParameters.FromShardID)
+		return sdkAccounts.Account{}, fmt.Errorf("Can't fetch starting balance for account %s, address: %s ", account.Name, account.Address)
 	}
 
 	gasLimit := -1
@@ -43,9 +43,7 @@ func GenerateAndFundAccount(testCase *TestCase, accountName string, amount ethCo
 	if accountStartingBalance.LT(fundingAmount) {
 		funding.PerformFundingTransaction(
 			&config.Configuration.Funding.Account,
-			testCase.Parameters.FromShardID,
 			account.Address,
-			testCase.Parameters.ToShardID,
 			fundingAmount,
 			gasLimit,
 			config.Configuration.Funding.Gas.Limit,
@@ -53,7 +51,7 @@ func GenerateAndFundAccount(testCase *TestCase, accountName string, amount ethCo
 			config.Configuration.Funding.Timeout,
 			config.Configuration.Funding.Retry.Attempts,
 		)
-		accountStartingBalance, err = balances.GetShardBalance(account.Address, testCase.StakingParameters.FromShardID)
+		accountStartingBalance, err = balances.GetBalance(account.Address)
 		if err != nil {
 			return sdkAccounts.Account{}, err
 		}
@@ -61,7 +59,7 @@ func GenerateAndFundAccount(testCase *TestCase, accountName string, amount ethCo
 
 	account.Balance = accountStartingBalance
 
-	logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has a starting balance of %f in shard %d before the test", account.Name, account.Address, accountStartingBalance, testCase.StakingParameters.FromShardID), testCase.Verbose)
+	logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has a starting balance of %f before the test", account.Name, account.Address, accountStartingBalance), testCase.Verbose)
 
 	return account, nil
 }

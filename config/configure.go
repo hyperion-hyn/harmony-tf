@@ -6,7 +6,6 @@ import (
 	"math"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 
@@ -106,28 +105,15 @@ func configureNetworkConfig() error {
 		}
 	}
 
-	node := sdkNetworkUtils.ResolveStartingNode(Configuration.Network.Name, Configuration.Network.Mode, 0, Configuration.Network.Nodes)
-	shards, shardingStructure, err := sdkNetworkTypes.GenerateShardSetup(node, Configuration.Network.Name, Configuration.Network.Mode, Configuration.Network.Nodes)
-	if err != nil {
-		return fmt.Errorf("failed to generate network & shard setup for network %s using node %s - error: %s", Configuration.Network.Name, node, err.Error())
-	}
-
+	node := sdkNetworkUtils.ResolveStartingNode(Configuration.Network.Name, Configuration.Network.Mode, Configuration.Network.Nodes)
 	if Configuration.Network.Mode == "api" {
 		Configuration.Network.Nodes = []string{}
-		for _, shard := range shards {
-			Configuration.Network.Nodes = append(Configuration.Network.Nodes, shard.Node)
-		}
-
-		sort.Slice(Configuration.Network.Nodes, func(i, j int) bool {
-			return Configuration.Network.Nodes[i] < Configuration.Network.Nodes[j]
-		})
+		Configuration.Network.Nodes = append(Configuration.Network.Nodes, node)
 	}
 
 	Configuration.Network.API = sdkNetworkTypes.Network{
-		Name:              Configuration.Network.Name,
-		Mode:              Configuration.Network.Mode,
-		Shards:            shards,
-		ShardingStructure: shardingStructure,
+		Name: Configuration.Network.Name,
+		Mode: Configuration.Network.Mode,
 		Retry: sdkCommonTypes.Retry{
 			Attempts: Configuration.Network.Retry.Attempts,
 			Wait:     Configuration.Network.Retry.Wait,
@@ -139,8 +125,6 @@ func configureNetworkConfig() error {
 	if Configuration.Network.API.ChainID == nil {
 		return errors.New("chain id must be set - please check that you are using correct network settings")
 	}
-
-	Configuration.Network.Shards = len(shardingStructure)
 
 	if err := Configuration.Network.Gas.Initialize(); err != nil {
 		return err

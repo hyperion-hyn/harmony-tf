@@ -27,7 +27,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 
 	requiredFunding := testCase.StakingParameters.Create.Validator.Amount.Add(testCase.StakingParameters.Delegation.Amount)
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(requiredFunding, fundingMultiple, 0)
+	_, _, err := funding.CalculateFundingDetails(requiredFunding, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -65,7 +65,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
-	accountEndingBalance, err := balances.GetShardBalance(validatorAccount.Address, testCase.StakingParameters.FromShardID)
+	accountEndingBalance, err := balances.GetBalance(validatorAccount.Address)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to fetch ending balance for account %s, address: %s", validatorAccount.Name, validatorAccount.Address)
 		testCase.HandleError(err, &validatorAccount, msg)
@@ -74,9 +74,9 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	expectedAccountEndingBalance := validatorAccount.Balance.Sub(testCase.StakingParameters.Create.Validator.Amount)
 
 	if testCase.Expected {
-		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f in shard %d after the test - expected value: %f (or less)", validatorAccount.Name, validatorAccount.Address, accountEndingBalance, testCase.StakingParameters.FromShardID, expectedAccountEndingBalance), testCase.Verbose)
+		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f  after the test - expected value: %f (or less)", validatorAccount.Name, validatorAccount.Address, accountEndingBalance, expectedAccountEndingBalance), testCase.Verbose)
 	} else {
-		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f in shard %d after the test", validatorAccount.Name, validatorAccount.Address, accountEndingBalance, testCase.StakingParameters.FromShardID), testCase.Verbose)
+		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f  after the test", validatorAccount.Name, validatorAccount.Address, accountEndingBalance), testCase.Verbose)
 	}
 
 	successfulValidatorCreation := tx.Success && accountEndingBalance.LT(expectedAccountEndingBalance) && validatorExists
@@ -110,9 +110,9 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	testing.Title(testCase, "footer", testCase.Verbose)
 
 	if !testCase.StakingParameters.ReuseExistingValidator {
-		testing.Teardown(&validatorAccount, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+		testing.Teardown(&validatorAccount, config.Configuration.Funding.Account.Address)
 	}
-	testing.Teardown(&delegatorAccount, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+	testing.Teardown(&delegatorAccount, config.Configuration.Funding.Account.Address)
 
 	testCase.FinishedAt = time.Now().UTC()
 }

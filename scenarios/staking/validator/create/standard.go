@@ -24,7 +24,7 @@ func StandardScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, fundingMultiple, 0)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -51,13 +51,13 @@ func StandardScenario(testCase *testing.TestCase) {
 	}
 
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
-	accountEndingBalance, _ := balances.GetShardBalance(account.Address, testCase.StakingParameters.FromShardID)
+	accountEndingBalance, _ := balances.GetBalance(account.Address)
 	expectedAccountEndingBalance := account.Balance.Sub(testCase.StakingParameters.Create.Validator.Amount)
 
 	if testCase.Expected {
-		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f in shard %d after the test - expected value: %f (or less)", account.Name, account.Address, accountEndingBalance, testCase.StakingParameters.FromShardID, expectedAccountEndingBalance), testCase.Verbose)
+		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f  after the test - expected value: %f (or less)", account.Name, account.Address, accountEndingBalance, expectedAccountEndingBalance), testCase.Verbose)
 	} else {
-		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f in shard %d after the test", account.Name, account.Address, accountEndingBalance, testCase.StakingParameters.FromShardID), testCase.Verbose)
+		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f  after the test", account.Name, account.Address, accountEndingBalance), testCase.Verbose)
 	}
 
 	testCase.Result = tx.Success && accountEndingBalance.LT(expectedAccountEndingBalance) && validatorExists
@@ -66,7 +66,7 @@ func StandardScenario(testCase *testing.TestCase) {
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
 	testing.Title(testCase, "footer", testCase.Verbose)
 
-	testing.Teardown(&account, testCase.StakingParameters.FromShardID, config.Configuration.Funding.Account.Address, testCase.StakingParameters.FromShardID)
+	testing.Teardown(&account, config.Configuration.Funding.Account.Address)
 
 	testCase.FinishedAt = time.Now().UTC()
 }

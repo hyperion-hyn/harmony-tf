@@ -12,8 +12,8 @@ import (
 )
 
 // Teardown - return any sent tokens (minus a gas cost) and remove the account from the keystore
-func Teardown(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32) {
-	amount, err := balances.GetShardBalance(account.Address, fromShardID)
+func Teardown(account *sdkAccounts.Account, toAddress string) {
+	amount, err := balances.GetBalance(account.Address)
 
 	if err == nil && !amount.IsNil() {
 		if amount.GT(ethCommon.NewDec(0)) {
@@ -21,7 +21,7 @@ func Teardown(account *sdkAccounts.Account, fromShardID uint32, toAddress string
 		}
 
 		if amount.GT(ethCommon.NewDec(0)) {
-			transactions.SendTransaction(account, fromShardID, toAddress, toShardID, amount, -1, config.Configuration.Funding.Gas.Limit, config.Configuration.Funding.Gas.Price, "", 0)
+			transactions.SendTransaction(account, toAddress, amount, -1, config.Configuration.Funding.Gas.Limit, config.Configuration.Funding.Gas.Price, "", 0)
 		}
 	}
 
@@ -29,7 +29,7 @@ func Teardown(account *sdkAccounts.Account, fromShardID uint32, toAddress string
 }
 
 // AsyncTeardown - return any sent tokens (minus a gas cost) and remove the account from the keystore
-func AsyncTeardown(account *sdkAccounts.Account, fromShardID uint32, toAddress string, toShardID uint32, waitGroup *sync.WaitGroup) {
+func AsyncTeardown(account *sdkAccounts.Account, toAddress string, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
-	Teardown(account, fromShardID, toAddress, toShardID)
+	Teardown(account, toAddress)
 }

@@ -33,7 +33,7 @@ func CreateValidator(validatorAccount *sdkAccounts.Account, senderAccount *sdkAc
 		params.Create.Validator.Account = validatorAccount
 	}
 
-	rpcClient, err := config.Configuration.Network.API.RPCClient(params.FromShardID)
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func CreateValidator(validatorAccount *sdkAccounts.Account, senderAccount *sdkAc
 		params.Gas.Price,
 		currentNonce,
 		config.Configuration.Account.Passphrase,
-		config.Configuration.Network.API.NodeAddress(params.FromShardID),
+		config.Configuration.Network.API.NodeAddress(),
 		params.Timeout,
 	)
 
@@ -84,7 +84,7 @@ func EditValidator(validatorAccount *sdkAccounts.Account, senderAccount *sdkAcco
 		params.Edit.Validator.Account = validatorAccount
 	}
 
-	rpcClient, err := config.Configuration.Network.API.RPCClient(params.FromShardID)
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func EditValidator(validatorAccount *sdkAccounts.Account, senderAccount *sdkAcco
 		gasPrice,
 		currentNonce,
 		config.Configuration.Account.Passphrase,
-		config.Configuration.Network.API.NodeAddress(params.FromShardID),
+		config.Configuration.Network.API.NodeAddress(),
 		params.Timeout,
 	)
 

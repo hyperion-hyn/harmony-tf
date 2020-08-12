@@ -2,8 +2,6 @@ package validator
 
 import (
 	ethCommon "github.com/ethereum/go-ethereum/common"
-	"strconv"
-
 	restaking "github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
@@ -13,8 +11,6 @@ import (
 
 // Validator - represents the validator details
 type Validator struct {
-	RawShardID string `yaml:"shard_id"`
-	ShardID    uint32 `yaml:"-"`
 	Account    *accounts.Account
 	Details    ValidatorDetails `yaml:"details"`
 	Commission Commission       `yaml:"commission"`
@@ -57,16 +53,6 @@ type Commission struct {
 // Initialize - initializes and converts values for a given validator
 func (validator *Validator) Initialize() error {
 	// Set the shard id - will be used when generating bls keys
-	if validator.RawShardID != "" {
-		converted, err := strconv.ParseInt(validator.RawShardID, 10, 64)
-		if err != nil {
-			return err
-		}
-		validator.ShardID = uint32(converted)
-	} else {
-		validator.ShardID = 0
-	}
-
 	if validator.RawMinimumSelfDelegation != "" {
 		decMinimumSelfDelegation, err := common.NewDecFromString(validator.RawMinimumSelfDelegation)
 		if err != nil {
