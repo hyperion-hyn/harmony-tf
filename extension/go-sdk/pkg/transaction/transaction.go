@@ -1,9 +1,8 @@
 package transaction
 
 import (
+	"context"
 	ethCommon "github.com/ethereum/go-ethereum/common"
-	"math/big"
-
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/rpc"
@@ -21,32 +20,9 @@ func NewTransaction(
 
 // GetNextNonce returns the nonce on-chain (finalized transactions)
 func GetNextNonce(addr string, messenger rpc.T) uint64 {
-	transactionCountRPCReply, err :=
-		messenger.SendRPC(rpc.Method.GetTransactionCount, []interface{}{address.Parse(addr), "latest"})
-
+	nonce, err := messenger.GetClient().NonceAt(context.Background(), address.Parse(addr), nil)
 	if err != nil {
 		return 0
 	}
-
-	transactionCount, _ := transactionCountRPCReply["result"].(string)
-	n, _ := big.NewInt(0).SetString(transactionCount[2:], 16)
-	return n.Uint64()
-}
-
-// GetNextPendingNonce returns the nonce from the tx-pool (un-finalized transactions)
-func GetNextPendingNonce(addr string, messenger rpc.T) uint64 {
-	transactionCountRPCReply, err :=
-		messenger.SendRPC(rpc.Method.GetTransactionCount, []interface{}{address.Parse(addr), "pending"})
-
-	if err != nil {
-		return 0
-	}
-
-	transactionCount, _ := transactionCountRPCReply["result"].(string)
-	n, _ := big.NewInt(0).SetString(transactionCount[2:], 16)
-	return n.Uint64()
-}
-
-func IsValid(tx *Transaction) bool {
-	return true
+	return nonce
 }

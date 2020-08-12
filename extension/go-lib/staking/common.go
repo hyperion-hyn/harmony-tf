@@ -1,13 +1,14 @@
 package staking
 
 import (
+	"context"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
-	staking "github.com/hyperion-hyn/hyperion-tf/extension/types"
 	"math/big"
 	"time"
 
@@ -104,11 +105,8 @@ func GenerateStakingTransaction(gasLimit int64, gasPrice ethCommon.Dec, nonce ui
 		return nil, 0, err
 	}
 
-	stakingTx, err := staking.NewStakingTransaction(nonce, calculatedGasLimit, gasPrice.TruncateInt(), directive, bytes)
-	if err != nil {
-		return nil, 0, err
-	}
-
+	stakingTx := types.NewTransaction(nonce, ethCommon.BigToAddress(ethCommon.Big0), big.NewInt(0), calculatedGasLimit, gasPrice.TruncateInt(), bytes)
+	stakingTx.SetType(directive)
 	return stakingTx, calculatedGasLimit, nil
 }
 
@@ -134,14 +132,17 @@ func SignStakingTransaction(keystore *keystore.KeyStore, account *accounts.Accou
 
 // SendRawStakingTransaction - send the raw staking tx to the RPC endpoint
 func SendRawStakingTransaction(rpcClient *rpc.HTTPMessenger, signature *string) (interface{}, error) {
-	reply, err := rpcClient.SendRPC(rpc.Method.SendRawStakingTransaction, []interface{}{signature})
+
+	rawTxBytes, err := hex.DecodeString(*signature)
+	tx := new(types.Transaction)
+	rlp.DecodeBytes(rawTxBytes, &tx)
+	err = rpcClient.GetClient().SendTransaction(context.Background(), tx)
 	if err != nil {
-		return nil, err
+		panic(fmt.Sprintf("%v", err))
 	}
+	fmt.Printf("tx sent: %s", tx.Hash().Hex())
 
-	receiptHash, _ := reply["result"]
-
-	return receiptHash, nil
+	return tx.Hash().Hex(), nil
 }
 
 // NumericDecToBigIntAmount - convert a ethCommon.Dec amount to a converted big.Int amount

@@ -6,9 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/staking/effective"
-	hmyStaking "github.com/ethereum/go-ethereum/staking/types"
-	hmyRestaking "github.com/ethereum/go-ethereum/staking/types/restaking"
+	restaking "github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking"
@@ -26,7 +24,7 @@ func Edit(
 	rpcClient *rpc.HTTPMessenger,
 	chain *common.ChainID,
 	validatorAddress string,
-	description hmyRestaking.Description_,
+	description restaking.Description_,
 	commissionRate *ethCommon.Dec,
 	minimumSelfDelegation ethCommon.Dec,
 	maximumTotalDelegation ethCommon.Dec,
@@ -68,33 +66,33 @@ func Edit(
 	return staking.SendTx(keystore, account, rpcClient, chain, gasLimit, gasPrice, nonce, keystorePassphrase, node, timeout, payloadGenerator, logMessage)
 }
 
-func determineEposStatus(status string) (statusEnum effective.Eligibility) {
+func determineEposStatus(status string) (statusEnum restaking.ValidatorStatus) {
 	switch strings.ToLower(status) {
 	case "active":
-		return effective.Active
+		return restaking.Active
 	case "inactive":
-		return effective.Inactive
+		return restaking.Inactive
 	default:
-		return effective.Nil
+		return restaking.Nil
 	}
 }
 
 func editTransactionGenerator(
 	validatorAddress string,
-	stakingDescription hmyRestaking.Description_,
+	stakingDescription restaking.Description_,
 	commissionRate ethCommon.Dec,
 	maximumTotalDelegation ethCommon.Dec,
 	blsKeyToRemove *crypto.BLSKey,
 	blsKeyToAdd *crypto.BLSKey,
-	statusEnum effective.Eligibility,
+	statusEnum restaking.ValidatorStatus,
 ) (transactions.StakeMsgFulfiller, error) {
-	var shardBlsKeyToRemove *hmyRestaking.BLSPublicKey_
+	var shardBlsKeyToRemove *restaking.BLSPublicKey_
 	if blsKeyToRemove != nil {
 		shardBlsKeyToRemove = blsKeyToRemove.ShardPublicKey
 	}
 
-	var shardBlsKeyToAdd *hmyRestaking.BLSPublicKey_
-	var shardBlsKeyToAddSig *hmyRestaking.BLSSignature
+	var shardBlsKeyToAdd *restaking.BLSPublicKey_
+	var shardBlsKeyToAddSig *restaking.BLSSignature
 	if blsKeyToAdd != nil {
 		shardBlsKeyToAdd = blsKeyToAdd.ShardPublicKey
 		shardBlsKeyToAddSig = blsKeyToAdd.ShardSignature
@@ -104,7 +102,7 @@ func editTransactionGenerator(
 
 	println(shardBlsKeyToAddSig) // todo need remove
 	payloadGenerator := func() (types.TransactionType, interface{}) {
-		return types.StakeEditVal, hmyStaking.EditValidator{
+		return types.StakeEditVal, restaking.EditValidator{
 			ValidatorAddress:   address.Parse(validatorAddress),
 			Description:        &stakingDescription,
 			CommissionRate:     &commissionRate,

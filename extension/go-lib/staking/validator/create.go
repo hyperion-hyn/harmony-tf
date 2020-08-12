@@ -8,8 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
-	hmyStaking "github.com/ethereum/go-ethereum/staking/types"
-	hmyRestaking "github.com/ethereum/go-ethereum/staking/types/restaking"
+	restaking "github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking"
@@ -25,8 +24,8 @@ func Create(
 	rpcClient *rpc.HTTPMessenger,
 	chain *common.ChainID,
 	operatorAddress string,
-	description hmyRestaking.Description_,
-	commissionRates hmyRestaking.CommissionRates_,
+	description restaking.Description_,
+	commissionRates restaking.CommissionRates_,
 	maximumTotalDelegation ethCommon.Dec,
 	blsKeys []crypto.BLSKey,
 	gasLimit int64,
@@ -63,8 +62,8 @@ func Create(
 
 func createTransactionGenerator(
 	validatorAddress string,
-	stakingDescription hmyRestaking.Description_,
-	stakingCommissionRates hmyRestaking.CommissionRates_,
+	stakingDescription restaking.Description_,
+	stakingCommissionRates restaking.CommissionRates_,
 	maximumTotalDelegation ethCommon.Dec,
 	blsKeys []crypto.BLSKey,
 ) (transactions.StakeMsgFulfiller, error) {
@@ -73,7 +72,7 @@ func createTransactionGenerator(
 
 	println(blsSigs) // todo need remove
 	payloadGenerator := func() (types.TransactionType, interface{}) {
-		return types.StakeCreateVal, hmyStaking.CreateValidator{
+		return types.StakeCreateVal, restaking.CreateValidator{
 			OperatorAddress:    address.Parse(validatorAddress),
 			Description:        stakingDescription,
 			CommissionRates:    stakingCommissionRates,

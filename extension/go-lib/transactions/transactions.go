@@ -2,7 +2,9 @@ package transactions
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
@@ -209,14 +211,18 @@ func EncodeSignature(tx interface{}) (*string, error) {
 
 // SendRawTransaction - sends a raw signed transaction via RPC
 func SendRawTransaction(rpcClient *goSdkRPC.HTTPMessenger, signature *string) (interface{}, error) {
-	reply, err := rpcClient.SendRPC(goSdkRPC.Method.SendRawTransaction, []interface{}{signature})
+
+	rawTxBytes, err := hex.DecodeString(*signature)
+	tx := new(types.Transaction)
+	eth_rlp.DecodeBytes(rawTxBytes, &tx)
+	err = rpcClient.GetClient().SendTransaction(context.Background(), tx)
 	if err != nil {
-		return nil, err
+		panic(fmt.Sprintf("%v", err))
 	}
+	fmt.Printf("tx sent: %s", tx.Hash().Hex())
 
-	receiptHash, _ := reply["result"]
+	return tx.Hash().Hex(), nil
 
-	return receiptHash, nil
 }
 
 // WaitForTxConfirmation - waits a given amount of seconds defined by timeout to try to receive a finalized transaction
@@ -311,16 +317,25 @@ func BumpGasPrice(gasPrice ethCommon.Dec) ethCommon.Dec {
 
 // GetTransactionReceipt - retrieves the transaction info/data for a transaction
 func GetTransactionReceipt(rpcClient *goSdkRPC.HTTPMessenger, receiptHash interface{}) (map[string]interface{}, error) {
-	response, err := rpcClient.SendRPC(goSdkRPC.Method.GetTransactionReceipt, []interface{}{receiptHash})
+	//response, err := rpcClient.SendRPC(goSdkRPC.Method.GetTransactionReceipt, []interface{}{receiptHash})
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//if response["result"] != nil {
+	//	return response["result"].(map[string]interface{}), nil
+	//}
+
+	receipt, err := rpcClient.GetClient().TransactionReceipt(context.Background(), ethCommon.HexToHash(receiptHash.(string)))
 	if err != nil {
 		return nil, err
 	}
 
-	if response["result"] != nil {
-		return response["result"].(map[string]interface{}), nil
-	}
+	result := make(map[string]interface{})
+	result["transactionHash"] = receiptHash
+	result["status"] = receipt.Status == 1
 
-	return nil, nil
+	return result, nil
 }
 
 // IsTransactionSuccessful - checks if a transaction is successful given a transaction response

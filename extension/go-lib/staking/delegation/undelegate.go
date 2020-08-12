@@ -8,7 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
-	hmyStaking "github.com/ethereum/go-ethereum/staking/types"
+	restaking "github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
@@ -49,7 +49,7 @@ func Undelegate(
 
 func createUndelegationTransactionGenerator(delegatorAddress string, validatorAddress string) (transactions.StakeMsgFulfiller, error) {
 	payloadGenerator := func() (types.TransactionType, interface{}) {
-		return types.Unredelegate, hmyStaking.Unredelegate{
+		return types.Unredelegate, restaking.Unredelegate{
 			address.Parse(delegatorAddress),
 			address.Parse(validatorAddress),
 		}

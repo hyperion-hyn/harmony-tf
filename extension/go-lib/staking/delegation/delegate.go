@@ -8,7 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
-	hmyStaking "github.com/ethereum/go-ethereum/staking/types"
+	restaking "github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
@@ -50,7 +50,7 @@ func Delegate(
 func createDelegationTransactionGenerator(delegatorAddress string, validatorAddress string) (transactions.StakeMsgFulfiller, error) {
 	payloadGenerator := func() (types.TransactionType, interface{}) {
 		return types.Redelegate,
-			hmyStaking.Redelegate{
+			restaking.Redelegate{
 				address.Parse(delegatorAddress),
 				address.Parse(validatorAddress),
 			}

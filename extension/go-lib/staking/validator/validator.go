@@ -4,7 +4,7 @@ import (
 	ethCommon "github.com/ethereum/go-ethereum/common"
 	"strconv"
 
-	hmyRestaking "github.com/ethereum/go-ethereum/staking/types/restaking"
+	restaking "github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
@@ -129,8 +129,8 @@ func (commission *Commission) Initialize() error {
 }
 
 // ToStakingDescription - convert validator details to a suitable format for staking txs
-func (validator *Validator) ToStakingDescription() hmyRestaking.Description_ {
-	return hmyRestaking.Description_{
+func (validator *Validator) ToStakingDescription() restaking.Description_ {
+	return restaking.Description_{
 		Name:            validator.Details.Name,
 		Identity:        validator.Details.Identity,
 		Website:         validator.Details.Website,
@@ -140,8 +140,8 @@ func (validator *Validator) ToStakingDescription() hmyRestaking.Description_ {
 }
 
 // ToCommissionRates - convert validator commission rates to a suitable format for staking txs
-func (validator *Validator) ToCommissionRates() hmyRestaking.CommissionRates_ {
-	return hmyRestaking.CommissionRates_{
+func (validator *Validator) ToCommissionRates() restaking.CommissionRates_ {
+	return restaking.CommissionRates_{
 		Rate:          validator.Commission.Rate,
 		MaxRate:       validator.Commission.MaxRate,
 		MaxChangeRate: validator.Commission.MaxChangeRate,

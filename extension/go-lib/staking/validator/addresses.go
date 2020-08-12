@@ -28,16 +28,6 @@ func Exists(rpcClient *goSdkRPC.HTTPMessenger, validatorAddress string) bool {
 	return false
 }
 
-// AllElected - retrieves all active validators
-func AllElected(rpcClient *goSdkRPC.HTTPMessenger) ([]string, error) {
-	reply, err := rpcClient.SendRPC(goSdkRPC.Method.GetElectedValidatorAddresses, []interface{}{})
-	if err != nil {
-		return nil, err
-	}
-
-	return processAddressResponse(reply), nil
-}
-
 func processAddressResponse(reply map[string]interface{}) (addresses []string) {
 	for _, address := range reply["result"].([]interface{}) {
 		addresses = append(addresses, address.(string))
