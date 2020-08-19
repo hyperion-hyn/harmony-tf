@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
@@ -36,7 +35,6 @@ const (
 	TxGasValidatorCreation uint64 = 5300000 // Per transaction that creates a new validator. NOTE: Not payable on data of calls between transactions.
 )
 
-// Copied from harmony-one/go-sdk/pkg/sharding/structure.go
 var (
 	// NanoAsDec - Nano denomination in ethCommon.Dec
 	NanoAsDec = ethCommon.NewDec(params.GWei)
@@ -204,14 +202,17 @@ func EncodeSignature(tx interface{}) (*string, error) {
 // SendRawTransaction - sends a raw signed transaction via RPC
 func SendRawTransaction(rpcClient *goSdkRPC.HTTPMessenger, signature *string) (interface{}, error) {
 
-	rawTxBytes, err := hex.DecodeString(*signature)
+	rawTxBytes, err := eth_hexutil.Decode(*signature)
 	tx := new(types.Transaction)
 	eth_rlp.DecodeBytes(rawTxBytes, &tx)
 	err = rpcClient.GetClient().SendTransaction(context.Background(), tx)
 	if err != nil {
-		panic(fmt.Sprintf("%v", err))
+		return nil, err
 	}
-	fmt.Printf("tx sent: %s", tx.Hash().Hex())
+
+	fmt.Printf("tx sent: %s ", tx.Hash().Hex())
+
+	time.Sleep(10 * time.Second)
 
 	return tx.Hash().Hex(), nil
 

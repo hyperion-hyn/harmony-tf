@@ -55,6 +55,8 @@ func getTxErrorBySink(txHash, errorSinkRPC string, messenger rpc.T) (Errors, err
 			txErrors = append(txErrors, &txError)
 		}
 	}
+
+	txErrors = make([]*Error, 0)
 	return txErrors, nil
 }
 

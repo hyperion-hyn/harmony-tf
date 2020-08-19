@@ -107,6 +107,7 @@ func configureNetworkConfig() error {
 
 	node := sdkNetworkUtils.ResolveStartingNode(Configuration.Network.Name, Configuration.Network.Mode, Configuration.Network.Nodes)
 	if Configuration.Network.Mode == "api" {
+		Configuration.Network.Node = node
 		Configuration.Network.Nodes = []string{}
 		Configuration.Network.Nodes = append(Configuration.Network.Nodes, node)
 	}
@@ -114,6 +115,7 @@ func configureNetworkConfig() error {
 	Configuration.Network.API = sdkNetworkTypes.Network{
 		Name: Configuration.Network.Name,
 		Mode: Configuration.Network.Mode,
+		Node: Configuration.Network.Node,
 		Retry: sdkCommonTypes.Retry{
 			Attempts: Configuration.Network.Retry.Attempts,
 			Wait:     Configuration.Network.Retry.Wait,

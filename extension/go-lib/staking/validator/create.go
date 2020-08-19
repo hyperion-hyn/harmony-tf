@@ -67,19 +67,21 @@ func createTransactionGenerator(
 	maximumTotalDelegation ethCommon.Dec,
 	blsKeys []crypto.BLSKey,
 ) (transactions.StakeMsgFulfiller, error) {
-	blsPubKeys, blsSigs := staking.ProcessBlsKeys(blsKeys)
+	//blsPubKeys, blsSigs := staking.ProcessBlsKeys(blsKeys)
 	bigMaximumTotalDelegation := staking.NumericDecToBigIntAmount(maximumTotalDelegation)
 
-	println(blsSigs) // todo need remove
+	blsKey := blsKeys[0]
+
+	//println(blsSigs) // todo need remove
 	payloadGenerator := func() (types.TransactionType, interface{}) {
 		return types.StakeCreateVal, restaking.CreateValidator{
 			OperatorAddress:    address.Parse(validatorAddress),
 			Description:        stakingDescription,
 			CommissionRates:    stakingCommissionRates,
 			MaxTotalDelegation: bigMaximumTotalDelegation,
-			SlotPubKeys:        blsPubKeys,
-			//SlotKeySigs:        blsSigs,
-			SlotKeySigs: nil, // todo need revert
+			SlotPubKey:         *blsKey.ShardPublicKey,
+			SlotKeySig:         *blsKey.ShardSignature,
+			//SlotKeySig: nil, // todo need revert
 		}
 	}
 

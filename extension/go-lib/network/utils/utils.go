@@ -34,7 +34,7 @@ func GenerateNodeAddress(network string, mode string) (node string) {
 	node = ToNodeAddress(network, shardID)
 
 	if strings.ToLower(mode) == "local" {
-		node = "http://localhost:9500"
+		node = "http://localhost:8545"
 	}
 
 	return node
@@ -70,7 +70,7 @@ func ToNodeAddress(network string, shardID uint32) (node string) {
 
 	switch network {
 	case "localnet":
-		node = fmt.Sprintf("http://localhost:950%d", shardID)
+		node = fmt.Sprintf("http://localhost:8545")
 	case "devnet":
 		node = fmt.Sprintf("https://api.s%d.pga.hmny.io", shardID)
 	case "pangaea":
@@ -86,7 +86,7 @@ func ToNodeAddress(network string, shardID uint32) (node string) {
 	case "mainnet":
 		node = fmt.Sprintf("https://api.s%d.t.hmny.io", shardID)
 	default:
-		node = fmt.Sprintf("http://localhost:950%d", shardID)
+		node = fmt.Sprintf("http://localhost:8545")
 	}
 
 	return node

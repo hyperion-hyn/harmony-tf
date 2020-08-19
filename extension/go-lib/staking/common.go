@@ -3,10 +3,11 @@ package staking
 import (
 	"context"
 	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	eth_hexutil "github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 	"math/big"
@@ -105,7 +106,10 @@ func GenerateStakingTransaction(gasLimit int64, gasPrice ethCommon.Dec, nonce ui
 		return nil, 0, err
 	}
 
-	stakingTx := types.NewTransaction(nonce, ethCommon.BigToAddress(ethCommon.Big0), big.NewInt(0), calculatedGasLimit, gasPrice.TruncateInt(), bytes)
+	// todo here add expend more staking price
+	gasPrice = gasPrice.Mul(ethCommon.NewDec(params.Ether)).Quo(ethCommon.NewDec(10))
+
+	stakingTx := types.NewTransaction(nonce, ethCommon.BigToAddress(ethCommon.Big0), big.NewInt(0), calculatedGasLimit*3, gasPrice.TruncateInt(), bytes)
 	stakingTx.SetType(directive)
 	return stakingTx, calculatedGasLimit, nil
 }
@@ -132,14 +136,16 @@ func SignStakingTransaction(keystore *keystore.KeyStore, account *accounts.Accou
 
 // SendRawStakingTransaction - send the raw staking tx to the RPC endpoint
 func SendRawStakingTransaction(rpcClient *rpc.HTTPMessenger, signature *string) (interface{}, error) {
-
-	rawTxBytes, err := hex.DecodeString(*signature)
+	rawTxBytes, err := eth_hexutil.Decode(*signature)
 	tx := new(types.Transaction)
 	rlp.DecodeBytes(rawTxBytes, &tx)
 	err = rpcClient.GetClient().SendTransaction(context.Background(), tx)
 	if err != nil {
-		panic(fmt.Sprintf("%v", err))
+		return nil, err
 	}
+
+	time.Sleep(10 * time.Second)
+
 	fmt.Printf("tx sent: %s", tx.Hash().Hex())
 
 	return tx.Hash().Hex(), nil

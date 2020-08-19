@@ -25,7 +25,11 @@ func ReuseOrCreateValidator(testCase *testing.TestCase, validatorName string) (a
 	}
 
 	validator = &testCase.StakingParameters.Create.Validator
-	acc, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.Create.Validator.Amount, 1)
+
+	// TODO  hard add money
+	transferMoney := testCase.StakingParameters.Create.Validator.Amount.Add(ethCommon.NewDec(100000))
+
+	acc, err := testing.GenerateAndFundAccount(testCase, validatorName, transferMoney, 1)
 	if err != nil {
 		return nil, nil, err
 	}

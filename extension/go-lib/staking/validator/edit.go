@@ -104,7 +104,7 @@ func editTransactionGenerator(
 	payloadGenerator := func() (types.TransactionType, interface{}) {
 		return types.StakeEditVal, restaking.EditValidator{
 			ValidatorAddress:   address.Parse(validatorAddress),
-			Description:        &stakingDescription,
+			Description:        stakingDescription,
 			CommissionRate:     &commissionRate,
 			MaxTotalDelegation: bigMaximumTotalDelegation,
 			SlotKeyToRemove:    shardBlsKeyToRemove,

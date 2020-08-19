@@ -23,7 +23,7 @@ type chainIDList struct {
 // Chain is an enumeration of the known Chain-IDs
 var Chain = chainIDList{
 	MainNet:    ChainID{"mainnet", big.NewInt(1)},
-	TestNet:    ChainID{"testnet", big.NewInt(2)},
+	TestNet:    ChainID{"testnet", big.NewInt(7500)},
 	PangaeaNet: ChainID{"pangaea", big.NewInt(3)},
 	PartnerNet: ChainID{"partner", big.NewInt(4)},
 	StressNet:  ChainID{"stress", big.NewInt(5)},

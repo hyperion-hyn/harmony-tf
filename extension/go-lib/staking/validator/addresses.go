@@ -1,17 +1,19 @@
 package validator
 
 import (
+	"context"
 	goSdkRPC "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/rpc"
 )
 
 // All - retrieves all validators
 func All(rpcClient *goSdkRPC.HTTPMessenger) (addresses []string, err error) {
-	reply, err := rpcClient.SendRPC(goSdkRPC.Method.GetAllValidatorAddresses, []interface{}{})
+
+	addresses, err = rpcClient.GetClient().GetAllValidatorAddresses(context.Background(), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return processAddressResponse(reply), nil
+	return addresses, nil
 }
 
 // Exists - checks if a given validator exists
@@ -26,12 +28,4 @@ func Exists(rpcClient *goSdkRPC.HTTPMessenger, validatorAddress string) bool {
 	}
 
 	return false
-}
-
-func processAddressResponse(reply map[string]interface{}) (addresses []string) {
-	for _, address := range reply["result"].([]interface{}) {
-		addresses = append(addresses, address.(string))
-	}
-
-	return addresses
 }

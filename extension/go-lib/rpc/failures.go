@@ -1,11 +1,5 @@
 package rpc
 
-import (
-	"encoding/json"
-
-	goSdkRPC "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/rpc"
-)
-
 // FailureWrapper - wrapper for the GetCurrentTransactionErrorSink / GetCurrentStakingErrorSink RPC methods
 type FailureWrapper struct {
 	ID       string    `json:"id" yaml:"id"`
@@ -40,32 +34,32 @@ func AllFailures(node string) (failures []Failure, err error) {
 
 // TransactionFailures - get the transaction failures from the given node
 func TransactionFailures(node string) ([]Failure, error) {
-	response := FailureWrapper{}
+	//response := FailureWrapper{}
 	failures := []Failure{}
 
-	bytes, err := goSdkRPC.RawRequest(goSdkRPC.Method.GetCurrentTransactionErrorSink, node, []interface{}{})
-	if err != nil {
-		return failures, err
-	}
-
-	json.Unmarshal(bytes, &response)
-	failures = response.Failures
+	//bytes, err := goSdkRPC.RawRequest(goSdkRPC.Method.GetCurrentTransactionErrorSink, node, []interface{}{})
+	//if err != nil {
+	//	return failures, err
+	//}
+	//
+	//json.Unmarshal(bytes, &response)
+	//failures = response.Failures
 
 	return failures, nil
 }
 
 // StakingFailures - get the staking failures from the given node
 func StakingFailures(node string) ([]Failure, error) {
-	response := FailureWrapper{}
+	//response := FailureWrapper{}
 	failures := []Failure{}
 
-	bytes, err := goSdkRPC.RawRequest(goSdkRPC.Method.GetCurrentStakingErrorSink, node, []interface{}{})
-	if err != nil {
-		return failures, err
-	}
-
-	json.Unmarshal(bytes, &response)
-	failures = response.Failures
+	//bytes, err := goSdkRPC.RawRequest(goSdkRPC.Method.GetCurrentStakingErrorSink, node, []interface{}{})
+	//if err != nil {
+	//	return failures, err
+	//}
+	//
+	//json.Unmarshal(bytes, &response)
+	//failures = response.Failures
 
 	return failures, nil
 }
