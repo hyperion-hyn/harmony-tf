@@ -25,11 +25,7 @@ func ReuseOrCreateValidator(testCase *testing.TestCase, validatorName string) (a
 	}
 
 	validator = &testCase.StakingParameters.Create.Validator
-
-	// TODO  hard add money
-	transferMoney := testCase.StakingParameters.Create.Validator.Amount.Add(ethCommon.NewDec(100000))
-
-	acc, err := testing.GenerateAndFundAccount(testCase, validatorName, transferMoney, 1)
+	acc, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.Create.Validator.Amount, 1)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -105,7 +101,7 @@ func BasicCreateValidator(testCase *testing.TestCase, validatorAccount *sdkAccou
 	logger.TransactionLog(fmt.Sprintf("Performed create validator - address: %s - transaction hash: %s, tx successful: %s", validatorAccount.Address, tx.TransactionHash, txResultColoring), testCase.Verbose)
 
 	rpcClient, err := config.Configuration.Network.API.RPCClient()
-	validatorExists := sdkValidator.Exists(rpcClient, validatorAccount.Address)
+	validatorExists := sdkValidator.Exists(rpcClient, tx.ContractAddress)
 	addressExistsColoring := logger.ResultColoring(validatorExists, true)
 	logger.StakingLog(fmt.Sprintf("Validator with address %s exists: %s", validatorAccount.Address, addressExistsColoring), testCase.Verbose)
 

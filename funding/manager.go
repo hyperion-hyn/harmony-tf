@@ -80,20 +80,9 @@ func SetupFundingAccount(accs []sdkAccounts.Account) (err error) {
 // FundFundingAccount - funds the funding account using the specified source accounts
 func FundFundingAccount(accs []sdkAccounts.Account) error {
 	var waitGroup sync.WaitGroup
-
 	for _, account := range accs {
-		if config.Configuration.Funding.Shards == "all" {
-			FundFundingAccountInShard(account, &waitGroup)
-		} else {
-			//shard, err := strconv.ParseUint(config.Configuration.Funding.Shards, 10, 32)
-			//if err != nil {
-			//	return err
-			//}
-
-			FundFundingAccountInShard(account, &waitGroup)
-		}
+		FundFundingAccountInShard(account, &waitGroup)
 	}
-
 	waitGroup.Wait()
 
 	return nil
@@ -101,10 +90,12 @@ func FundFundingAccount(accs []sdkAccounts.Account) error {
 
 // FundFundingAccountInShard - fund the funding account in a given shard
 func FundFundingAccountInShard(account sdkAccounts.Account, waitGroup *sync.WaitGroup) {
-	availableShardBalance, err := balances.GetBalance(account.Address)
+	availableBalance, err := balances.GetBalance(account.Address)
 
-	if err == nil && !availableShardBalance.IsNil() && !availableShardBalance.IsZero() {
-		amount := availableShardBalance.Sub(config.Configuration.Network.Gas.Cost)
+	logger.FundingLog(fmt.Sprintf("funding from account  %s to %s balance %f ", account.Address, config.Configuration.Funding.Account.Address, availableBalance), true)
+
+	if err == nil && !availableBalance.IsNil() && !availableBalance.IsZero() {
+		amount := availableBalance.Sub(config.Configuration.Network.Gas.Cost)
 
 		if !amount.IsNil() && !amount.IsZero() {
 			waitGroup.Add(1)
@@ -121,7 +112,7 @@ func FundFundingAccountInShard(account sdkAccounts.Account, waitGroup *sync.Wait
 			)
 		}
 	} else if err != nil {
-		fmt.Println(fmt.Sprintf("Failed to retrieve the shard balance for the address %s  - balance: %f, error: %s", account.Address, availableShardBalance, err.Error()))
+		fmt.Println(fmt.Sprintf("Failed to retrieve the shard balance for the address %s  - balance: %f, error: %s", account.Address, availableBalance, err.Error()))
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 type Transaction struct {
 	FromAddress     string
 	ToAddress       string
+	ContractAddress string
 	Data            string
 	Amount          ethCommon.Dec
 	GasPrice        int64
@@ -40,6 +41,7 @@ func ToTransaction(fromAddress string, toAddress string, rawTx map[string]interf
 			TransactionHash: txHash,
 			Success:         success,
 			Response:        rawTx,
+			ContractAddress: rawTx["contractAddress"].(string),
 		}
 	}
 

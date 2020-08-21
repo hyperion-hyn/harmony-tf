@@ -7,7 +7,6 @@ import (
 	ethCommon "github.com/ethereum/go-ethereum/common"
 	eth_hexutil "github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 	"math/big"
@@ -107,10 +106,9 @@ func GenerateStakingTransaction(gasLimit int64, gasPrice ethCommon.Dec, nonce ui
 	}
 
 	// todo here add expend more staking price
-	gasPrice = gasPrice.Mul(ethCommon.NewDec(params.Ether)).Quo(ethCommon.NewDec(10))
+	//gasPrice = gasPrice.Mul(ethCommon.NewDec(params.Ether)).Quo(ethCommon.NewDec(10))
 
-	stakingTx := types.NewTransaction(nonce, ethCommon.BigToAddress(ethCommon.Big0), big.NewInt(0), calculatedGasLimit*3, gasPrice.TruncateInt(), bytes)
-	stakingTx.SetType(directive)
+	stakingTx := types.NewStakingTransaction(nonce, calculatedGasLimit*3, gasPrice.TruncateInt(), bytes, directive)
 	return stakingTx, calculatedGasLimit, nil
 }
 
@@ -143,11 +141,7 @@ func SendRawStakingTransaction(rpcClient *rpc.HTTPMessenger, signature *string) 
 	if err != nil {
 		return nil, err
 	}
-
-	time.Sleep(10 * time.Second)
-
-	fmt.Printf("tx sent: %s", tx.Hash().Hex())
-
+	fmt.Printf("tx sent: %s \n", tx.Hash().Hex())
 	return tx.Hash().Hex(), nil
 }
 
