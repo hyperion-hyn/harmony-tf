@@ -259,8 +259,7 @@ func CalculateGasLimit(gasLimit int64, inputData string, isValidatorCreation boo
 			if err != nil {
 				return 0, err
 			}
-
-			calculatedGasLimit, err = core.IntrinsicGas(base64InputData, false, true, isValidatorCreation)
+			calculatedGasLimit, err = core.IntrinsicGasForStaking(base64InputData, isValidatorCreation)
 			if err != nil {
 				return 0, err
 			}

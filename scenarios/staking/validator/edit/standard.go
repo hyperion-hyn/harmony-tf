@@ -2,6 +2,7 @@ package edit
 
 import (
 	"fmt"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 	"time"
 
 	"github.com/hyperion-hyn/hyperion-tf/accounts"
@@ -39,12 +40,12 @@ func StandardScenario(testCase *testing.TestCase) {
 
 	if validator.Exists {
 		var (
-			lastEditTx              sdkTxs.Transaction
-			lastValidatorResult     sdkValidator.RPCValidatorResult
+			lastEditTx sdkTxs.Transaction
+			//lastValidatorResult     sdkValidator.RPCValidatorResult
 			lastSuccessfullyUpdated bool
 			lastEditTxErr           error
 		)
-		node := config.Configuration.Network.API.NodeAddress()
+		//node := config.Configuration.Network.API.NodeAddress()
 
 		for i := uint32(0); i < testCase.StakingParameters.Edit.Repeat; i++ {
 			if i == 0 || (lastEditTxErr == nil && lastEditTx.Success && lastSuccessfullyUpdated) {
@@ -55,7 +56,7 @@ func StandardScenario(testCase *testing.TestCase) {
 					return
 				}
 
-				lastEditTx, lastEditTxErr = staking.BasicEditValidator(testCase, validator.Account, nil, blsKeyToRemove, blsKeyToAdd)
+				lastEditTx, lastEditTxErr = staking.BasicEditValidator(testCase, validator.ValidatorAddress, validator.Account, blsKeyToRemove, blsKeyToAdd)
 				if lastEditTxErr != nil {
 					msg := fmt.Sprintf("Failed to edit validator using account %s, address: %s", validator.Account.Name, validator.Account.Address)
 					testCase.HandleError(lastEditTxErr, validator.Account, msg)
@@ -63,14 +64,19 @@ func StandardScenario(testCase *testing.TestCase) {
 				}
 				testCase.Transactions = append(testCase.Transactions, lastEditTx)
 
-				lastValidatorResult, lastEditTxErr = sdkValidator.Information(node, validator.Account.Address)
+				rpcClient, err := config.Configuration.Network.API.RPCClient()
+				if err != nil {
+					testCase.HandleError(lastEditTxErr, validator.Account, "getRpcClient")
+					return
+				}
+				lastValidator, lastEditTxErr := sdkValidator.Information(rpcClient, address.Parse(validator.ValidatorAddress))
 				if lastEditTxErr != nil {
 					msg := fmt.Sprintf("Failed to retrieve validator info for validator %s", validator.Account.Address)
 					testCase.HandleError(lastEditTxErr, validator.Account, msg)
 					return
 				}
 
-				lastSuccessfullyUpdated = testCase.StakingParameters.Edit.EvaluateChanges(lastValidatorResult.Validator, testCase.Verbose)
+				lastSuccessfullyUpdated = testCase.StakingParameters.Edit.EvaluateChanges(*lastValidator, testCase.Verbose)
 				editValidatorColoring := logger.ResultColoring(lastSuccessfullyUpdated, true)
 				logger.StakingLog(fmt.Sprintf("Validator successfully edited: %s", editValidatorColoring), testCase.Verbose)
 			}

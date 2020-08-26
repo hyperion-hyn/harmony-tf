@@ -2,6 +2,7 @@ package parameters
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/staking/types/restaking"
 	"strings"
 
 	sdkNetworkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
@@ -119,87 +120,78 @@ func (editParams *EditValidatorParameters) DetectChanges(verbose bool) {
 }
 
 // EvaluateChanges - evaluates which changes have taken place and if they were successful
-func (editParams *EditValidatorParameters) EvaluateChanges(validatorInfo sdkValidator.RPCValidator, verbose bool) bool {
+func (editParams *EditValidatorParameters) EvaluateChanges(validatorInfo restaking.ValidatorWrapperRPC, verbose bool) bool {
 	successfulChangeCount := uint32(0)
 
 	if editParams.Changes.ValidatorName {
-		if validatorInfo.Name == editParams.Validator.Details.Name {
+		if validatorInfo.Validator.Description.Name == editParams.Validator.Details.Name {
 			logger.StakingLog(fmt.Sprintf("Successfully updated the name of the validator to %s", editParams.Validator.Details.Name), verbose)
 			successfulChangeCount++
 		} else {
-			logger.StakingLog(fmt.Sprintf("Failed to update the name of the validator to %s - returned name is %s", editParams.Validator.Details.Name, validatorInfo.Name), verbose)
+			logger.StakingLog(fmt.Sprintf("Failed to update the name of the validator to %s - returned name is %s", editParams.Validator.Details.Name, validatorInfo.Validator.Description.Name), verbose)
 		}
 	}
 
 	if editParams.Changes.ValidatorIdentity {
-		if validatorInfo.Identity == editParams.Validator.Details.Identity {
+		if validatorInfo.Validator.Description.Identity == editParams.Validator.Details.Identity {
 			logger.StakingLog(fmt.Sprintf("Successfully updated the identity of the validator to %s", editParams.Validator.Details.Identity), verbose)
 			successfulChangeCount++
 		} else {
-			logger.StakingLog(fmt.Sprintf("Failed to update the identity of the validator to %s - returned identity is %s", editParams.Validator.Details.Identity, validatorInfo.Identity), verbose)
+			logger.StakingLog(fmt.Sprintf("Failed to update the identity of the validator to %s - returned identity is %s", editParams.Validator.Details.Identity, validatorInfo.Validator.Description.Identity), verbose)
 		}
 	}
 
 	if editParams.Changes.ValidatorWebsite {
-		if validatorInfo.Website == editParams.Validator.Details.Website {
+		if validatorInfo.Validator.Description.Website == editParams.Validator.Details.Website {
 			logger.StakingLog(fmt.Sprintf("Successfully updated the website of the validator to %s", editParams.Validator.Details.Website), verbose)
 			successfulChangeCount++
 		} else {
-			logger.StakingLog(fmt.Sprintf("Failed to update the website of the validator to %s - returned website is %s", editParams.Validator.Details.Website, validatorInfo.Website), verbose)
+			logger.StakingLog(fmt.Sprintf("Failed to update the website of the validator to %s - returned website is %s", editParams.Validator.Details.Website, validatorInfo.Validator.Description.Website), verbose)
 		}
 	}
 
 	if editParams.Changes.ValidatorSecurityContact {
-		if validatorInfo.SecurityContact == editParams.Validator.Details.SecurityContact {
+		if validatorInfo.Validator.Description.SecurityContact == editParams.Validator.Details.SecurityContact {
 			logger.StakingLog(fmt.Sprintf("Successfully updated the security contact of the validator to %s", editParams.Validator.Details.SecurityContact), verbose)
 			successfulChangeCount++
 		} else {
-			logger.StakingLog(fmt.Sprintf("Failed to update the security contact of the validator to %s - returned security contact is %s", editParams.Validator.Details.SecurityContact, validatorInfo.SecurityContact), verbose)
+			logger.StakingLog(fmt.Sprintf("Failed to update the security contact of the validator to %s - returned security contact is %s", editParams.Validator.Details.SecurityContact, validatorInfo.Validator.Description.SecurityContact), verbose)
 		}
 	}
 
 	if editParams.Changes.ValidatorDetails {
-		if validatorInfo.Details == editParams.Validator.Details.Details {
+		if validatorInfo.Validator.Description.Details == editParams.Validator.Details.Details {
 			logger.StakingLog(fmt.Sprintf("Successfully updated the details of the validator to %s", editParams.Validator.Details.Details), verbose)
 			successfulChangeCount++
 		} else {
-			logger.StakingLog(fmt.Sprintf("Failed to update the details of the validator to %s - returned details is %s", editParams.Validator.Details.Details, validatorInfo.Details), verbose)
+			logger.StakingLog(fmt.Sprintf("Failed to update the details of the validator to %s - returned details is %s", editParams.Validator.Details.Details, validatorInfo.Validator.Description.Details), verbose)
 		}
 	}
 
 	if editParams.Changes.CommissionRate {
-		if !validatorInfo.Rate.IsNil() && validatorInfo.Rate.Equal(editParams.Validator.Commission.Rate) {
+		if !validatorInfo.Validator.Commission.CommissionRates.Rate.IsNil() && validatorInfo.Validator.Commission.CommissionRates.Rate.Equal(editParams.Validator.Commission.Rate) {
 			logger.StakingLog(fmt.Sprintf("Successfully updated the commission rate of the validator to %f", editParams.Validator.Commission.Rate), verbose)
 			successfulChangeCount++
 		} else {
-			logger.StakingLog(fmt.Sprintf("Failed to update the commission rate of the validator to %f - returned commission rate is %f", editParams.Validator.Commission.Rate, validatorInfo.Rate), verbose)
-		}
-	}
-
-	if editParams.Changes.MinimumSelfDelegation {
-		if !validatorInfo.MinSelfDelegation.IsNil() && validatorInfo.MinSelfDelegation.Equal(editParams.Validator.MinimumSelfDelegation) {
-			logger.StakingLog(fmt.Sprintf("Successfully updated the minimum self delegation of the validator to %f", editParams.Validator.MinimumSelfDelegation), verbose)
-			successfulChangeCount++
-		} else {
-			logger.StakingLog(fmt.Sprintf("Failed to update the minimum self delegation of the validator to %f - returned minimum self delegations is %f", editParams.Validator.MinimumSelfDelegation, validatorInfo.MinSelfDelegation), verbose)
+			logger.StakingLog(fmt.Sprintf("Failed to update the commission rate of the validator to %f - returned commission rate is %f", editParams.Validator.Commission.Rate, validatorInfo.Validator.Commission.CommissionRates.Rate), verbose)
 		}
 	}
 
 	if editParams.Changes.MaximumTotalDelegation {
-		if !validatorInfo.MaxTotalDelegation.IsNil() && validatorInfo.MaxTotalDelegation.Equal(editParams.Validator.MaximumTotalDelegation) {
+		if validatorInfo.Validator.MaxTotalDelegation != nil && validatorInfo.Validator.MaxTotalDelegation.Cmp(editParams.Validator.MaximumTotalDelegation.BigInt()) == 0 {
 			logger.StakingLog(fmt.Sprintf("Successfully updated the maximum total delegation of the validator to %f", editParams.Validator.MaximumTotalDelegation), verbose)
 			successfulChangeCount++
 		} else {
-			logger.StakingLog(fmt.Sprintf("Failed to update the maximum total delegation of the validator to %f - returned maximum total delegation is %f", editParams.Validator.MaximumTotalDelegation, validatorInfo.MaxTotalDelegation), verbose)
+			logger.StakingLog(fmt.Sprintf("Failed to update the maximum total delegation of the validator to %f - returned maximum total delegation is %f", editParams.Validator.MaximumTotalDelegation, validatorInfo.Validator.MaxTotalDelegation), verbose)
 		}
 	}
 
 	if editParams.Changes.EligibilityStatus {
-		if validatorInfo.EligibilityStatus == editParams.Validator.EligibilityStatus {
+		if restaking.ValidatorStatus(validatorInfo.Validator.Status).String() == editParams.Validator.EligibilityStatus {
 			logger.StakingLog(fmt.Sprintf("Successfully updated the eligibility status of the validator to %s", editParams.Validator.EligibilityStatus), verbose)
 			successfulChangeCount++
 		} else {
-			logger.StakingLog(fmt.Sprintf("Failed to update the eligibility status of the validator to %v - returned status is %v", editParams.Validator.EligibilityStatus, validatorInfo.EligibilityStatus), verbose)
+			logger.StakingLog(fmt.Sprintf("Failed to update the eligibility status of the validator to %v - returned status is %v", editParams.Validator.EligibilityStatus, restaking.ValidatorStatus(validatorInfo.Validator.Status).String()), verbose)
 		}
 	}
 

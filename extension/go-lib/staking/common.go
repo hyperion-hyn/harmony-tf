@@ -108,7 +108,7 @@ func GenerateStakingTransaction(gasLimit int64, gasPrice ethCommon.Dec, nonce ui
 	// todo here add expend more staking price
 	//gasPrice = gasPrice.Mul(ethCommon.NewDec(params.Ether)).Quo(ethCommon.NewDec(10))
 
-	stakingTx := types.NewStakingTransaction(nonce, calculatedGasLimit*3, gasPrice.TruncateInt(), bytes, directive)
+	stakingTx := types.NewStakingTransaction(nonce, calculatedGasLimit, gasPrice.TruncateInt(), bytes, directive)
 	return stakingTx, calculatedGasLimit, nil
 }
 

@@ -11,14 +11,13 @@ require (
 	github.com/ethereum/go-ethereum v1.8.27
 	github.com/gookit/color v1.2.4
 	github.com/harmony-one/bls v0.0.6
-	github.com/karalabe/hid v1.0.0
 	github.com/mackerelio/go-osstat v0.1.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.0.0
 	github.com/tyler-smith/go-bip39 v1.0.1-0.20181017060643-dbb3b84ba2ef
 	github.com/valyala/fasthttp v1.2.0
-	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	gopkg.in/yaml.v2 v2.3.0
 )
 

@@ -5,8 +5,8 @@ import (
 	"regexp"
 
 	"github.com/btcsuite/btcd/btcec"
-	hmyAccounts "github.com/ethereum/go-ethereum/accounts"
-	hmyKeystore "github.com/ethereum/go-ethereum/accounts/keystore"
+	ethAccounts "github.com/ethereum/go-ethereum/accounts"
+	ethKeystore "github.com/ethereum/go-ethereum/accounts/keystore"
 	networkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
 	goSDKAccount "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/account"
 	goSDKAddress "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
@@ -25,8 +25,8 @@ type Account struct {
 	Passphrase string `json:"passphrase" yaml:"passphrase"`
 	Nonce      uint64
 	Balance    ethCommon.Dec
-	Keystore   *hmyKeystore.KeyStore
-	Account    *hmyAccounts.Account
+	Keystore   *ethKeystore.KeyStore
+	Account    *ethAccounts.Account
 	PrivateKey *btcec.PrivateKey
 	PublicKey  *btcec.PublicKey
 	Unlocked   bool
@@ -61,7 +61,7 @@ func (account *Account) ExportKeystore(passphrase string) ([]byte, error) {
 	}
 
 	for _, acc := range account.Keystore.Accounts() {
-		keyJSON, err := account.Keystore.Export(hmyAccounts.Account{Address: acc.Address}, passphrase, passphrase)
+		keyJSON, err := account.Keystore.Export(ethAccounts.Account{Address: acc.Address}, passphrase, passphrase)
 		if err != nil {
 			return nil, err
 		}

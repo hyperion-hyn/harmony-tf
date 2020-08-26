@@ -11,11 +11,12 @@ import (
 
 // Validator - represents the validator details
 type Validator struct {
-	Account    *accounts.Account
-	Details    ValidatorDetails `yaml:"details"`
-	Commission Commission       `yaml:"commission"`
-	BLSKeys    []crypto.BLSKey  `yaml:"-"`
-	Exists     bool
+	ValidatorAddress string `yaml:"-"`
+	Account          *accounts.Account
+	Details          ValidatorDetails `yaml:"details"`
+	Commission       Commission       `yaml:"commission"`
+	BLSKeys          []crypto.BLSKey  `yaml:"-"`
+	Exists           bool
 
 	RawMinimumSelfDelegation string        `yaml:"minimum_self_delegation"`
 	MinimumSelfDelegation    ethCommon.Dec `yaml:"-"`

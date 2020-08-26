@@ -40,6 +40,7 @@ func ReuseOrCreateValidator(testCase *testing.TestCase, validatorName string) (a
 	}
 	testCase.Transactions = append(testCase.Transactions, tx)
 	testCase.StakingParameters.Create.Validator.BLSKeys = createdBlsKeys
+	testCase.StakingParameters.Create.Validator.ValidatorAddress = tx.ContractAddress
 
 	if config.Configuration.Network.StakingWaitTime > 0 {
 		time.Sleep(time.Duration(config.Configuration.Network.StakingWaitTime) * time.Second)
@@ -47,6 +48,7 @@ func ReuseOrCreateValidator(testCase *testing.TestCase, validatorName string) (a
 
 	validator.Exists = validatorExists
 	validator.BLSKeys = createdBlsKeys
+	validator.ValidatorAddress = tx.ContractAddress
 
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
 	accountEndingBalance, _ := balances.GetBalance(validator.Account.Address)
@@ -103,22 +105,22 @@ func BasicCreateValidator(testCase *testing.TestCase, validatorAccount *sdkAccou
 	rpcClient, err := config.Configuration.Network.API.RPCClient()
 	validatorExists := sdkValidator.Exists(rpcClient, tx.ContractAddress)
 	addressExistsColoring := logger.ResultColoring(validatorExists, true)
-	logger.StakingLog(fmt.Sprintf("Validator with address %s exists: %s", validatorAccount.Address, addressExistsColoring), testCase.Verbose)
+	logger.StakingLog(fmt.Sprintf("Validator with address %s exists: %s", tx.ContractAddress, addressExistsColoring), testCase.Verbose)
 
 	return tx, blsKeys, validatorExists, nil
 }
 
 // BasicEditValidator - helper method to edit a validator
-func BasicEditValidator(testCase *testing.TestCase, validatorAccount *sdkAccounts.Account, senderAccount *sdkAccounts.Account, blsKeyToRemove *sdkCrypto.BLSKey, blsKeyToAdd *sdkCrypto.BLSKey) (sdkTxs.Transaction, error) {
+func BasicEditValidator(testCase *testing.TestCase, validatorAddress string, senderAccount *sdkAccounts.Account, blsKeyToRemove *sdkCrypto.BLSKey, blsKeyToAdd *sdkCrypto.BLSKey) (sdkTxs.Transaction, error) {
 	if senderAccount == nil {
-		senderAccount = validatorAccount
+		panic("senderAccount is nil")
 	}
 
-	logger.StakingLog(fmt.Sprintf("Proceeding to edit the validator %s ...", validatorAccount.Address), testCase.Verbose)
+	logger.StakingLog(fmt.Sprintf("Proceeding to edit the validator %s ...", validatorAddress), testCase.Verbose)
 	testCase.StakingParameters.Edit.DetectChanges(testCase.Verbose)
 	logger.TransactionLog(fmt.Sprintf("Sending edit validator transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
 
-	editRawTx, err := EditValidator(validatorAccount, senderAccount, &testCase.StakingParameters, blsKeyToRemove, blsKeyToAdd)
+	editRawTx, err := EditValidator(validatorAddress, senderAccount, &testCase.StakingParameters, blsKeyToRemove, blsKeyToAdd)
 	if err != nil {
 		return sdkTxs.Transaction{}, err
 	}

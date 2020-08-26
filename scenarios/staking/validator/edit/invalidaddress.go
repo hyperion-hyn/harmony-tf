@@ -45,7 +45,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 			return
 		}
 
-		lastEditTx, lastEditTxErr := staking.BasicEditValidator(testCase, validator.Account, &invalidAccount, nil, nil)
+		lastEditTx, lastEditTxErr := staking.BasicEditValidator(testCase, validator.ValidatorAddress, &invalidAccount, nil, nil)
 		if lastEditTxErr != nil {
 			msg := fmt.Sprintf("Failed to edit validator using account %s, address: %s", invalidAccount.Name, invalidAccount.Address)
 			testCase.HandleError(lastEditTxErr, validator.Account, msg)

@@ -40,7 +40,7 @@ func Edit(
 ) (map[string]interface{}, error) {
 	statusEnum := determineEposStatus(status)
 
-	payloadGenerator, err := editTransactionGenerator(validatorAddress, description, *commissionRate, maximumTotalDelegation, blsKeyToRemove, blsKeyToAdd, statusEnum)
+	payloadGenerator, err := editTransactionGenerator(address.Parse(validatorAddress), account.Address, description, commissionRate, maximumTotalDelegation, blsKeyToRemove, blsKeyToAdd, statusEnum)
 	if err != nil {
 		return nil, err
 	}
@@ -78,9 +78,10 @@ func determineEposStatus(status string) (statusEnum restaking.ValidatorStatus) {
 }
 
 func editTransactionGenerator(
-	validatorAddress string,
+	validatorAddress ethCommon.Address,
+	operatorAddress ethCommon.Address,
 	stakingDescription restaking.Description_,
-	commissionRate ethCommon.Dec,
+	commissionRate *ethCommon.Dec,
 	maximumTotalDelegation ethCommon.Dec,
 	blsKeyToRemove *crypto.BLSKey,
 	blsKeyToAdd *crypto.BLSKey,
@@ -100,18 +101,17 @@ func editTransactionGenerator(
 
 	bigMaximumTotalDelegation := staking.NumericDecToBigIntAmount(maximumTotalDelegation)
 
-	println(shardBlsKeyToAddSig) // todo need remove
 	payloadGenerator := func() (types.TransactionType, interface{}) {
 		return types.StakeEditVal, restaking.EditValidator{
-			ValidatorAddress:   address.Parse(validatorAddress),
+			ValidatorAddress:   validatorAddress,
+			OperatorAddress:    operatorAddress,
 			Description:        stakingDescription,
-			CommissionRate:     &commissionRate,
+			CommissionRate:     commissionRate,
 			MaxTotalDelegation: bigMaximumTotalDelegation,
 			SlotKeyToRemove:    shardBlsKeyToRemove,
 			SlotKeyToAdd:       shardBlsKeyToAdd,
-			//SlotKeyToAddSig:    shardBlsKeyToAddSig,
-			SlotKeyToAddSig: nil, // todo need remove
-			EPOSStatus:      statusEnum,
+			SlotKeyToAddSig:    shardBlsKeyToAddSig,
+			EPOSStatus:         statusEnum,
 		}
 	}
 

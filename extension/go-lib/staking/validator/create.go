@@ -70,7 +70,18 @@ func createTransactionGenerator(
 	//blsPubKeys, blsSigs := staking.ProcessBlsKeys(blsKeys)
 	bigMaximumTotalDelegation := staking.NumericDecToBigIntAmount(maximumTotalDelegation)
 
-	blsKey := blsKeys[0]
+	var slotPubKey restaking.BLSPublicKey_
+
+	var slotKeySig restaking.BLSSignature
+
+	if len(blsKeys) == 0 {
+		slotPubKey = restaking.BLSPublicKey_{Key: [48]byte{}}
+		slotKeySig = [restaking.BLSSignatureSizeInBytes]byte{}
+	} else {
+		blsKey := blsKeys[0]
+		slotPubKey = *blsKey.ShardPublicKey
+		slotKeySig = *blsKey.ShardSignature
+	}
 
 	//println(blsSigs) // todo need remove
 	payloadGenerator := func() (types.TransactionType, interface{}) {
@@ -79,8 +90,8 @@ func createTransactionGenerator(
 			Description:        stakingDescription,
 			CommissionRates:    stakingCommissionRates,
 			MaxTotalDelegation: bigMaximumTotalDelegation,
-			SlotPubKey:         *blsKey.ShardPublicKey,
-			SlotKeySig:         *blsKey.ShardSignature,
+			SlotPubKey:         slotPubKey,
+			SlotKeySig:         slotKeySig,
 			//SlotKeySig: nil, // todo need revert
 		}
 	}

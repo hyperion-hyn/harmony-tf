@@ -35,13 +35,20 @@ func ToTransaction(fromAddress string, toAddress string, rawTx map[string]interf
 	if txHash != "" {
 		success := IsTransactionSuccessful(rawTx)
 
+		contractAddress := rawTx["contractAddress"]
+
+		var contractAddrStr = ""
+		if contractAddress != nil {
+			contractAddrStr = contractAddress.(string)
+		}
+
 		tx = Transaction{
 			FromAddress:     fromAddress,
 			ToAddress:       toAddress,
 			TransactionHash: txHash,
 			Success:         success,
 			Response:        rawTx,
-			ContractAddress: rawTx["contractAddress"].(string),
+			ContractAddress: contractAddrStr,
 		}
 	}
 

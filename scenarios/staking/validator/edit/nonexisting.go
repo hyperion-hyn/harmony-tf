@@ -37,7 +37,7 @@ func NonExistingScenario(testCase *testing.TestCase) {
 	}
 
 	testCase.StakingParameters.Create.Validator.Account = &account
-	tx, err := staking.BasicEditValidator(testCase, &account, nil, nil, nil)
+	tx, err := staking.BasicEditValidator(testCase, account.Address, &account, nil, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to edit validator using account %s, address: %s", account.Name, account.Address)
 		testCase.HandleError(err, &account, msg)

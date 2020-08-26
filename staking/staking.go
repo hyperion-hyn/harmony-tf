@@ -74,15 +74,15 @@ func CreateValidator(validatorAccount *sdkAccounts.Account, senderAccount *sdkAc
 }
 
 // EditValidator - edits a given validator using the provided information
-func EditValidator(validatorAccount *sdkAccounts.Account, senderAccount *sdkAccounts.Account, params *testParams.StakingParameters, blsKeyToRemove *sdkCrypto.BLSKey, blsKeyToAdd *sdkCrypto.BLSKey) (map[string]interface{}, error) {
+func EditValidator(validatorAddress string, senderAccount *sdkAccounts.Account, params *testParams.StakingParameters, blsKeyToRemove *sdkCrypto.BLSKey, blsKeyToAdd *sdkCrypto.BLSKey) (map[string]interface{}, error) {
 	if senderAccount == nil {
-		senderAccount = validatorAccount
+		panic("sender account is nil")
 	}
 	senderAccount.Unlock()
 
-	if params.Edit.Validator.Account == nil {
-		params.Edit.Validator.Account = validatorAccount
-	}
+	//if params.Edit.Validator.Account == nil {
+	//	params.Edit.Validator.Account = validatorAccount
+	//}
 
 	rpcClient, err := config.Configuration.Network.API.RPCClient()
 	if err != nil {
@@ -117,7 +117,7 @@ func EditValidator(validatorAccount *sdkAccounts.Account, senderAccount *sdkAcco
 		senderAccount.Account,
 		rpcClient,
 		config.Configuration.Network.API.ChainID,
-		validatorAccount.Address,
+		validatorAddress,
 		params.Edit.Validator.ToStakingDescription(),
 		commissionRate,
 		params.Edit.Validator.MinimumSelfDelegation,
