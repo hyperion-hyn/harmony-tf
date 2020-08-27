@@ -8,11 +8,11 @@ import (
 	"encoding/hex"
 	"errors"
 	"github.com/ethereum/go-ethereum/crypto/bls"
+	"github.com/ethereum/go-ethereum/staking/types/common"
+	"github.com/ethereum/go-ethereum/staking/types/restaking"
+	bls_core "github.com/harmony-one/bls/ffi/go/bls"
 	"github.com/hyperion-hyn/hyperion-tf/extension/crypto/hash"
 	"io"
-
-	restaking "github.com/ethereum/go-ethereum/staking/types/restaking"
-	bls_core "github.com/harmony-one/bls/ffi/go/bls"
 )
 
 // BLSKey - represents a BLS key
@@ -23,7 +23,7 @@ type BLSKey struct {
 	PublicKeyHex  string
 
 	ShardPublicKey *restaking.BLSPublicKey_
-	ShardSignature *restaking.BLSSignature
+	ShardSignature *common.BLSSignature
 }
 
 // GenerateBlsKey - generates a new bls key and returns its private and public keys as hex strings
@@ -64,17 +64,17 @@ func (blsKey *BLSKey) Initialize(message string) error {
 
 // AssignShardSignature - signs a given message using the BLSKey and assigns ShardSignature
 func (blsKey *BLSKey) AssignShardSignature(message string) error {
-	var sig restaking.BLSSignature
+	var sig common.BLSSignature
 
 	if message == "" {
-		message = restaking.BLSVerificationStr
+		message = common.BLSVerificationStr
 	}
 
 	msgHash := hash.Keccak256([]byte(message))
 	signature := blsKey.PrivateKey.SignHash(msgHash[:])
 
 	bytes := signature.Serialize()
-	if len(bytes) != restaking.BLSSignatureSizeInBytes {
+	if len(bytes) != common.BLSSignatureSizeInBytes {
 		return errors.New("bls key length is not 96 bytes")
 	}
 

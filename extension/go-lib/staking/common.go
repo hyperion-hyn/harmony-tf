@@ -7,6 +7,7 @@ import (
 	ethCommon "github.com/ethereum/go-ethereum/common"
 	eth_hexutil "github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
+	stakingCommon "github.com/ethereum/go-ethereum/staking/types/common"
 	"github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 	"math/big"
@@ -113,11 +114,11 @@ func GenerateStakingTransaction(gasLimit int64, gasPrice ethCommon.Dec, nonce ui
 }
 
 // ProcessBlsKeys - separate bls keys to pub key and sig slices
-func ProcessBlsKeys(blsKeys []crypto.BLSKey) (blsPubKeys restaking.BLSPublicKeys_, blsSigs []restaking.BLSSignature) {
+func ProcessBlsKeys(blsKeys []crypto.BLSKey) (blsPubKeys restaking.BLSPublicKeys_, blsSigs []stakingCommon.BLSSignature) {
 	blsPubKeys = restaking.BLSPublicKeys_{
 		Keys: make([]*restaking.BLSPublicKey_, len(blsKeys)),
 	}
-	blsSigs = make([]restaking.BLSSignature, len(blsKeys))
+	blsSigs = make([]stakingCommon.BLSSignature, len(blsKeys))
 	return blsPubKeys, blsSigs
 }
 

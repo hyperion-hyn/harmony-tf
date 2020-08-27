@@ -44,7 +44,7 @@ func NonExistingScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	undelegationTx, undelegationSucceeded, err := staking.BasicUndelegation(testCase, &delegatorAccount, &validatorAccount, nil)
+	undelegationTx, undelegationSucceeded, err := staking.BasicUndelegation(testCase, &delegatorAccount, validatorAccount.Address, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to undelegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address)
 		testCase.HandleError(err, &validatorAccount, msg)

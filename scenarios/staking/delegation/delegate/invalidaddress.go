@@ -76,7 +76,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	successfulValidatorCreation := tx.Success && accountEndingBalance.LT(expectedAccountEndingBalance) && validatorExists
 
 	if successfulValidatorCreation {
-		delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, &validatorAccount, &senderAccount)
+		delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, tx.ContractAddress, &senderAccount)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address)
 			testCase.HandleError(err, &validatorAccount, msg)

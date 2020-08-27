@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	stakingCommon "github.com/ethereum/go-ethereum/staking/types/common"
 	restaking "github.com/ethereum/go-ethereum/staking/types/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network"
@@ -93,7 +94,7 @@ func editTransactionGenerator(
 	}
 
 	var shardBlsKeyToAdd *restaking.BLSPublicKey_
-	var shardBlsKeyToAddSig *restaking.BLSSignature
+	var shardBlsKeyToAddSig *stakingCommon.BLSSignature
 	if blsKeyToAdd != nil {
 		shardBlsKeyToAdd = blsKeyToAdd.ShardPublicKey
 		shardBlsKeyToAddSig = blsKeyToAdd.ShardSignature

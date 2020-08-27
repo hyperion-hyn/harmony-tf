@@ -4,6 +4,7 @@ import (
 	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	stakingCommon "github.com/ethereum/go-ethereum/staking/types/common"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/transactions"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -72,11 +73,11 @@ func createTransactionGenerator(
 
 	var slotPubKey restaking.BLSPublicKey_
 
-	var slotKeySig restaking.BLSSignature
+	var slotKeySig stakingCommon.BLSSignature
 
 	if len(blsKeys) == 0 {
 		slotPubKey = restaking.BLSPublicKey_{Key: [48]byte{}}
-		slotKeySig = [restaking.BLSSignatureSizeInBytes]byte{}
+		slotKeySig = [stakingCommon.BLSSignatureSizeInBytes]byte{}
 	} else {
 		blsKey := blsKeys[0]
 		slotPubKey = *blsKey.ShardPublicKey

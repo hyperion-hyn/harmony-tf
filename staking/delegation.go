@@ -17,16 +17,16 @@ var (
 )
 
 // Delegate - performs delegation
-func Delegate(delegator *sdkAccounts.Account, validator *sdkAccounts.Account, sender *sdkAccounts.Account, params *testParams.StakingParameters) (map[string]interface{}, error) {
-	return executeDelegationMethod("delegate", delegator, validator, sender, params)
+func Delegate(delegator *sdkAccounts.Account, validatorAddress string, sender *sdkAccounts.Account, params *testParams.StakingParameters) (map[string]interface{}, error) {
+	return executeDelegationMethod("delegate", delegator, validatorAddress, sender, params)
 }
 
 // Undelegate - performs undelegation
-func Undelegate(delegator *sdkAccounts.Account, validator *sdkAccounts.Account, sender *sdkAccounts.Account, params *testParams.StakingParameters) (map[string]interface{}, error) {
-	return executeDelegationMethod("undelegate", delegator, validator, sender, params)
+func Undelegate(delegator *sdkAccounts.Account, validatorAddress string, sender *sdkAccounts.Account, params *testParams.StakingParameters) (map[string]interface{}, error) {
+	return executeDelegationMethod("undelegate", delegator, validatorAddress, sender, params)
 }
 
-func executeDelegationMethod(method string, delegator *sdkAccounts.Account, validator *sdkAccounts.Account, sender *sdkAccounts.Account, params *testParams.StakingParameters) (txResult map[string]interface{}, err error) {
+func executeDelegationMethod(method string, delegator *sdkAccounts.Account, validatorAddress string, sender *sdkAccounts.Account, params *testParams.StakingParameters) (txResult map[string]interface{}, err error) {
 	if err = validateDelegationValues(params); err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, vali
 			rpcClient,
 			config.Configuration.Network.API.ChainID,
 			delegator.Address,
-			validator.Address,
+			validatorAddress,
 			params.Delegation.Delegate.Gas.Limit,
 			params.Delegation.Delegate.Gas.Price,
 			currentNonce,
@@ -77,7 +77,7 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, vali
 			rpcClient,
 			config.Configuration.Network.API.ChainID,
 			delegator.Address,
-			validator.Address,
+			validatorAddress,
 			params.Delegation.Undelegate.Gas.Limit,
 			params.Delegation.Undelegate.Gas.Price,
 			currentNonce,

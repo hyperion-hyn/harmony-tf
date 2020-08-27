@@ -3,6 +3,8 @@ package staking
 import (
 	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/params"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 	"time"
 
 	"github.com/hyperion-hyn/hyperion-tf/balances"
@@ -132,67 +134,69 @@ func BasicEditValidator(testCase *testing.TestCase, validatorAddress string, sen
 }
 
 // BasicDelegation - helper method to perform delegation
-func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, validatorAccount *sdkAccounts.Account, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
+func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, validatorAddress string, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
 	logger.StakingLog("Proceeding to perform delegation...", testCase.Verbose)
 	logger.TransactionLog(fmt.Sprintf("Sending delegation transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
 
-	rawTx, err := Delegate(delegatorAccount, validatorAccount, senderAccount, &testCase.StakingParameters)
+	rawTx, err := Delegate(delegatorAccount, validatorAddress, senderAccount, &testCase.StakingParameters)
 	if err != nil {
 		return sdkTxs.Transaction{}, false, err
 	}
-	tx := sdkTxs.ToTransaction(delegatorAccount.Address, validatorAccount.Address, rawTx, err)
+	tx := sdkTxs.ToTransaction(delegatorAccount.Address, validatorAddress, rawTx, err)
 	txResultColoring := logger.ResultColoring(tx.Success, true)
 	logger.TransactionLog(fmt.Sprintf("Performed delegation - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
 
-	node := config.Configuration.Network.API.NodeAddress()
-	delegations, err := sdkDelegation.ByDelegator(node, delegatorAccount.Address)
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
+	delegations, err := sdkDelegation.ByValidator(rpcClient, validatorAddress)
 	if err != nil {
 		return sdkTxs.Transaction{}, false, err
 	}
 
 	delegationSucceeded := false
 	for _, del := range delegations {
-		if del.DelegatorAddress == delegatorAccount.Address && del.ValidatorAddress == validatorAccount.Address {
+		if del.DelegatorAddress == address.Parse(delegatorAccount.Address) {
 			delegationSucceeded = true
 			break
 		}
 	}
 
 	delegationSucceededColoring := logger.ResultColoring(delegationSucceeded, true)
-	logger.StakingLog(fmt.Sprintf("Delegation from %s to %s of %f, successful: %s", delegatorAccount.Address, validatorAccount.Address, testCase.StakingParameters.Delegation.Delegate.Amount, delegationSucceededColoring), testCase.Verbose)
+	logger.StakingLog(fmt.Sprintf("Delegation from %s to %s of %f, successful: %s", delegatorAccount.Address, validatorAddress, testCase.StakingParameters.Delegation.Delegate.Amount, delegationSucceededColoring), testCase.Verbose)
 
 	return tx, delegationSucceeded, nil
 }
 
 // BasicUndelegation - helper method to perform undelegation
-func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, validatorAccount *sdkAccounts.Account, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
+func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, validatorAddress string, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
 	logger.StakingLog("Proceeding to perform undelegation...", testCase.Verbose)
 	logger.TransactionLog(fmt.Sprintf("Sending undelegation transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
 
-	rawTx, err := Undelegate(delegatorAccount, validatorAccount, senderAccount, &testCase.StakingParameters)
+	rawTx, err := Undelegate(delegatorAccount, validatorAddress, senderAccount, &testCase.StakingParameters)
 	if err != nil {
 		return sdkTxs.Transaction{}, false, err
 	}
-	tx := sdkTxs.ToTransaction(delegatorAccount.Address, validatorAccount.Address, rawTx, err)
+	tx := sdkTxs.ToTransaction(delegatorAccount.Address, validatorAddress, rawTx, err)
 	txResultColoring := logger.ResultColoring(tx.Success, true)
 	logger.TransactionLog(fmt.Sprintf("Performed undelegation - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
 
-	node := config.Configuration.Network.API.NodeAddress()
-	delegations, err := sdkDelegation.ByDelegator(node, delegatorAccount.Address)
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
+	delegations, err := sdkDelegation.ByValidator(rpcClient, validatorAddress)
 	if err != nil {
 		return sdkTxs.Transaction{}, false, err
 	}
 
 	undelegationSucceeded := false
+	var undelegationAmount ethCommon.Dec
 	for _, del := range delegations {
-		if len(del.Undelegations) > 0 {
+		if del.DelegatorAddress == delegatorAccount.Account.Address && del.Undelegation.Amount.Sign() > 0 {
 			undelegationSucceeded = true
+			undelegationAmount = ethCommon.NewDecFromBigInt(del.Undelegation.Amount).QuoInt64(params.Ether)
 			break
 		}
 	}
 
 	undelegationSucceededColoring := logger.ResultColoring(undelegationSucceeded, true)
-	logger.StakingLog(fmt.Sprintf("Performed undelegation from validator %s by delegator %s, amount: %f, successful: %s", validatorAccount.Address, delegatorAccount.Address, testCase.StakingParameters.Delegation.Undelegate.Amount, undelegationSucceededColoring), testCase.Verbose)
+	logger.StakingLog(fmt.Sprintf("Performed undelegation from validator %s by delegator %s,expect amount: %f, actual undelegation amount %f ,successful: %s", validatorAddress, delegatorAccount.Address, testCase.StakingParameters.Delegation.Undelegate.Amount, undelegationAmount, undelegationSucceededColoring), testCase.Verbose)
 
 	return tx, true, nil
 }
