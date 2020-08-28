@@ -2,6 +2,8 @@ package parameters
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/staking/types/restaking"
 	"strings"
 
@@ -178,11 +180,19 @@ func (editParams *EditValidatorParameters) EvaluateChanges(validatorInfo restaki
 	}
 
 	if editParams.Changes.MaximumTotalDelegation {
-		if validatorInfo.Validator.MaxTotalDelegation != nil && validatorInfo.Validator.MaxTotalDelegation.Cmp(editParams.Validator.MaximumTotalDelegation.BigInt()) == 0 {
+		var actualMaxTotalDelegation common.Dec
+
+		if validatorInfo.Validator.MaxTotalDelegation != nil {
+			actualMaxTotalDelegation = common.NewDecFromBigInt(validatorInfo.Validator.MaxTotalDelegation).QuoInt64(params.Ether)
+		} else {
+			actualMaxTotalDelegation = common.NewDec(0)
+		}
+
+		if !actualMaxTotalDelegation.Equal(common.NewDec(0)) && actualMaxTotalDelegation.Equal(editParams.Validator.MaximumTotalDelegation) {
 			logger.StakingLog(fmt.Sprintf("Successfully updated the maximum total delegation of the validator to %f", editParams.Validator.MaximumTotalDelegation), verbose)
 			successfulChangeCount++
 		} else {
-			logger.StakingLog(fmt.Sprintf("Failed to update the maximum total delegation of the validator to %f - returned maximum total delegation is %f", editParams.Validator.MaximumTotalDelegation, validatorInfo.Validator.MaxTotalDelegation), verbose)
+			logger.StakingLog(fmt.Sprintf("Failed to update the maximum total delegation of the validator to %f - returned maximum total delegation is %f", editParams.Validator.MaximumTotalDelegation, actualMaxTotalDelegation), verbose)
 		}
 	}
 

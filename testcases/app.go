@@ -154,6 +154,12 @@ func execute() {
 			} else {
 				Dismissed = append(Dismissed, testCase)
 			}
+
+			if testCase.Error != nil {
+				fmt.Println(fmt.Sprintf("Error is not nil, wait %ds for chain finalize", config.Configuration.Network.ErrorWaitTime))
+				time.Sleep(time.Duration(config.Configuration.Network.ErrorWaitTime) * time.Second)
+			}
+
 		} else {
 			fmt.Println(fmt.Sprintf("\nTest case %s has the execute attribute set to false - make sure to set it to true if you want to execute this test case\n", testCase.Name))
 		}

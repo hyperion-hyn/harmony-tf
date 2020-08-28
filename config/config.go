@@ -65,6 +65,7 @@ type Network struct {
 	Timeout              int                     `yaml:"timeout"`
 	CrossShardTxWaitTime uint32                  `yaml:"cross_shard_tx_wait_time"`
 	StakingWaitTime      uint32                  `yaml:"staking_wait_time"`
+	ErrorWaitTime        uint32                  `yaml:"error_wait_time"`
 	Gas                  sdkNetworkTypes.Gas     `yaml:"gas"`
 	API                  sdkNetworkTypes.Network `yaml:"-"`
 	Retry                Retry                   `yaml:"retry"`
