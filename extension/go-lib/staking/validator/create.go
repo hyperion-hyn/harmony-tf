@@ -86,7 +86,7 @@ func createTransactionGenerator(
 
 	//println(blsSigs) // todo need remove
 	payloadGenerator := func() (types.TransactionType, interface{}) {
-		return types.StakeCreateVal, restaking.CreateValidator{
+		return types.CreateValidator, restaking.CreateValidator{
 			OperatorAddress:    address.Parse(validatorAddress),
 			Description:        stakingDescription,
 			CommissionRates:    stakingCommissionRates,

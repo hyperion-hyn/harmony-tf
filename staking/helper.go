@@ -228,6 +228,19 @@ func ManageBLSKeys(validator *sdkValidator.Validator, mode string, blsSignatureM
 		}
 		blsKeyToRemove = &nonExistingKey
 		logger.StakingLog(fmt.Sprintf("Removing non existing bls key %v from validator: %s", blsKeyToRemove.PublicKeyHex, validator.Account.Address), verbose)
+
+	case "replace_bls_key":
+		keyToAdd, err := crypto.GenerateBlsKey(blsSignatureMessage)
+		if err != nil {
+			fmt.Printf("\n\nStakingParameters.ManageBLSKeys - err: %+v\n\n", err)
+			return nil, nil, err
+		}
+		blsKeyToAdd = &keyToAdd
+		logger.StakingLog(fmt.Sprintf("Adding bls key %v to validator: %s", blsKeyToAdd.PublicKeyHex, validator.Account.Address), verbose)
+
+		blsKeyToRemove = &validator.BLSKeys[0]
+		logger.StakingLog(fmt.Sprintf("Removing bls key %v from validator: %s", blsKeyToRemove.PublicKeyHex, validator.Account.Address), verbose)
+
 	}
 
 	return blsKeyToRemove, blsKeyToAdd, nil

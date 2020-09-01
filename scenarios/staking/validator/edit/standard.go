@@ -55,6 +55,12 @@ func StandardScenario(testCase *testing.TestCase) {
 					testCase.HandleError(blsErr, validator.Account, msg)
 					return
 				}
+				if blsKeyToAdd != nil {
+					testCase.StakingParameters.Edit.Validator.BLSKeys = append(testCase.StakingParameters.Edit.Validator.BLSKeys, *blsKeyToAdd)
+				}
+				if blsKeyToRemove != nil {
+					testCase.StakingParameters.Edit.Validator.BLSKeys = append(testCase.StakingParameters.Edit.Validator.BLSKeys, *blsKeyToRemove)
+				}
 
 				lastEditTx, lastEditTxErr = staking.BasicEditValidator(testCase, validator.ValidatorAddress, validator.Account, blsKeyToRemove, blsKeyToAdd)
 				if lastEditTxErr != nil {

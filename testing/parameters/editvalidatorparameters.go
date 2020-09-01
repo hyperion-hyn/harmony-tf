@@ -5,6 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/staking/types/restaking"
+	"github.com/status-im/keycard-go/hexutils"
 	"strings"
 
 	sdkNetworkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
@@ -36,6 +37,7 @@ type EditValidatorChanges struct {
 	MinimumSelfDelegation    bool   `yaml:"-"`
 	MaximumTotalDelegation   bool   `yaml:"-"`
 	EligibilityStatus        bool   `yaml:"-"`
+	ReplaceBlsKey            bool   `yaml:"-"`
 	TotalChanged             uint32 `yaml:"-"`
 }
 
@@ -64,6 +66,12 @@ func (editParams *EditValidatorParameters) Initialize() error {
 func (editParams *EditValidatorParameters) DetectChanges(verbose bool) {
 	if editParams.Mode != "" {
 		editParams.Mode = strings.ToLower(editParams.Mode)
+
+		switch editParams.Mode {
+		case "replace_bls_key":
+			editParams.Changes.ReplaceBlsKey = true
+			editParams.Changes.TotalChanged++
+		}
 	}
 
 	if editParams.Validator.Details.Name != "" {
@@ -203,6 +211,20 @@ func (editParams *EditValidatorParameters) EvaluateChanges(validatorInfo restaki
 		} else {
 			logger.StakingLog(fmt.Sprintf("Failed to update the eligibility status of the validator to %v - returned status is %v", editParams.Validator.EligibilityStatus, restaking.ValidatorStatus(validatorInfo.Validator.Status).String()), verbose)
 		}
+	}
+
+	if editParams.Changes.ReplaceBlsKey {
+
+		editBlsKes := hexutils.BytesToHex(editParams.Validator.BLSKeys[0].ShardPublicKey.Key[:])
+		returnBlsKeys := hexutils.BytesToHex(validatorInfo.Validator.SlotPubKeys[0][:])
+
+		if editBlsKes == returnBlsKeys {
+			logger.StakingLog(fmt.Sprintf("Successfully replace blsKey of the validator to %s", editBlsKes), verbose)
+			successfulChangeCount++
+		} else {
+			logger.StakingLog(fmt.Sprintf("Failed replace blsKey of the validator to %v - returned status is %v", editBlsKes, returnBlsKeys), verbose)
+		}
+
 	}
 
 	return editParams.Changes.TotalChanged == successfulChangeCount

@@ -103,7 +103,7 @@ func editTransactionGenerator(
 	bigMaximumTotalDelegation := staking.NumericDecToBigIntAmount(maximumTotalDelegation)
 
 	payloadGenerator := func() (types.TransactionType, interface{}) {
-		return types.StakeEditVal, restaking.EditValidator{
+		return types.EditValidator, restaking.EditValidator{
 			ValidatorAddress:   validatorAddress,
 			OperatorAddress:    operatorAddress,
 			Description:        stakingDescription,

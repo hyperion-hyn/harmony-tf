@@ -92,7 +92,7 @@ func SendTx(
 // GenerateStakingTransaction - generate a staking transaction
 func GenerateStakingTransaction(gasLimit int64, gasPrice ethCommon.Dec, nonce uint64, payloadGenerator transactions.StakeMsgFulfiller) (*types.Transaction, uint64, error) {
 	directive, payload := payloadGenerator()
-	isCreateValidator := directive == types.StakeCreateVal
+	isCreateValidator := directive == types.CreateValidator
 
 	bytes, err := rlp.EncodeToBytes(payload)
 	if err != nil {
