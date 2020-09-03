@@ -70,6 +70,64 @@ func CreateMap3Node(map3NodeAccount *sdkAccounts.Account, senderAccount *sdkAcco
 	return txResult, nil
 }
 
+// EditMap3Node - edits a given validator using the provided information
+func EditMap3Node(validatorAddress string, senderAccount *sdkAccounts.Account, params *testParams.StakingParameters, blsKeyToRemove *sdkCrypto.BLSKey, blsKeyToAdd *sdkCrypto.BLSKey) (map[string]interface{}, error) {
+	if senderAccount == nil {
+		panic("sender account is nil")
+	}
+	senderAccount.Unlock()
+
+	//if params.EditMap3Node.Validator.Account == nil {
+	//	params.EditMap3Node.Map3Node.Account = validatorAccount
+	//}
+
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
+	if err != nil {
+		return nil, err
+	}
+
+	var currentNonce uint64
+	if params.Nonce < 0 {
+		currentNonce = sdkNetworkNonce.CurrentNonce(rpcClient, senderAccount.Address)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		currentNonce = uint64(params.Nonce)
+	}
+
+	gasLimit := params.Gas.Limit
+	gasPrice := params.Gas.Price
+
+	if params.EditMap3Node.Gas.RawPrice != "" {
+		gasLimit = params.EditMap3Node.Gas.Limit
+		gasPrice = params.EditMap3Node.Gas.Price
+	}
+
+	txResult, err := sdkMap3Node.Edit(
+		senderAccount.Keystore,
+		senderAccount.Account,
+		rpcClient,
+		config.Configuration.Network.API.ChainID,
+		validatorAddress,
+		params.EditMap3Node.Map3Node.ToMicroStakeDescription(),
+		blsKeyToRemove,
+		blsKeyToAdd,
+		gasLimit,
+		gasPrice,
+		currentNonce,
+		config.Configuration.Account.Passphrase,
+		config.Configuration.Network.API.NodeAddress(),
+		params.Timeout,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return txResult, nil
+}
+
 func validateMap3NodeValues(map3Node sdkMap3Node.Map3Node) error {
 	if map3Node.Amount.IsNil() {
 		return errNilAmount

@@ -55,7 +55,7 @@ func (testCase *TestCase) Initialize() {
 		}
 	}
 
-	if testCase.StakingParameters.CreateMap3Node.Map3Node.RawAmount != "" {
+	if testCase.StakingParameters.CreateMap3Node.Map3Node.RawAmount != "" || testCase.StakingParameters.EditMap3Node.Map3Node.RawAmount != "" {
 		if err := testCase.StakingParameters.Initialize(); err != nil {
 			testCase.Error = err
 			testCase.Result = false

@@ -7,6 +7,7 @@ import (
 	"github.com/gookit/color"
 
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
+	sdkMap3Node "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/microstake/map3node"
 	sdkNetworkTypes "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/network/types/network"
 	sdkValidator "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/validator"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
@@ -35,6 +36,7 @@ type Framework struct {
 	StartTime             time.Time               `yaml:"-"`
 	EndTime               time.Time               `yaml:"-"`
 	CurrentValidator      *sdkValidator.Validator `yaml:"-"`
+	CurrentMap3Node       *sdkMap3Node.Map3Node   `yaml:"-"`
 	Styling               Styling                 `yaml:"-"`
 }
 
