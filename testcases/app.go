@@ -2,6 +2,7 @@ package testcases
 
 import (
 	"fmt"
+	microstakeCreateMapNodeScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/microstake/map3node/create"
 	"strings"
 	"time"
 
@@ -141,6 +142,8 @@ func execute() {
 				stakingDelegationUndelegateScenarios.InvalidAddressScenario(testCase)
 			case "staking/delegation/undelegate/non_existing":
 				stakingDelegationUndelegateScenarios.NonExistingScenario(testCase)
+			case "microstake/node/create/standard":
+				microstakeCreateMapNodeScenarios.StandardScenario(testCase)
 			default:
 				testCase.Executed = false
 				fmt.Println(fmt.Sprintf("Please specify a valid test type for your test case %s", testCase.Name))

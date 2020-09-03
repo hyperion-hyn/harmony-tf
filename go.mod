@@ -15,6 +15,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.0.0
+	github.com/status-im/keycard-go v0.0.0-20190316090335-8537d3370df4
 	github.com/tyler-smith/go-bip39 v1.0.1-0.20181017060643-dbb3b84ba2ef
 	github.com/valyala/fasthttp v1.2.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9

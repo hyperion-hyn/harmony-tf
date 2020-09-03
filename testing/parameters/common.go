@@ -2,6 +2,7 @@ package parameters
 
 import (
 	"fmt"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/microstake/map3node"
 	"math/rand"
 	"time"
 
@@ -27,4 +28,11 @@ func generateUniqueProperty(property string, maxLength int) string {
 	}
 
 	return newProperty
+}
+
+// GenerateUniqueDetails - generates new unique details to bypass uniqueness validation
+func GenerateMap3NodeUniqueDetails(details *map3node.Map3NodeDetails) {
+	if len(details.Identity) > 0 && len(details.Identity) <= restakingTypes.MaxIdentityLength {
+		details.Identity = generateUniqueProperty(details.Identity, restakingTypes.MaxIdentityLength)
+	}
 }

@@ -9,6 +9,7 @@ import (
 	"errors"
 	"github.com/ethereum/go-ethereum/crypto/bls"
 	"github.com/ethereum/go-ethereum/staking/types/common"
+	"github.com/ethereum/go-ethereum/staking/types/microstaking"
 	"github.com/ethereum/go-ethereum/staking/types/restaking"
 	bls_core "github.com/harmony-one/bls/ffi/go/bls"
 	"github.com/hyperion-hyn/hyperion-tf/extension/crypto/hash"
@@ -24,6 +25,7 @@ type BLSKey struct {
 
 	ShardPublicKey *restaking.BLSPublicKey_
 	ShardSignature *common.BLSSignature
+	NodePublicKey  *microstaking.BLSPublicKey_
 }
 
 // GenerateBlsKey - generates a new bls key and returns its private and public keys as hex strings
@@ -56,6 +58,10 @@ func (blsKey *BLSKey) Initialize(message string) error {
 	}
 
 	if err := blsKey.AssignShardPublicKey(); err != nil {
+		return err
+	}
+
+	if err := blsKey.AssignNodePublicKey(); err != nil {
 		return err
 	}
 
@@ -93,6 +99,18 @@ func (blsKey *BLSKey) AssignShardPublicKey() error {
 	}
 
 	blsKey.ShardPublicKey = shardPubKey
+
+	return nil
+}
+
+func (blsKey *BLSKey) AssignNodePublicKey() error {
+	shardPubKey := new(microstaking.BLSPublicKey_)
+	err := shardPubKey.FromLibBLSPublicKey(blsKey.PublicKey)
+	if err != nil {
+		return errors.New("couldn't convert bls.PublicKey -> shard.BLSPublicKey")
+	}
+
+	blsKey.NodePublicKey = shardPubKey
 
 	return nil
 }
