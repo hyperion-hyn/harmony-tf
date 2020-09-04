@@ -8,8 +8,10 @@ import (
 	"github.com/hyperion-hyn/hyperion-tf/crypto"
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	sdkCrypto "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
+	sdkDelegation "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/microstake/delegation"
 	sdkMap3Node "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/microstake/map3node"
 	sdkTxs "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/transactions"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 	"github.com/hyperion-hyn/hyperion-tf/logger"
 	"github.com/hyperion-hyn/hyperion-tf/testing"
 	"time"
@@ -125,6 +127,39 @@ func BasicEditMap3Node(testCase *testing.TestCase, map3NodeAddress string, sende
 	logger.TransactionLog(fmt.Sprintf("Performed edit map3Node - transaction hash: %s, tx successful: %s", editTx.TransactionHash, editTxResultColoring), testCase.Verbose)
 
 	return editTx, nil
+}
+
+// BasicDelegation - helper method to perform delegation
+func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, map3NodeAddress string, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
+	logger.StakingLog("Proceeding to perform delegation...", testCase.Verbose)
+	logger.TransactionLog(fmt.Sprintf("Sending delegation transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
+
+	rawTx, err := Delegate(delegatorAccount, map3NodeAddress, senderAccount, &testCase.StakingParameters)
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+	tx := sdkTxs.ToTransaction(delegatorAccount.Address, map3NodeAddress, rawTx, err)
+	txResultColoring := logger.ResultColoring(tx.Success, true)
+	logger.TransactionLog(fmt.Sprintf("Performed delegation - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
+
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
+	delegations, err := sdkDelegation.ByMap3Node(rpcClient, map3NodeAddress)
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+
+	delegationSucceeded := false
+	for _, del := range delegations {
+		if del.DelegatorAddress == address.Parse(delegatorAccount.Address) {
+			delegationSucceeded = true
+			break
+		}
+	}
+
+	delegationSucceededColoring := logger.ResultColoring(delegationSucceeded, true)
+	logger.StakingLog(fmt.Sprintf("DelegationMap3Node from %s to %s of %f, successful: %s", delegatorAccount.Address, map3NodeAddress, testCase.StakingParameters.DelegationMap3Node.Delegate.Amount, delegationSucceededColoring), testCase.Verbose)
+
+	return tx, delegationSucceeded, nil
 }
 
 // ManageBLSKeys - manage bls keys for edit map3Node scenarios
