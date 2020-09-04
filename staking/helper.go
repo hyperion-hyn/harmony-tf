@@ -198,7 +198,7 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 	undelegationSucceededColoring := logger.ResultColoring(undelegationSucceeded, true)
 	logger.StakingLog(fmt.Sprintf("Performed undelegation from validator %s by delegator %s,expect amount: %f, actual undelegation amount %f ,successful: %s", validatorAddress, delegatorAccount.Address, testCase.StakingParameters.Delegation.Undelegate.Amount, undelegationAmount, undelegationSucceededColoring), testCase.Verbose)
 
-	return tx, true, nil
+	return tx, undelegationSucceeded, nil
 }
 
 // ManageBLSKeys - manage bls keys for edit validator scenarios

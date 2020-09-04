@@ -3,6 +3,7 @@ package microstake
 import (
 	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/hyperion-hyn/hyperion-tf/balances"
 	"github.com/hyperion-hyn/hyperion-tf/config"
 	"github.com/hyperion-hyn/hyperion-tf/crypto"
@@ -160,6 +161,58 @@ func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.A
 	logger.StakingLog(fmt.Sprintf("DelegationMap3Node from %s to %s of %f, successful: %s", delegatorAccount.Address, map3NodeAddress, testCase.StakingParameters.DelegationMap3Node.Delegate.Amount, delegationSucceededColoring), testCase.Verbose)
 
 	return tx, delegationSucceeded, nil
+}
+
+// BasicUndelegation - helper method to perform undelegation
+func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, map3NodeAddress string, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
+	logger.StakingLog("Proceeding to perform undelegation...", testCase.Verbose)
+	logger.TransactionLog(fmt.Sprintf("Sending undelegation transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
+
+	rawTx, err := Undelegate(delegatorAccount, map3NodeAddress, senderAccount, &testCase.StakingParameters)
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+	tx := sdkTxs.ToTransaction(delegatorAccount.Address, map3NodeAddress, rawTx, err)
+	txResultColoring := logger.ResultColoring(tx.Success, true)
+	logger.TransactionLog(fmt.Sprintf("Performed undelegation - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
+
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
+	delegations, err := sdkDelegation.ByMap3Node(rpcClient, map3NodeAddress)
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+
+	undelegationSucceeded := false
+
+	delegateAmount := testCase.StakingParameters.DelegationMap3Node.Delegate.Amount
+	undelegateAmount := testCase.StakingParameters.DelegationMap3Node.Undelegate.Amount
+	remainingDelegateAmount := delegateAmount.Sub(undelegateAmount)
+
+	if undelegateAmount.LT(delegateAmount) {
+		// less then delegate amount
+		for _, del := range delegations {
+			pendingDelegateAmount := ethCommon.NewDecFromBigInt(del.PendingDelegation.Amount).QuoInt64(params.Ether)
+			if del.DelegatorAddress == delegatorAccount.Account.Address && pendingDelegateAmount.Equal(remainingDelegateAmount) {
+				undelegationSucceeded = true
+				break
+			}
+		}
+
+	} else {
+		undelegationSucceeded = true
+		for _, del := range delegations {
+			if del.DelegatorAddress == delegatorAccount.Account.Address {
+				undelegationSucceeded = false
+				break
+			}
+		}
+
+	}
+
+	undelegationSucceededColoring := logger.ResultColoring(undelegationSucceeded, true)
+	logger.StakingLog(fmt.Sprintf("Performed undelegation from map3Node %s by delegator %s,expect amount: %f ,successful: %s", map3NodeAddress, delegatorAccount.Address, testCase.StakingParameters.DelegationMap3Node.Undelegate.Amount, undelegationSucceededColoring), testCase.Verbose)
+
+	return tx, undelegationSucceeded, nil
 }
 
 // ManageBLSKeys - manage bls keys for edit map3Node scenarios
