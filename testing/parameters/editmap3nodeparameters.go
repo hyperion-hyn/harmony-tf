@@ -163,7 +163,7 @@ func (editParams *EditMap3NodeParameters) EvaluateChanges(nodeInfo microstaking.
 	}
 
 	if editParams.Changes.CommissionRate {
-		if !nodeInfo.Map3Node.Commission.Rate.IsNil() && nodeInfo.Map3Node.Commission.Rate.Equal(editParams.Map3Node.Commission) {
+		if !nodeInfo.Map3Node.Commission.RateForNextPeriod.IsNil() && nodeInfo.Map3Node.Commission.RateForNextPeriod.Equal(editParams.Map3Node.Commission) {
 			logger.StakingLog(fmt.Sprintf("Successfully updated the commission rate of the validator to %f", editParams.Map3Node.Commission), verbose)
 			successfulChangeCount++
 		} else {
