@@ -165,6 +165,10 @@ func execute() {
 				microstakeDelegateMap3NodeScenarios.NonExistingScenario(testCase)
 			case "microstake/delegation/undelegate/standard":
 				microstakeUndelegateMap3NodeScenarios.StandardScenario(testCase)
+			case "microstake/delegation/undelegate/invalid_address":
+				microstakeUndelegateMap3NodeScenarios.InvalidAddressScenario(testCase)
+			case "microstake/delegation/undelegate/non_existing":
+				microstakeUndelegateMap3NodeScenarios.NonExistingScenario(testCase)
 			default:
 				testCase.Executed = false
 				fmt.Println(fmt.Sprintf("Please specify a valid test type for your test case %s", testCase.Name))
