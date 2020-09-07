@@ -147,6 +147,10 @@ func execute() {
 				stakingDelegationUndelegateScenarios.NonExistingScenario(testCase)
 			case "microstake/node/create/standard":
 				microstakeCreateMap3NodeScenarios.StandardScenario(testCase)
+			case "microstake/node/create/invalid_address":
+				microstakeCreateMap3NodeScenarios.InvalidAddressScenario(testCase)
+			case "microstake/node/create/existing_bls_key":
+				microstakeCreateMap3NodeScenarios.ExistingBLSKeyScenario(testCase)
 			case "microstake/node/edit/standard":
 				microstakeEditMap3NodeScenarios.StandardScenario(testCase)
 			case "microstake/delegation/delegate/standard":
