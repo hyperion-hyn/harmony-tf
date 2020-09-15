@@ -62,7 +62,7 @@ func Create(
 }
 
 func createTransactionGenerator(
-	validatorAddress string,
+	operatorAddress string,
 	stakingDescription restaking.Description_,
 	stakingCommissionRates restaking.CommissionRates_,
 	maximumTotalDelegation ethCommon.Dec,
@@ -84,10 +84,12 @@ func createTransactionGenerator(
 		slotKeySig = *blsKey.ShardSignature
 	}
 
+	fmt.Println(fmt.Sprintf("operator address %s,hex:%s", operatorAddress, address.Parse(operatorAddress).Hex()))
+
 	//println(blsSigs) // todo need remove
 	payloadGenerator := func() (types.TransactionType, interface{}) {
 		return types.CreateValidator, restaking.CreateValidator{
-			OperatorAddress:    address.Parse(validatorAddress),
+			OperatorAddress:    address.Parse(operatorAddress),
 			Description:        stakingDescription,
 			CommissionRates:    stakingCommissionRates,
 			MaxTotalDelegation: bigMaximumTotalDelegation,

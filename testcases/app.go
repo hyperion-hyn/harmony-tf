@@ -14,6 +14,7 @@ import (
 	"github.com/hyperion-hyn/hyperion-tf/export"
 	"github.com/hyperion-hyn/hyperion-tf/funding"
 	"github.com/hyperion-hyn/hyperion-tf/keys"
+	restakingCreateValidatorScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/restaking/validator/create"
 	stakingDelegationDelegateScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/staking/delegation/delegate"
 	stakingDelegationUndelegateScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/staking/delegation/undelegate"
 	stakingCreateValidatorScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/staking/validator/create"
@@ -169,6 +170,8 @@ func execute() {
 				microstakeUndelegateMap3NodeScenarios.InvalidAddressScenario(testCase)
 			case "microstake/delegation/undelegate/non_existing":
 				microstakeUndelegateMap3NodeScenarios.NonExistingScenario(testCase)
+			case "restaking/validator/create/standard":
+				restakingCreateValidatorScenarios.StandardScenario(testCase)
 			default:
 				testCase.Executed = false
 				fmt.Println(fmt.Sprintf("Please specify a valid test type for your test case %s", testCase.Name))

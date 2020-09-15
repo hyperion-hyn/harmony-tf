@@ -114,7 +114,7 @@ func (editParams *EditMap3NodeParameters) DetectChanges(verbose bool) {
 }
 
 // EvaluateChanges - evaluates which changes have taken place and if they were successful
-func (editParams *EditMap3NodeParameters) EvaluateChanges(nodeInfo microstaking.Map3NodeWrapperRPC, verbose bool) bool {
+func (editParams *EditMap3NodeParameters) EvaluateChanges(nodeInfo microstaking.SimplifiedMap3NodeWrapper, verbose bool) bool {
 	successfulChangeCount := uint32(0)
 
 	if editParams.Changes.ValidatorName {

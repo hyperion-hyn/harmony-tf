@@ -130,7 +130,7 @@ func (editParams *EditValidatorParameters) DetectChanges(verbose bool) {
 }
 
 // EvaluateChanges - evaluates which changes have taken place and if they were successful
-func (editParams *EditValidatorParameters) EvaluateChanges(validatorInfo restaking.ValidatorWrapperRPC, verbose bool) bool {
+func (editParams *EditValidatorParameters) EvaluateChanges(validatorInfo restaking.SimplifiedValidatorWrapper, verbose bool) bool {
 	successfulChangeCount := uint32(0)
 
 	if editParams.Changes.ValidatorName {

@@ -62,6 +62,13 @@ func (testCase *TestCase) Initialize() {
 		}
 	}
 
+	if testCase.StakingParameters.CreateRestaking.Map3Node.RawAmount != "" {
+		if err := testCase.StakingParameters.Initialize(); err != nil {
+			testCase.Error = err
+			testCase.Result = false
+		}
+	}
+
 	if config.Configuration.Network.Timeout > 0 {
 		testCase.Parameters.Timeout = config.Configuration.Network.Timeout
 		testCase.StakingParameters.Timeout = config.Configuration.Network.Timeout
