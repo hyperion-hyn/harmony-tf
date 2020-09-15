@@ -172,6 +172,10 @@ func execute() {
 				microstakeUndelegateMap3NodeScenarios.NonExistingScenario(testCase)
 			case "restaking/validator/create/standard":
 				restakingCreateValidatorScenarios.StandardScenario(testCase)
+			case "restaking/validator/create/invalid_map3_node_address":
+				restakingCreateValidatorScenarios.InvalidMap3NodeAddressScenario(testCase)
+			case "restaking/validator/create/invalid_address":
+				restakingCreateValidatorScenarios.InvalidAddressScenario(testCase)
 			default:
 				testCase.Executed = false
 				fmt.Println(fmt.Sprintf("Please specify a valid test type for your test case %s", testCase.Name))
