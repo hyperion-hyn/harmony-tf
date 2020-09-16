@@ -56,6 +56,18 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 			return
 		}
 
+		if testCase.StakingParameters.Mode == "duplicate_identity" {
+			blsKeys = nil
+		} else {
+			// reinit identity
+			err = testCase.StakingParameters.CreateMap3Node.Initialize()
+			if err != nil {
+				msg := fmt.Sprintf("Failed to re initialize testcase")
+				testCase.HandleError(err, &duplicateAccount, msg)
+				return
+			}
+		}
+
 		testCase.StakingParameters.CreateMap3Node.Map3Node.Account = &duplicateAccount
 		duplicateTx, _, duplicateMap3NodeExists, err := microstake.BasicCreateMap3Node(testCase, &duplicateAccount, nil, blsKeys)
 		if err != nil {
