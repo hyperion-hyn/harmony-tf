@@ -28,15 +28,20 @@ type TestCase struct {
 	Scenario          string    `yaml:"scenario"`
 	Dismissal         string    `yaml:"-"`
 	Error             error
+	ErrorResult       bool                         `yaml:"-"`
 	Parameters        parameters.Parameters        `yaml:"parameters"`
 	StakingParameters parameters.StakingParameters `yaml:"staking_parameters"`
 	Transactions      []sdkTxs.Transaction
 	SuccessfulTxCount int64 `yaml:"-"`
 	Function          interface{}
+	ExpectError       string `yaml:"expect_err"`
 }
 
 // Initialize - initializes and converts values for a given test case
 func (testCase *TestCase) Initialize() {
+
+	testCase.ErrorResult = true
+
 	if testCase.Scenario != "" {
 		testCase.Scenario = strings.ToLower(testCase.Scenario)
 	}
@@ -100,7 +105,7 @@ func (testCase *TestCase) ReportMemoryDismissal() {
 
 // Successful - if the test case result matches the expected result
 func (testCase *TestCase) Successful() bool {
-	return testCase.Result == testCase.Expected
+	return testCase.Result == testCase.Expected && testCase.ErrorResult
 }
 
 // Status - test case status represented as a string
@@ -142,6 +147,19 @@ func statusMessage(status bool) string {
 // SetErrorState - set the error state for a test case based on a given error
 func (testCase *TestCase) SetErrorState() {
 	testCase.Result = false
+
+	if testCase.ExpectError != "" {
+		isErrEqual := strings.HasPrefix(testCase.Error.Error(), testCase.ExpectError)
+		testCase.ErrorResult = isErrEqual
+		if !isErrEqual {
+
+			expectError := logger.ResultColor(true, true).Render(testCase.ExpectError)
+			actualError := logger.ResultColor(false, true).Render(testCase.Error.Error())
+
+			logger.ErrorLog(fmt.Sprintf("Error not equal,expect: %s,actual: %s", expectError, actualError), testCase.Verbose)
+		}
+	}
+
 	testCase.FinishedAt = time.Now().UTC()
 }
 
