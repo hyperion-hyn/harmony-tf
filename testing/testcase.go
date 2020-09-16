@@ -149,10 +149,10 @@ func (testCase *TestCase) SetErrorState() {
 	testCase.Result = false
 
 	var isErrEqual bool
-	if strings.HasSuffix(testCase.Scenario, "existing_bls_key") {
-		isErrEqual = strings.HasPrefix(testCase.Error.Error(), testCase.ExpectError)
+	if testCase.ExpectError == "" {
+		isErrEqual = false
 	} else {
-		isErrEqual = testCase.Error.Error() == testCase.ExpectError
+		isErrEqual = strings.HasPrefix(testCase.Error.Error(), testCase.ExpectError)
 	}
 	testCase.ErrorResult = isErrEqual
 	if !isErrEqual {
