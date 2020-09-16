@@ -56,7 +56,20 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 			return
 		}
 
+		if testCase.StakingParameters.Mode == "duplicate_identity" {
+			blsKeys = nil
+		} else {
+			// reinit identity
+			err = testCase.StakingParameters.Create.Initialize()
+			if err != nil {
+				msg := fmt.Sprintf("Failed to re initialize testcase")
+				testCase.HandleError(err, &duplicateAccount, msg)
+				return
+			}
+		}
+
 		testCase.StakingParameters.Create.Validator.Account = &duplicateAccount
+
 		duplicateTx, _, duplicateValidatorExists, err := staking.BasicCreateValidator(testCase, &duplicateAccount, nil, blsKeys)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", duplicateAccount.Name, duplicateAccount.Address)

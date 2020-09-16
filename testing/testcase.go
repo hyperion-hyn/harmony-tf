@@ -148,16 +148,17 @@ func statusMessage(status bool) string {
 func (testCase *TestCase) SetErrorState() {
 	testCase.Result = false
 
-	if testCase.ExpectError != "" {
-		isErrEqual := strings.HasPrefix(testCase.Error.Error(), testCase.ExpectError)
-		testCase.ErrorResult = isErrEqual
-		if !isErrEqual {
-
-			expectError := logger.ResultColor(true, true).Render(testCase.ExpectError)
-			actualError := logger.ResultColor(false, true).Render(testCase.Error.Error())
-
-			logger.ErrorLog(fmt.Sprintf("Error not equal,expect: %s,actual: %s", expectError, actualError), testCase.Verbose)
-		}
+	var isErrEqual bool
+	if strings.HasSuffix(testCase.Scenario, "existing_bls_key") {
+		isErrEqual = strings.HasPrefix(testCase.Error.Error(), testCase.ExpectError)
+	} else {
+		isErrEqual = testCase.Error.Error() == testCase.ExpectError
+	}
+	testCase.ErrorResult = isErrEqual
+	if !isErrEqual {
+		expectError := logger.ResultColor(true, true).Render(testCase.ExpectError)
+		actualError := logger.ResultColor(false, true).Render(testCase.Error.Error())
+		logger.ErrorLog(fmt.Sprintf("Error not equal,expect: %s,actual: %s", expectError, actualError), testCase.Verbose)
 	}
 
 	testCase.FinishedAt = time.Now().UTC()

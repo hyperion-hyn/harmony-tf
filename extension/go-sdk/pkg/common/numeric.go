@@ -1,12 +1,9 @@
 package common
 
 import (
-	"errors"
-	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -33,25 +30,29 @@ func Pow(base common.Dec, exp int) common.Dec {
 }
 
 func NewDecFromString(i string) (common.Dec, error) {
-	if strings.HasPrefix(i, "-") {
-		return common.ZeroDec(), errors.New(fmt.Sprintf("can not be negative: %s", i))
+	//if strings.HasPrefix(i, "-") {
+	//	return common.ZeroDec(), errors.New(fmt.Sprintf("can not be negative: %s", i))
+	//}
+	//if pattern.FindString(i) != "" {
+	//	if tokens := strings.Split(i, "e"); len(tokens) > 1 {
+	//		a, _ := common.NewDecFromStr(tokens[0])
+	//		b, _ := strconv.Atoi(tokens[1])
+	//		return a.Mul(Pow(common.NewDec(10), b)), nil
+	//	}
+	//	tokens := strings.Split(i, "E")
+	//	a, _ := common.NewDecFromStr(tokens[0])
+	//	b, _ := strconv.Atoi(tokens[1])
+	//	return a.Mul(Pow(common.NewDec(10), b)), nil
+	//} else {
+	//	if strings.HasPrefix(i, ".") {
+	//		i = "0" + i
+	//	}
+	//	return common.NewDecFromStr(i)
+	//}
+	if strings.HasPrefix(i, ".") {
+		i = "0" + i
 	}
-	if pattern.FindString(i) != "" {
-		if tokens := strings.Split(i, "e"); len(tokens) > 1 {
-			a, _ := common.NewDecFromStr(tokens[0])
-			b, _ := strconv.Atoi(tokens[1])
-			return a.Mul(Pow(common.NewDec(10), b)), nil
-		}
-		tokens := strings.Split(i, "E")
-		a, _ := common.NewDecFromStr(tokens[0])
-		b, _ := strconv.Atoi(tokens[1])
-		return a.Mul(Pow(common.NewDec(10), b)), nil
-	} else {
-		if strings.HasPrefix(i, ".") {
-			i = "0" + i
-		}
-		return common.NewDecFromStr(i)
-	}
+	return common.NewDecFromStr(i)
 }
 
 // Assumes Hex string input
