@@ -232,7 +232,7 @@ func ManageBLSKeys(validator *sdkValidator.Validator, mode string, blsSignatureM
 	case "replace_bls_key":
 		keyToAdd, err := crypto.GenerateBlsKey(blsSignatureMessage)
 		if err != nil {
-			fmt.Printf("\n\nStakingParameters.ManageBLSKeys - err: %+v\n\n", err)
+			fmt.Printf("replace bls key generate bls key err: %v", err)
 			return nil, nil, err
 		}
 		blsKeyToAdd = &keyToAdd
