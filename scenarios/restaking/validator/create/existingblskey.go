@@ -3,6 +3,7 @@ package create
 import (
 	"fmt"
 	"github.com/hyperion-hyn/hyperion-tf/restaking"
+	"github.com/hyperion-hyn/hyperion-tf/testing/parameters"
 	"time"
 
 	"github.com/hyperion-hyn/hyperion-tf/accounts"
@@ -72,6 +73,8 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 			testCase.HandleError(err, &duplicateAccount, msg)
 			return
 		}
+
+		parameters.GenerateMap3NodeUniqueDetails(&testCase.StakingParameters.CreateRestaking.Map3Node.Details)
 
 		if testCase.StakingParameters.Mode == "duplicate_identity" {
 			blsKeys = nil
