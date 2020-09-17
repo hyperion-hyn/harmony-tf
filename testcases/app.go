@@ -176,6 +176,8 @@ func execute() {
 				restakingCreateValidatorScenarios.InvalidMap3NodeAddressScenario(testCase)
 			case "restaking/validator/create/invalid_address":
 				restakingCreateValidatorScenarios.InvalidAddressScenario(testCase)
+			case "restaking/validator/create/existing_bls_key":
+				restakingCreateValidatorScenarios.ExistingBLSKeyScenario(testCase)
 			default:
 				testCase.Executed = false
 				fmt.Println(fmt.Sprintf("Please specify a valid test type for your test case %s", testCase.Name))
