@@ -114,7 +114,7 @@ func (editParams *EditMap3NodeParameters) DetectChanges(verbose bool) {
 }
 
 // EvaluateChanges - evaluates which changes have taken place and if they were successful
-func (editParams *EditMap3NodeParameters) EvaluateChanges(nodeInfo microstaking.SimplifiedMap3NodeWrapper, verbose bool) bool {
+func (editParams *EditMap3NodeParameters) EvaluateChanges(nodeInfo microstaking.PlainMap3NodeWrapper, verbose bool) bool {
 	successfulChangeCount := uint32(0)
 
 	if editParams.Changes.ValidatorName {
@@ -183,7 +183,7 @@ func (editParams *EditMap3NodeParameters) EvaluateChanges(nodeInfo microstaking.
 	if editParams.Changes.ReplaceBlsKey {
 
 		editBlsKes := hexutils.BytesToHex(editParams.Map3Node.BLSKeys[0].ShardPublicKey.Key[:])
-		returnBlsKeys := hexutils.BytesToHex(nodeInfo.Map3Node.NodeKeys[0][:])
+		returnBlsKeys := hexutils.BytesToHex(nodeInfo.Map3Node.NodeKeys[0].Key[:])
 
 		if editBlsKes == returnBlsKeys {
 			logger.StakingLog(fmt.Sprintf("Successfully replace blsKey of the validator to %s", editBlsKes), verbose)

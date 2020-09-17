@@ -7,7 +7,7 @@ import (
 	goSdkRPC "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/rpc"
 )
 
-func Information(rpcClient *goSdkRPC.HTTPMessenger, map3NodeAddress common.Address) (*microstaking.SimplifiedMap3NodeWrapper, error) {
+func Information(rpcClient *goSdkRPC.HTTPMessenger, map3NodeAddress common.Address) (*microstaking.PlainMap3NodeWrapper, error) {
 
 	return rpcClient.GetClient().GetMap3NodeInformation(context.Background(), map3NodeAddress, nil)
 

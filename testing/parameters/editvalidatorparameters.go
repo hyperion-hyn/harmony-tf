@@ -130,7 +130,7 @@ func (editParams *EditValidatorParameters) DetectChanges(verbose bool) {
 }
 
 // EvaluateChanges - evaluates which changes have taken place and if they were successful
-func (editParams *EditValidatorParameters) EvaluateChanges(validatorInfo restaking.SimplifiedValidatorWrapper, verbose bool) bool {
+func (editParams *EditValidatorParameters) EvaluateChanges(validatorInfo restaking.PlainValidatorWrapper, verbose bool) bool {
 	successfulChangeCount := uint32(0)
 
 	if editParams.Changes.ValidatorName {
@@ -216,7 +216,7 @@ func (editParams *EditValidatorParameters) EvaluateChanges(validatorInfo restaki
 	if editParams.Changes.ReplaceBlsKey {
 
 		editBlsKes := hexutils.BytesToHex(editParams.Validator.BLSKeys[0].ShardPublicKey.Key[:])
-		returnBlsKeys := hexutils.BytesToHex(validatorInfo.Validator.SlotPubKeys[0][:])
+		returnBlsKeys := hexutils.BytesToHex(validatorInfo.Validator.SlotPubKeys[0].Key[:])
 
 		if editBlsKes == returnBlsKeys {
 			logger.StakingLog(fmt.Sprintf("Successfully replace blsKey of the validator to %s", editBlsKes), verbose)

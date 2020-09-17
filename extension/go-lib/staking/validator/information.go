@@ -30,7 +30,7 @@ import (
 //	return result, nil
 //}
 
-func Information(rpcClient *goSdkRPC.HTTPMessenger, validatorAddress common.Address) (*restaking.SimplifiedValidatorWrapper, error) {
+func Information(rpcClient *goSdkRPC.HTTPMessenger, validatorAddress common.Address) (*restaking.PlainValidatorWrapper, error) {
 
 	return rpcClient.GetClient().GetValidatorInformation(context.Background(), validatorAddress, nil)
 
