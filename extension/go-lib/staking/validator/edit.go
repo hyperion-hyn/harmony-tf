@@ -25,6 +25,7 @@ func Edit(
 	rpcClient *rpc.HTTPMessenger,
 	chain *common.ChainID,
 	validatorAddress string,
+	operatorAddress string,
 	description restaking.Description_,
 	commissionRate *ethCommon.Dec,
 	minimumSelfDelegation ethCommon.Dec,
@@ -41,7 +42,7 @@ func Edit(
 ) (map[string]interface{}, error) {
 	statusEnum := determineEposStatus(status)
 
-	payloadGenerator, err := editTransactionGenerator(address.Parse(validatorAddress), account.Address, description, commissionRate, maximumTotalDelegation, blsKeyToRemove, blsKeyToAdd, statusEnum)
+	payloadGenerator, err := editTransactionGenerator(address.Parse(validatorAddress), address.Parse(operatorAddress), description, commissionRate, maximumTotalDelegation, blsKeyToRemove, blsKeyToAdd, statusEnum)
 	if err != nil {
 		return nil, err
 	}

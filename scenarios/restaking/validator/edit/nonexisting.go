@@ -23,20 +23,20 @@ func NonExistingScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
-	account, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.Create.Validator.Amount, fundingMultiple)
+	account, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to fetch latest account balance for the account %s, address: %s", account.Name, account.Address)
 		testCase.HandleError(err, &account, msg)
 		return
 	}
 
-	testCase.StakingParameters.Create.Validator.Account = &account
+	testCase.StakingParameters.CreateRestaking.Validator.Account = &account
 	tx, err := staking.BasicEditValidator(testCase, account.Address, account.Address, &account, nil, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to edit validator using account %s, address: %s", account.Name, account.Address)

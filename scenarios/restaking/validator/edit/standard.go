@@ -3,6 +3,7 @@ package edit
 import (
 	"fmt"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
+	"github.com/hyperion-hyn/hyperion-tf/restaking"
 	"time"
 
 	"github.com/hyperion-hyn/hyperion-tf/accounts"
@@ -25,13 +26,13 @@ func StandardScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, 1)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Validator.Amount, 1)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
-	account, validator, err := staking.ReuseOrCreateValidator(testCase, validatorName)
+	account, validator, err := restaking.ReuseOrCreateValidator(testCase, validatorName)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to create validator using account %s", validatorName)
 		testCase.HandleError(err, account, msg)
@@ -49,7 +50,7 @@ func StandardScenario(testCase *testing.TestCase) {
 
 		for i := uint32(0); i < testCase.StakingParameters.Edit.Repeat; i++ {
 			if i == 0 || (lastEditTxErr == nil && lastEditTx.Success && lastSuccessfullyUpdated) {
-				blsKeyToRemove, blsKeyToAdd, blsErr := staking.ManageBLSKeys(validator, testCase.StakingParameters.Edit.Mode, testCase.StakingParameters.Create.BLSSignatureMessage, testCase.Verbose)
+				blsKeyToRemove, blsKeyToAdd, blsErr := staking.ManageBLSKeys(validator, testCase.StakingParameters.Edit.Mode, testCase.StakingParameters.CreateRestaking.BLSSignatureMessage, testCase.Verbose)
 				if blsErr != nil {
 					msg := fmt.Sprintf("Failed to generate new bls key to use for adding to existing validator %s", validator.Account.Address)
 					testCase.HandleError(blsErr, validator.Account, msg)
@@ -62,7 +63,7 @@ func StandardScenario(testCase *testing.TestCase) {
 					testCase.StakingParameters.Edit.Validator.BLSKeys = append(testCase.StakingParameters.Edit.Validator.BLSKeys, *blsKeyToRemove)
 				}
 
-				lastEditTx, lastEditTxErr = staking.BasicEditValidator(testCase, validator.ValidatorAddress, validator.Account.Address, validator.Account, blsKeyToRemove, blsKeyToAdd)
+				lastEditTx, lastEditTxErr = staking.BasicEditValidator(testCase, validator.ValidatorAddress, validator.OperatorAddress, validator.Account, blsKeyToRemove, blsKeyToAdd)
 				if lastEditTxErr != nil {
 					msg := fmt.Sprintf("Failed to edit validator using account %s, address: %s", validator.Account.Name, validator.Account.Address)
 					testCase.HandleError(lastEditTxErr, validator.Account, msg)

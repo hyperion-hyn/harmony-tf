@@ -3,6 +3,7 @@ package restaking
 import (
 	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/hyperion-hyn/hyperion-tf/balances"
 	"github.com/hyperion-hyn/hyperion-tf/config"
 	"github.com/hyperion-hyn/hyperion-tf/crypto"
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
@@ -12,7 +13,77 @@ import (
 	sdkTxs "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/transactions"
 	"github.com/hyperion-hyn/hyperion-tf/logger"
 	"github.com/hyperion-hyn/hyperion-tf/testing"
+	"time"
 )
+
+// ReuseOrCreateValidator - reuse an existing validator or create a new one
+func ReuseOrCreateValidator(testCase *testing.TestCase, validatorName string) (account *sdkAccounts.Account, validator *sdkValidator.Validator, err error) {
+	if testCase.StakingParameters.ReuseExistingValidator && config.Configuration.Framework.CurrentValidator != nil {
+		return config.Configuration.Framework.CurrentValidator.Account, config.Configuration.Framework.CurrentValidator, nil
+	}
+
+	validator = &testCase.StakingParameters.CreateRestaking.Validator
+	acc, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.CreateRestaking.Validator.Amount, 1)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	account = &acc
+	validator.Account = account
+	testCase.StakingParameters.CreateRestaking.Validator.Account = account
+
+	testCase.StakingParameters.CreateRestaking.Map3Node.Account = &acc
+	map3NodeTx, _, map3NodeExists, err := BasicCreateMap3Node(testCase, account, nil, nil)
+	if err != nil {
+		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", account.Name, account.Address)
+		testCase.HandleError(err, account, msg)
+		return
+	}
+
+	if !map3NodeExists {
+		msg := fmt.Sprintf("Create map3Node not exist ")
+		testCase.HandleError(err, account, msg)
+		return
+	}
+
+	logger.Log(fmt.Sprintf("sleep %d second for map3Node active", config.Configuration.Network.WaitMap3ActiveTime), true)
+	time.Sleep(time.Duration(config.Configuration.Network.WaitMap3ActiveTime) * time.Second)
+
+	tx, createdBlsKeys, validatorExists, err := BasicCreateValidator(testCase, map3NodeTx.ContractAddress, validator.Account, nil, nil)
+	if err != nil {
+		return account, nil, err
+	}
+	testCase.Transactions = append(testCase.Transactions, tx)
+	testCase.StakingParameters.CreateRestaking.Validator.BLSKeys = createdBlsKeys
+	testCase.StakingParameters.CreateRestaking.Validator.ValidatorAddress = tx.ContractAddress
+	testCase.StakingParameters.CreateRestaking.Validator.OperatorAddress = map3NodeTx.ContractAddress
+
+	if config.Configuration.Network.StakingWaitTime > 0 {
+		time.Sleep(time.Duration(config.Configuration.Network.StakingWaitTime) * time.Second)
+	}
+
+	validator.Exists = validatorExists
+	validator.BLSKeys = createdBlsKeys
+	validator.ValidatorAddress = tx.ContractAddress
+	validator.OperatorAddress = map3NodeTx.ContractAddress
+
+	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
+	accountEndingBalance, _ := balances.GetBalance(validator.Account.Address)
+	expectedAccountEndingBalance := account.Balance.Sub(testCase.StakingParameters.CreateRestaking.Validator.Amount)
+
+	if testCase.Expected {
+		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f after creating the validator - expected value: %f (or less)", validator.Account.Name, validator.Account.Address, accountEndingBalance, expectedAccountEndingBalance), testCase.Verbose)
+	} else {
+		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f after creating the validator", validator.Account.Name, validator.Account.Address, accountEndingBalance), testCase.Verbose)
+	}
+
+	if testCase.StakingParameters.ReuseExistingValidator && config.Configuration.Framework.CurrentValidator == nil && validatorExists {
+		config.Configuration.Framework.CurrentValidator = validator
+		validator = config.Configuration.Framework.CurrentValidator
+	}
+
+	return account, validator, nil
+}
 
 func BasicCreateMap3Node(testCase *testing.TestCase, validatorAccount *sdkAccounts.Account, senderAccount *sdkAccounts.Account, blsKeys []sdkCrypto.BLSKey) (sdkTxs.Transaction, []sdkCrypto.BLSKey, bool, error) {
 	if senderAccount == nil {

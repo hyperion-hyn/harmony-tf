@@ -43,6 +43,7 @@ func ReuseOrCreateValidator(testCase *testing.TestCase, validatorName string) (a
 	testCase.Transactions = append(testCase.Transactions, tx)
 	testCase.StakingParameters.Create.Validator.BLSKeys = createdBlsKeys
 	testCase.StakingParameters.Create.Validator.ValidatorAddress = tx.ContractAddress
+	testCase.StakingParameters.Create.Validator.OperatorAddress = validator.Account.Address
 
 	if config.Configuration.Network.StakingWaitTime > 0 {
 		time.Sleep(time.Duration(config.Configuration.Network.StakingWaitTime) * time.Second)
@@ -51,6 +52,7 @@ func ReuseOrCreateValidator(testCase *testing.TestCase, validatorName string) (a
 	validator.Exists = validatorExists
 	validator.BLSKeys = createdBlsKeys
 	validator.ValidatorAddress = tx.ContractAddress
+	validator.OperatorAddress = validator.Account.Address
 
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
 	accountEndingBalance, _ := balances.GetBalance(validator.Account.Address)
@@ -113,7 +115,7 @@ func BasicCreateValidator(testCase *testing.TestCase, validatorAccount *sdkAccou
 }
 
 // BasicEditValidator - helper method to edit a validator
-func BasicEditValidator(testCase *testing.TestCase, validatorAddress string, senderAccount *sdkAccounts.Account, blsKeyToRemove *sdkCrypto.BLSKey, blsKeyToAdd *sdkCrypto.BLSKey) (sdkTxs.Transaction, error) {
+func BasicEditValidator(testCase *testing.TestCase, validatorAddress string, operatorAddress string, senderAccount *sdkAccounts.Account, blsKeyToRemove *sdkCrypto.BLSKey, blsKeyToAdd *sdkCrypto.BLSKey) (sdkTxs.Transaction, error) {
 	if senderAccount == nil {
 		panic("senderAccount is nil")
 	}
@@ -122,7 +124,7 @@ func BasicEditValidator(testCase *testing.TestCase, validatorAddress string, sen
 	testCase.StakingParameters.Edit.DetectChanges(testCase.Verbose)
 	logger.TransactionLog(fmt.Sprintf("Sending edit validator transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
 
-	editRawTx, err := EditValidator(validatorAddress, senderAccount, &testCase.StakingParameters, blsKeyToRemove, blsKeyToAdd)
+	editRawTx, err := EditValidator(validatorAddress, operatorAddress, senderAccount, &testCase.StakingParameters, blsKeyToRemove, blsKeyToAdd)
 	if err != nil {
 		return sdkTxs.Transaction{}, err
 	}

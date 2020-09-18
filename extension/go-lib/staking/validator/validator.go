@@ -12,6 +12,7 @@ import (
 // Validator - represents the validator details
 type Validator struct {
 	ValidatorAddress string `yaml:"-"`
+	OperatorAddress  string `yaml:"-"`
 	Account          *accounts.Account
 	Details          ValidatorDetails `yaml:"details"`
 	Commission       Commission       `yaml:"commission"`

@@ -74,7 +74,7 @@ func CreateValidator(validatorAccount *sdkAccounts.Account, senderAccount *sdkAc
 }
 
 // EditValidator - edits a given validator using the provided information
-func EditValidator(validatorAddress string, senderAccount *sdkAccounts.Account, params *testParams.StakingParameters, blsKeyToRemove *sdkCrypto.BLSKey, blsKeyToAdd *sdkCrypto.BLSKey) (map[string]interface{}, error) {
+func EditValidator(validatorAddress string, operatorAddress string, senderAccount *sdkAccounts.Account, params *testParams.StakingParameters, blsKeyToRemove *sdkCrypto.BLSKey, blsKeyToAdd *sdkCrypto.BLSKey) (map[string]interface{}, error) {
 	if senderAccount == nil {
 		panic("sender account is nil")
 	}
@@ -118,6 +118,7 @@ func EditValidator(validatorAddress string, senderAccount *sdkAccounts.Account, 
 		rpcClient,
 		config.Configuration.Network.API.ChainID,
 		validatorAddress,
+		operatorAddress,
 		params.Edit.Validator.ToStakingDescription(),
 		commissionRate,
 		params.Edit.Validator.MinimumSelfDelegation,

@@ -2,13 +2,14 @@ package edit
 
 import (
 	"fmt"
+	"github.com/hyperion-hyn/hyperion-tf/staking"
 	"time"
 
 	"github.com/hyperion-hyn/hyperion-tf/accounts"
 	"github.com/hyperion-hyn/hyperion-tf/config"
 	"github.com/hyperion-hyn/hyperion-tf/funding"
 	"github.com/hyperion-hyn/hyperion-tf/logger"
-	"github.com/hyperion-hyn/hyperion-tf/staking"
+	"github.com/hyperion-hyn/hyperion-tf/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/testing"
 )
 
@@ -23,13 +24,13 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Validator.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
-	account, validator, err := staking.ReuseOrCreateValidator(testCase, validatorName)
+	account, validator, err := restaking.ReuseOrCreateValidator(testCase, validatorName)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to create validator using account %s", validatorName)
 		testCase.HandleError(err, account, msg)
@@ -38,14 +39,14 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 
 	if validator.Exists {
 		invalidAccountName := accounts.GenerateTestCaseAccountName(testCase.Name, "InvalidChanger")
-		invalidAccount, err := testing.GenerateAndFundAccount(testCase, invalidAccountName, testCase.StakingParameters.Create.Validator.Amount, fundingMultiple)
+		invalidAccount, err := testing.GenerateAndFundAccount(testCase, invalidAccountName, testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to generate and fund account %s", invalidAccountName)
 			testCase.HandleError(err, validator.Account, msg)
 			return
 		}
 
-		lastEditTx, lastEditTxErr := staking.BasicEditValidator(testCase, validator.ValidatorAddress, invalidAccount.Address, &invalidAccount, nil, nil)
+		lastEditTx, lastEditTxErr := staking.BasicEditValidator(testCase, validator.ValidatorAddress, validator.OperatorAddress, &invalidAccount, nil, nil)
 		if lastEditTxErr != nil {
 			msg := fmt.Sprintf("Failed to edit validator using account %s, address: %s", invalidAccount.Name, invalidAccount.Address)
 			testCase.HandleError(lastEditTxErr, validator.Account, msg)
