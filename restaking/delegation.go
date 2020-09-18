@@ -1,4 +1,4 @@
-package staking
+package restaking
 
 import (
 	"errors"
@@ -63,8 +63,8 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, vali
 			config.Configuration.Network.API.ChainID,
 			delegatorAddress,
 			validatorAddress,
-			params.Delegation.Delegate.Gas.Limit,
-			params.Delegation.Delegate.Gas.Price,
+			params.DelegationRestaking.Delegate.Gas.Limit,
+			params.DelegationRestaking.Delegate.Gas.Price,
 			currentNonce,
 			config.Configuration.Account.Passphrase,
 			config.Configuration.Network.API.NodeAddress(),
@@ -78,8 +78,8 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, vali
 			config.Configuration.Network.API.ChainID,
 			delegatorAddress,
 			validatorAddress,
-			params.Delegation.Undelegate.Gas.Limit,
-			params.Delegation.Undelegate.Gas.Price,
+			params.DelegationRestaking.Undelegate.Gas.Limit,
+			params.DelegationRestaking.Undelegate.Gas.Price,
 			currentNonce,
 			config.Configuration.Account.Passphrase,
 			config.Configuration.Network.API.NodeAddress(),
@@ -95,11 +95,11 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, vali
 }
 
 func validateDelegationValues(params *testParams.StakingParameters) error {
-	if params.Delegation.Delegate.RawAmount != "" && (params.Delegation.Delegate.Amount.IsNil() || params.Delegation.Delegate.Amount.LT(ethCommon.NewDec(0))) {
+	if params.DelegationRestaking.Delegate.RawAmount != "" && (params.DelegationRestaking.Delegate.Amount.IsNil() || params.DelegationRestaking.Delegate.Amount.LT(ethCommon.NewDec(0))) {
 		return errNilDelegate
 	}
 
-	if params.Delegation.Undelegate.RawAmount != "" && (params.Delegation.Undelegate.Amount.IsNil() || params.Delegation.Undelegate.Amount.LT(ethCommon.NewDec(0))) {
+	if params.DelegationRestaking.Undelegate.RawAmount != "" && (params.DelegationRestaking.Undelegate.Amount.IsNil() || params.DelegationRestaking.Undelegate.Amount.LT(ethCommon.NewDec(0))) {
 		return errNilUndelegate
 	}
 

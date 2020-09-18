@@ -148,3 +148,57 @@ func validateMap3NodeValues(map3Node sdkMap3Node.Map3Node) error {
 
 	return nil
 }
+
+func CreateDelegateMap3Node(map3NodeAccount *sdkAccounts.Account, senderAccount *sdkAccounts.Account, params *testParams.StakingParameters, blsKeys []sdkCrypto.BLSKey) (map[string]interface{}, error) {
+	if err := validateMap3NodeValues(params.DelegationRestaking.Delegate.Map3Node); err != nil {
+		return nil, err
+	}
+
+	if senderAccount == nil {
+		senderAccount = map3NodeAccount
+	}
+	senderAccount.Unlock()
+
+	if params.DelegationRestaking.Delegate.Map3Node.Account == nil {
+		params.DelegationRestaking.Delegate.Map3Node.Account = map3NodeAccount
+	}
+
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
+	if err != nil {
+		return nil, err
+	}
+
+	var currentNonce uint64
+	if params.Nonce < 0 {
+		currentNonce = sdkNetworkNonce.CurrentNonce(rpcClient, senderAccount.Address)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		currentNonce = uint64(params.Nonce)
+	}
+
+	txResult, err := sdkMap3Node.Create(
+		senderAccount.Keystore,
+		senderAccount.Account,
+		rpcClient,
+		config.Configuration.Network.API.ChainID,
+		map3NodeAccount.Address,
+		params.DelegationRestaking.Delegate.Map3Node.ToMicroStakeDescription(),
+		params.DelegationRestaking.Delegate.Map3Node.Commission,
+		blsKeys,
+		params.DelegationRestaking.Delegate.Map3Node.Amount,
+		params.Gas.Limit,
+		params.Gas.Price,
+		currentNonce,
+		config.Configuration.Account.Passphrase,
+		config.Configuration.Network.API.NodeAddress(),
+		params.Timeout,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return txResult, nil
+}

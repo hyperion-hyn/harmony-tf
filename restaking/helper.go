@@ -3,14 +3,17 @@ package restaking
 import (
 	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/hyperion-hyn/hyperion-tf/balances"
 	"github.com/hyperion-hyn/hyperion-tf/config"
 	"github.com/hyperion-hyn/hyperion-tf/crypto"
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	sdkCrypto "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
 	sdkMap3Node "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/microstake/map3node"
+	sdkDelegation "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/delegation"
 	sdkValidator "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/validator"
 	sdkTxs "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/transactions"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 	"github.com/hyperion-hyn/hyperion-tf/logger"
 	"github.com/hyperion-hyn/hyperion-tf/testing"
 	"time"
@@ -163,6 +166,102 @@ func BasicCreateValidator(testCase *testing.TestCase, map3NodeAddress string, va
 	validatorExists := sdkValidator.Exists(rpcClient, tx.ContractAddress)
 	addressExistsColoring := logger.ResultColoring(validatorExists, true)
 	logger.StakingLog(fmt.Sprintf("Validator with address %s exists: %s", tx.ContractAddress, addressExistsColoring), testCase.Verbose)
+
+	return tx, blsKeys, validatorExists, nil
+}
+
+// BasicDelegation - helper method to perform delegation
+func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, validatorAddress string, delegatorAddress string, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
+	logger.StakingLog("Proceeding to perform delegation...", testCase.Verbose)
+	logger.TransactionLog(fmt.Sprintf("Sending delegation transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
+
+	rawTx, err := Delegate(delegatorAccount, validatorAddress, delegatorAddress, senderAccount, &testCase.StakingParameters)
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+	tx := sdkTxs.ToTransaction(delegatorAccount.Address, validatorAddress, rawTx, err)
+	txResultColoring := logger.ResultColoring(tx.Success, true)
+	logger.TransactionLog(fmt.Sprintf("Performed delegation - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
+
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
+	delegations, err := sdkDelegation.ByValidator(rpcClient, validatorAddress)
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+
+	delegationSucceeded := false
+	for _, del := range delegations {
+		if del.DelegatorAddress == address.Parse(delegatorAddress) {
+			delegationSucceeded = true
+			break
+		}
+	}
+
+	delegationSucceededColoring := logger.ResultColoring(delegationSucceeded, true)
+	logger.StakingLog(fmt.Sprintf("Delegation from %s to %s of %f, successful: %s", delegatorAccount.Address, validatorAddress, testCase.StakingParameters.DelegationRestaking.Delegate.Amount, delegationSucceededColoring), testCase.Verbose)
+
+	return tx, delegationSucceeded, nil
+}
+
+// BasicUndelegation - helper method to perform undelegation
+func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, validatorAddress string, delegatorAddress string, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
+	logger.StakingLog("Proceeding to perform undelegation...", testCase.Verbose)
+	logger.TransactionLog(fmt.Sprintf("Sending undelegation transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
+
+	rawTx, err := Undelegate(delegatorAccount, validatorAddress, delegatorAddress, senderAccount, &testCase.StakingParameters)
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+	tx := sdkTxs.ToTransaction(delegatorAccount.Address, validatorAddress, rawTx, err)
+	txResultColoring := logger.ResultColoring(tx.Success, true)
+	logger.TransactionLog(fmt.Sprintf("Performed undelegation - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
+
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
+	delegations, err := sdkDelegation.ByValidator(rpcClient, validatorAddress)
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+
+	undelegationSucceeded := false
+	var undelegationAmount ethCommon.Dec
+	for _, del := range delegations {
+		if del.DelegatorAddress == address.Parse(delegatorAddress) && del.Undelegation.Amount.Sign() > 0 {
+			undelegationSucceeded = true
+			undelegationAmount = ethCommon.NewDecFromBigInt(del.Undelegation.Amount).QuoInt64(params.Ether)
+			break
+		}
+	}
+
+	undelegationSucceededColoring := logger.ResultColoring(undelegationSucceeded, true)
+	logger.StakingLog(fmt.Sprintf("Performed undelegation from validator %s by delegator %s,expect amount: %f, actual undelegation amount %f ,successful: %s", validatorAddress, delegatorAccount.Address, testCase.StakingParameters.DelegationRestaking.Undelegate.Amount, undelegationAmount, undelegationSucceededColoring), testCase.Verbose)
+
+	return tx, undelegationSucceeded, nil
+}
+
+func BasicCreateDelegateMap3Node(testCase *testing.TestCase, validatorAccount *sdkAccounts.Account, senderAccount *sdkAccounts.Account, blsKeys []sdkCrypto.BLSKey) (sdkTxs.Transaction, []sdkCrypto.BLSKey, bool, error) {
+	if senderAccount == nil {
+		senderAccount = validatorAccount
+	}
+
+	if blsKeys == nil || len(blsKeys) == 0 {
+		blsKeys = crypto.GenerateBlsKeys(1, "")
+	}
+
+	logger.TransactionLog(fmt.Sprintf("Sending create map3Node transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
+
+	rawTx, err := CreateDelegateMap3Node(validatorAccount, senderAccount, &testCase.StakingParameters, blsKeys)
+	if err != nil {
+		return sdkTxs.Transaction{}, nil, false, err
+	}
+
+	tx := sdkTxs.ToTransaction(senderAccount.Address, senderAccount.Address, rawTx, err)
+	txResultColoring := logger.ResultColoring(tx.Success, true)
+	logger.TransactionLog(fmt.Sprintf("Performed create map3Node - address: %s - transaction hash: %s, tx successful: %s", validatorAccount.Address, tx.TransactionHash, txResultColoring), testCase.Verbose)
+
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
+	validatorExists := sdkMap3Node.Exists(rpcClient, tx.ContractAddress)
+	addressExistsColoring := logger.ResultColoring(validatorExists, true)
+	logger.StakingLog(fmt.Sprintf("Map3Node with address %s exists: %s", tx.ContractAddress, addressExistsColoring), testCase.Verbose)
 
 	return tx, blsKeys, validatorExists, nil
 }

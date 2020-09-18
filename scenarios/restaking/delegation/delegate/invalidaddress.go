@@ -2,6 +2,7 @@ package delegate
 
 import (
 	"fmt"
+	"github.com/hyperion-hyn/hyperion-tf/restaking"
 	"time"
 
 	tfAccounts "github.com/hyperion-hyn/hyperion-tf/accounts"
@@ -24,7 +25,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	requiredFunding := testCase.StakingParameters.Create.Validator.Amount.Add(testCase.StakingParameters.Delegation.Amount)
+	requiredFunding := testCase.StakingParameters.CreateRestaking.Validator.Amount.Add(testCase.StakingParameters.DelegationRestaking.Amount)
 	fundingMultiple := int64(1)
 	_, _, err := funding.CalculateFundingDetails(requiredFunding, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
@@ -40,7 +41,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 
 	for _, accountType := range accountTypes {
 		accountName := tfAccounts.GenerateTestCaseAccountName(testCase.Name, accountType)
-		account, err := testing.GenerateAndFundAccount(testCase, accountName, testCase.StakingParameters.Create.Validator.Amount, fundingMultiple)
+		account, err := testing.GenerateAndFundAccount(testCase, accountName, testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to generate and fund %s account %s", accountType, accountName)
 			testCase.HandleError(err, &account, msg)
@@ -50,8 +51,26 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	validatorAccount, delegatorAccount, senderAccount := accounts["validator"], accounts["delegator"], accounts["sender"]
-	testCase.StakingParameters.Create.Validator.Account = &validatorAccount
-	tx, _, validatorExists, err := staking.BasicCreateValidator(testCase, &validatorAccount, &senderAccount, nil)
+
+	testCase.StakingParameters.CreateRestaking.Map3Node.Account = &validatorAccount
+	map3NodeTx, _, map3NodeExists, err := restaking.BasicCreateMap3Node(testCase, &validatorAccount, nil, nil)
+	if err != nil {
+		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", validatorAccount.Name, validatorAccount.Address)
+		testCase.HandleError(err, &validatorAccount, msg)
+		return
+	}
+
+	if !map3NodeExists {
+		msg := fmt.Sprintf("Create map3Node not exist ")
+		testCase.HandleError(err, &delegatorAccount, msg)
+		return
+	}
+
+	logger.Log(fmt.Sprintf("sleep %d second for map3Node active", config.Configuration.Network.WaitMap3ActiveTime), true)
+	time.Sleep(time.Duration(config.Configuration.Network.WaitMap3ActiveTime) * time.Second)
+
+	testCase.StakingParameters.CreateRestaking.Validator.Account = &validatorAccount
+	tx, _, validatorExists, err := restaking.BasicCreateValidator(testCase, map3NodeTx.ContractAddress, &validatorAccount, &senderAccount, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", validatorAccount.Name, validatorAccount.Address)
 		testCase.HandleError(err, &validatorAccount, msg)
@@ -65,7 +84,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
 	accountEndingBalance, _ := balances.GetBalance(validatorAccount.Address)
-	expectedAccountEndingBalance := validatorAccount.Balance.Sub(testCase.StakingParameters.Create.Validator.Amount)
+	expectedAccountEndingBalance := validatorAccount.Balance.Sub(testCase.StakingParameters.CreateRestaking.Validator.Amount)
 
 	if testCase.Expected {
 		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f  after the test - expected value: %f (or less)", validatorAccount.Name, validatorAccount.Address, accountEndingBalance, expectedAccountEndingBalance), testCase.Verbose)
@@ -76,7 +95,25 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	successfulValidatorCreation := tx.Success && accountEndingBalance.LT(expectedAccountEndingBalance) && validatorExists
 
 	if successfulValidatorCreation {
-		delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, tx.ContractAddress, delegatorAccount.Address, &senderAccount)
+
+		testCase.StakingParameters.DelegationRestaking.Delegate.Map3Node.Account = &delegatorAccount
+		map3NodeTx, _, map3NodeExists, err := restaking.BasicCreateDelegateMap3Node(testCase, &delegatorAccount, nil, nil)
+		if err != nil {
+			msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", delegatorAccount.Name, delegatorAccount.Address)
+			testCase.HandleError(err, &delegatorAccount, msg)
+			return
+		}
+
+		if !map3NodeExists {
+			msg := fmt.Sprintf("Create map3Node not exist ")
+			testCase.HandleError(err, &delegatorAccount, msg)
+			return
+		}
+
+		logger.Log(fmt.Sprintf("sleep %d second for map3Node active", config.Configuration.Network.WaitMap3ActiveTime), true)
+		time.Sleep(time.Duration(config.Configuration.Network.WaitMap3ActiveTime) * time.Second)
+
+		delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, tx.ContractAddress, map3NodeTx.ContractAddress, &senderAccount)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address)
 			testCase.HandleError(err, &validatorAccount, msg)

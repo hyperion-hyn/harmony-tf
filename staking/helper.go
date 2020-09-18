@@ -136,11 +136,11 @@ func BasicEditValidator(testCase *testing.TestCase, validatorAddress string, ope
 }
 
 // BasicDelegation - helper method to perform delegation
-func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, validatorAddress string, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
+func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, validatorAddress string, delegatorAddress string, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
 	logger.StakingLog("Proceeding to perform delegation...", testCase.Verbose)
 	logger.TransactionLog(fmt.Sprintf("Sending delegation transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
 
-	rawTx, err := Delegate(delegatorAccount, validatorAddress, senderAccount, &testCase.StakingParameters)
+	rawTx, err := Delegate(delegatorAccount, validatorAddress, delegatorAddress, senderAccount, &testCase.StakingParameters)
 	if err != nil {
 		return sdkTxs.Transaction{}, false, err
 	}
@@ -169,11 +169,11 @@ func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.A
 }
 
 // BasicUndelegation - helper method to perform undelegation
-func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, validatorAddress string, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
+func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, validatorAddress string, delegatorAddress string, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
 	logger.StakingLog("Proceeding to perform undelegation...", testCase.Verbose)
 	logger.TransactionLog(fmt.Sprintf("Sending undelegation transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
 
-	rawTx, err := Undelegate(delegatorAccount, validatorAddress, senderAccount, &testCase.StakingParameters)
+	rawTx, err := Undelegate(delegatorAccount, validatorAddress, delegatorAddress, senderAccount, &testCase.StakingParameters)
 	if err != nil {
 		return sdkTxs.Transaction{}, false, err
 	}

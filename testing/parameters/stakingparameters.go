@@ -18,7 +18,8 @@ type StakingParameters struct {
 	EditMap3Node       EditMap3NodeParameters   `yaml:"editMap3Node"`
 	DelegationMap3Node DelegationParameters     `yaml:"delegationMap3Node"`
 
-	CreateRestaking CreateRestakingParameters `yaml:"createRestaking"`
+	CreateRestaking     CreateRestakingParameters     `yaml:"createRestaking"`
+	DelegationRestaking DelegationRestakingParameters `yaml:"delegationRestaking"`
 
 	Mode                   string `yaml:"mode"`
 	ReuseExistingValidator bool   `yaml:"reuse_existing_validator"`
@@ -60,6 +61,10 @@ func (params *StakingParameters) Initialize() (err error) {
 	}
 
 	if err = params.CreateRestaking.Initialize(); err != nil {
+		return err
+	}
+
+	if err = params.DelegationRestaking.Initialize(); err != nil {
 		return err
 	}
 

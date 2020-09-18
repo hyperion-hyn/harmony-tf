@@ -46,7 +46,7 @@ func StandardScenario(testCase *testing.TestCase) {
 			return
 		}
 
-		delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, validator.ValidatorAddress, nil)
+		delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, validator.ValidatorAddress, delegatorAccount.Address, nil)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validator.Account.Name, validator.Account.Address)
 			testCase.HandleError(err, validator.Account, msg)

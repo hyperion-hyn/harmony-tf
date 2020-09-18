@@ -2,6 +2,7 @@ package delegate
 
 import (
 	"fmt"
+	"github.com/hyperion-hyn/hyperion-tf/restaking"
 	"time"
 
 	"github.com/hyperion-hyn/hyperion-tf/accounts"
@@ -23,7 +24,7 @@ func NonExistingScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Delegation.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.DelegationRestaking.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -37,14 +38,31 @@ func NonExistingScenario(testCase *testing.TestCase) {
 	}
 
 	delegatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Delegator")
-	delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.Delegation.Amount, fundingMultiple)
+	delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.DelegationRestaking.Amount, fundingMultiple)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to generate and fund %s account", delegatorName)
 		testCase.HandleError(err, &delegatorAccount, msg)
 		return
 	}
 
-	delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, validatorAccount.Address, delegatorAccount.Address, nil)
+	testCase.StakingParameters.DelegationRestaking.Delegate.Map3Node.Account = &delegatorAccount
+	map3NodeTx, _, map3NodeExists, err := restaking.BasicCreateDelegateMap3Node(testCase, &delegatorAccount, nil, nil)
+	if err != nil {
+		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", delegatorAccount.Name, delegatorAccount.Address)
+		testCase.HandleError(err, &delegatorAccount, msg)
+		return
+	}
+
+	if !map3NodeExists {
+		msg := fmt.Sprintf("Create map3Node not exist ")
+		testCase.HandleError(err, &delegatorAccount, msg)
+		return
+	}
+
+	logger.Log(fmt.Sprintf("sleep %d second for map3Node active", config.Configuration.Network.WaitMap3ActiveTime), true)
+	time.Sleep(time.Duration(config.Configuration.Network.WaitMap3ActiveTime) * time.Second)
+
+	delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, validatorAccount.Address, map3NodeTx.ContractAddress, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address)
 		testCase.HandleError(err, &validatorAccount, msg)
