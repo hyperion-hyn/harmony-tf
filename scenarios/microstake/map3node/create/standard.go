@@ -24,20 +24,20 @@ func StandardScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Map3Node.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
 
 	accountName := accounts.GenerateTestCaseAccountName(testCase.Name, "Map3Node")
-	account, err := testing.GenerateAndFundAccount(testCase, accountName, testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, fundingMultiple)
+	account, err := testing.GenerateAndFundAccount(testCase, accountName, testCase.StakingParameters.Create.Map3Node.Amount, fundingMultiple)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to generate and fund account %s", accountName)
 		testCase.HandleError(err, &account, msg)
 		return
 	}
 
-	testCase.StakingParameters.CreateMap3Node.Map3Node.Account = &account
+	testCase.StakingParameters.Create.Map3Node.Account = &account
 	tx, _, validatorExists, err := microstake.BasicCreateMap3Node(testCase, &account, nil, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", account.Name, account.Address)
@@ -52,7 +52,7 @@ func StandardScenario(testCase *testing.TestCase) {
 
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
 	accountEndingBalance, _ := balances.GetBalance(account.Address)
-	expectedAccountEndingBalance := account.Balance.Sub(testCase.StakingParameters.CreateMap3Node.Map3Node.Amount)
+	expectedAccountEndingBalance := account.Balance.Sub(testCase.StakingParameters.Create.Map3Node.Amount)
 
 	if testCase.Expected {
 		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f  after the test - expected value: %f (or less)", account.Name, account.Address, accountEndingBalance, expectedAccountEndingBalance), testCase.Verbose)

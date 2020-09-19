@@ -22,7 +22,7 @@ func StandardScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	requiredFunding := testCase.StakingParameters.CreateMap3Node.Map3Node.Amount.Add(testCase.StakingParameters.DelegationMap3Node.Amount)
+	requiredFunding := testCase.StakingParameters.Create.Map3Node.Amount.Add(testCase.StakingParameters.DelegationMap3Node.Amount)
 	fundingMultiple := int64(1)
 	_, _, err := funding.CalculateFundingDetails(requiredFunding, fundingMultiple)
 	if testCase.ErrorOccurred(err) {

@@ -24,13 +24,13 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Map3Node.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
 
 	senderName := accounts.GenerateTestCaseAccountName(testCase.Name, "InvalidSender")
-	senderAccount, err := testing.GenerateAndFundAccount(testCase, senderName, testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, fundingMultiple)
+	senderAccount, err := testing.GenerateAndFundAccount(testCase, senderName, testCase.StakingParameters.Create.Map3Node.Amount, fundingMultiple)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to generate and fund account: %s", senderName)
 		testCase.HandleError(err, &senderAccount, msg)
@@ -47,7 +47,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 	logger.AccountLog(fmt.Sprintf("Generated account: %s, address: %s", map3NodeAccount.Name, map3NodeAccount.Address), testCase.Verbose)
 
-	testCase.StakingParameters.CreateMap3Node.Map3Node.Account = &map3NodeAccount
+	testCase.StakingParameters.Create.Map3Node.Account = &map3NodeAccount
 	tx, _, map3NodeExists, err := microstake.BasicCreateMap3Node(testCase, &map3NodeAccount, &senderAccount, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to create map3Node using account %s, address: %s", senderAccount.Name, senderAccount.Address)

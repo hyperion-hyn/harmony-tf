@@ -23,7 +23,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Map3Node.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -38,7 +38,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 
 	if map3Node.Exists {
 		invalidAccountName := accounts.GenerateTestCaseAccountName(testCase.Name, "InvalidChanger")
-		invalidAccount, err := testing.GenerateAndFundAccount(testCase, invalidAccountName, testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, fundingMultiple)
+		invalidAccount, err := testing.GenerateAndFundAccount(testCase, invalidAccountName, testCase.StakingParameters.Create.Map3Node.Amount, fundingMultiple)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to generate and fund account %s", invalidAccountName)
 			testCase.HandleError(err, map3Node.Account, msg)

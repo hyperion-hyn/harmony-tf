@@ -17,7 +17,7 @@ var (
 )
 
 func CreateMap3Node(map3NodeAccount *sdkAccounts.Account, senderAccount *sdkAccounts.Account, params *testParams.StakingParameters, blsKeys []sdkCrypto.BLSKey) (map[string]interface{}, error) {
-	if err := validateMap3NodeValues(params.CreateMap3Node.Map3Node); err != nil {
+	if err := validateMap3NodeValues(params.Create.Map3Node); err != nil {
 		return nil, err
 	}
 
@@ -26,8 +26,8 @@ func CreateMap3Node(map3NodeAccount *sdkAccounts.Account, senderAccount *sdkAcco
 	}
 	senderAccount.Unlock()
 
-	if params.CreateMap3Node.Map3Node.Account == nil {
-		params.CreateMap3Node.Map3Node.Account = map3NodeAccount
+	if params.Create.Map3Node.Account == nil {
+		params.Create.Map3Node.Account = map3NodeAccount
 	}
 
 	rpcClient, err := config.Configuration.Network.API.RPCClient()
@@ -51,10 +51,10 @@ func CreateMap3Node(map3NodeAccount *sdkAccounts.Account, senderAccount *sdkAcco
 		rpcClient,
 		config.Configuration.Network.API.ChainID,
 		map3NodeAccount.Address,
-		params.CreateMap3Node.Map3Node.ToMicroStakeDescription(),
-		params.CreateMap3Node.Map3Node.Commission,
+		params.Create.Map3Node.ToMicroStakeDescription(),
+		params.Create.Map3Node.Commission,
 		blsKeys,
-		params.CreateMap3Node.Map3Node.Amount,
+		params.Create.Map3Node.Amount,
 		params.Gas.Limit,
 		params.Gas.Price,
 		currentNonce,

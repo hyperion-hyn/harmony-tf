@@ -23,20 +23,20 @@ func NonExistingScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Map3Node.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Map3Node")
-	account, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, fundingMultiple)
+	account, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.Create.Map3Node.Amount, fundingMultiple)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to fetch latest account balance for the account %s, address: %s", account.Name, account.Address)
 		testCase.HandleError(err, &account, msg)
 		return
 	}
 
-	testCase.StakingParameters.CreateMap3Node.Map3Node.Account = &account
+	testCase.StakingParameters.Create.Map3Node.Account = &account
 	tx, err := microstake.BasicEditMap3Node(testCase, account.Address, &account, nil, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to edit validator using account %s, address: %s", account.Name, account.Address)

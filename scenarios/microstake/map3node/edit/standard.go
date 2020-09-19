@@ -25,7 +25,7 @@ func StandardScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, 1)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Map3Node.Amount, 1)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -49,7 +49,7 @@ func StandardScenario(testCase *testing.TestCase) {
 
 		for i := uint32(0); i < testCase.StakingParameters.EditMap3Node.Repeat; i++ {
 			if i == 0 || (lastEditTxErr == nil && lastEditTx.Success && lastSuccessfullyUpdated) {
-				blsKeyToRemove, blsKeyToAdd, blsErr := microstake.ManageBLSKeys(map3Node, testCase.StakingParameters.EditMap3Node.Mode, testCase.StakingParameters.CreateMap3Node.BLSSignatureMessage, testCase.Verbose)
+				blsKeyToRemove, blsKeyToAdd, blsErr := microstake.ManageBLSKeys(map3Node, testCase.StakingParameters.EditMap3Node.Mode, testCase.StakingParameters.Create.BLSSignatureMessage, testCase.Verbose)
 				if blsErr != nil {
 					msg := fmt.Sprintf("Failed to generate new bls key to use for adding to existing map3Node %s", map3Node.Account.Address)
 					testCase.HandleError(blsErr, map3Node.Account, msg)

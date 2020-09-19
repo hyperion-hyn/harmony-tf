@@ -22,7 +22,6 @@ import (
 	stakingDelegationUndelegateScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/staking/delegation/undelegate"
 	stakingCreateValidatorScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/staking/validator/create"
 	stakingEditValidatorScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/staking/validator/edit"
-	transactionScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/transactions"
 	"github.com/hyperion-hyn/hyperion-tf/testing"
 )
 
@@ -115,14 +114,6 @@ func execute() {
 	for _, testCase := range TestCases {
 		if testCase.Execute {
 			switch testCase.Scenario {
-			case "transactions/standard":
-				transactionScenarios.StandardScenario(testCase)
-			case "transactions/same_account":
-				transactionScenarios.SameAccountScenario(testCase)
-			case "transactions/multiple_senders":
-				transactionScenarios.MultipleSenderScenario(testCase)
-			case "transactions/multiple_receivers_invalid_nonce":
-				transactionScenarios.MultipleReceiverInvalidNonceScenario(testCase)
 			case "staking/validator/create/standard":
 				stakingCreateValidatorScenarios.StandardScenario(testCase)
 			case "staking/validator/create/invalid_address":

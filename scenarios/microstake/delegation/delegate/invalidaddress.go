@@ -24,7 +24,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	requiredFunding := testCase.StakingParameters.CreateMap3Node.Map3Node.Amount.Add(testCase.StakingParameters.DelegationMap3Node.Amount)
+	requiredFunding := testCase.StakingParameters.Create.Map3Node.Amount.Add(testCase.StakingParameters.DelegationMap3Node.Amount)
 	fundingMultiple := int64(1)
 	_, _, err := funding.CalculateFundingDetails(requiredFunding, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
@@ -40,7 +40,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 
 	for _, accountType := range accountTypes {
 		accountName := tfAccounts.GenerateTestCaseAccountName(testCase.Name, accountType)
-		account, err := testing.GenerateAndFundAccount(testCase, accountName, testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, fundingMultiple)
+		account, err := testing.GenerateAndFundAccount(testCase, accountName, testCase.StakingParameters.Create.Map3Node.Amount, fundingMultiple)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to generate and fund %s account %s", accountType, accountName)
 			testCase.HandleError(err, &account, msg)
@@ -50,7 +50,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	map3NodeAccount, delegatorAccount, senderAccount := accounts["map3Node"], accounts["delegator"], accounts["sender"]
-	testCase.StakingParameters.CreateMap3Node.Map3Node.Account = &map3NodeAccount
+	testCase.StakingParameters.Create.Map3Node.Account = &map3NodeAccount
 	tx, _, map3NodeExists, err := staking.BasicCreateMap3Node(testCase, &map3NodeAccount, &senderAccount, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to create map3Node using account %s, address: %s", map3NodeAccount.Name, map3NodeAccount.Address)
@@ -65,7 +65,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 
 	// The ending balance of the account that created the map3Node should be less than the funded amount since the create map3Node tx should've used the specified amount for self delegation
 	accountEndingBalance, _ := balances.GetBalance(map3NodeAccount.Address)
-	expectedAccountEndingBalance := map3NodeAccount.Balance.Sub(testCase.StakingParameters.CreateMap3Node.Map3Node.Amount)
+	expectedAccountEndingBalance := map3NodeAccount.Balance.Sub(testCase.StakingParameters.Create.Map3Node.Amount)
 
 	if testCase.Expected {
 		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f  after the test - expected value: %f (or less)", map3NodeAccount.Name, map3NodeAccount.Address, accountEndingBalance, expectedAccountEndingBalance), testCase.Verbose)

@@ -24,23 +24,23 @@ func ReuseOrCreateMap3Node(testCase *testing.TestCase, validatorName string) (ac
 		return config.Configuration.Framework.CurrentValidator.Account, config.Configuration.Framework.CurrentMap3Node, nil
 	}
 
-	map3Node = &testCase.StakingParameters.CreateMap3Node.Map3Node
-	acc, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, 1)
+	map3Node = &testCase.StakingParameters.Create.Map3Node
+	acc, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.Create.Map3Node.Amount, 1)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	account = &acc
 	map3Node.Account = account
-	testCase.StakingParameters.CreateMap3Node.Map3Node.Account = account
+	testCase.StakingParameters.Create.Map3Node.Account = account
 
 	tx, createdBlsKeys, map3NodeExists, err := BasicCreateMap3Node(testCase, map3Node.Account, nil, nil)
 	if err != nil {
 		return account, nil, err
 	}
 	testCase.Transactions = append(testCase.Transactions, tx)
-	testCase.StakingParameters.CreateMap3Node.Map3Node.BLSKeys = createdBlsKeys
-	testCase.StakingParameters.CreateMap3Node.Map3Node.Map3Address = tx.ContractAddress
+	testCase.StakingParameters.Create.Map3Node.BLSKeys = createdBlsKeys
+	testCase.StakingParameters.Create.Map3Node.Map3Address = tx.ContractAddress
 
 	if config.Configuration.Network.StakingWaitTime > 0 {
 		time.Sleep(time.Duration(config.Configuration.Network.StakingWaitTime) * time.Second)
@@ -52,7 +52,7 @@ func ReuseOrCreateMap3Node(testCase *testing.TestCase, validatorName string) (ac
 
 	// The ending balance of the account that created the map3Node should be less than the funded amount since the create map3Node tx should've used the specified amount for self delegation
 	accountEndingBalance, _ := balances.GetBalance(map3Node.Account.Address)
-	expectedAccountEndingBalance := account.Balance.Sub(testCase.StakingParameters.CreateMap3Node.Map3Node.Amount)
+	expectedAccountEndingBalance := account.Balance.Sub(testCase.StakingParameters.Create.Map3Node.Amount)
 
 	if testCase.Expected {
 		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f after creating the map3Node - expected value: %f (or less)", map3Node.Account.Name, map3Node.Account.Address, accountEndingBalance, expectedAccountEndingBalance), testCase.Verbose)
@@ -74,14 +74,14 @@ func BasicCreateMap3Node(testCase *testing.TestCase, validatorAccount *sdkAccoun
 	}
 
 	if blsKeys == nil || len(blsKeys) == 0 {
-		blsKeys = crypto.GenerateBlsKeys(testCase.StakingParameters.CreateMap3Node.BLSKeyCount, testCase.StakingParameters.CreateMap3Node.BLSSignatureMessage)
+		blsKeys = crypto.GenerateBlsKeys(testCase.StakingParameters.Create.BLSKeyCount, testCase.StakingParameters.Create.BLSSignatureMessage)
 	}
 
 	switch testCase.StakingParameters.Mode {
 	case "duplicate_bls_key", "duplicateblskey":
 		blsKeys = append(blsKeys, blsKeys[0])
 	case "amount_larger_than_balance", "amountlargerthanbalance":
-		testCase.StakingParameters.CreateMap3Node.Map3Node.Amount = testCase.StakingParameters.CreateMap3Node.Map3Node.Amount.Mul(ethCommon.NewDec(2))
+		testCase.StakingParameters.Create.Map3Node.Amount = testCase.StakingParameters.Create.Map3Node.Amount.Mul(ethCommon.NewDec(2))
 	}
 
 	if len(blsKeys) > 0 {

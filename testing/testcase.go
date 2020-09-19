@@ -53,25 +53,9 @@ func (testCase *TestCase) Initialize() {
 		}
 	}
 
-	if testCase.StakingParameters.Create.Validator.RawAmount != "" || testCase.StakingParameters.Edit.Validator.RawAmount != "" || testCase.StakingParameters.Delegation.Delegate.RawAmount != "" || testCase.StakingParameters.Delegation.Undelegate.RawAmount != "" {
-		if err := testCase.StakingParameters.Initialize(); err != nil {
-			testCase.Error = err
-			testCase.Result = false
-		}
-	}
-
-	if testCase.StakingParameters.CreateMap3Node.Map3Node.RawAmount != "" || testCase.StakingParameters.EditMap3Node.Map3Node.RawAmount != "" {
-		if err := testCase.StakingParameters.Initialize(); err != nil {
-			testCase.Error = err
-			testCase.Result = false
-		}
-	}
-
-	if testCase.StakingParameters.CreateRestaking.Map3Node.RawAmount != "" {
-		if err := testCase.StakingParameters.Initialize(); err != nil {
-			testCase.Error = err
-			testCase.Result = false
-		}
+	if err := testCase.StakingParameters.Initialize(); err != nil {
+		testCase.Error = err
+		testCase.Result = false
 	}
 
 	if config.Configuration.Network.Timeout > 0 {

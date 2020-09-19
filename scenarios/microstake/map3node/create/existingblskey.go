@@ -23,20 +23,20 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Create.Map3Node.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
 
 	map3NodeName := accounts.GenerateTestCaseAccountName(testCase.Name, "Map3Node")
-	account, err := testing.GenerateAndFundAccount(testCase, map3NodeName, testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, fundingMultiple)
+	account, err := testing.GenerateAndFundAccount(testCase, map3NodeName, testCase.StakingParameters.Create.Map3Node.Amount, fundingMultiple)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to generate and fund the account %s", map3NodeName)
 		testCase.HandleError(err, &account, msg)
 		return
 	}
 
-	testCase.StakingParameters.CreateMap3Node.Map3Node.Account = &account
+	testCase.StakingParameters.Create.Map3Node.Account = &account
 	tx, blsKeys, map3NodeExists, err := microstake.BasicCreateMap3Node(testCase, &account, nil, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to create map3Node using account %s, address: %s", account.Name, account.Address)
@@ -49,7 +49,7 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 		logger.StakingLog(fmt.Sprintf("Proceeding with trying to create a new map3Node using the previously used bls key: %s", blsKeys[0].PublicKeyHex), testCase.Verbose)
 
 		duplicateMap3NodeName := accounts.GenerateTestCaseAccountName(testCase.Name, "Map3Node_DuplicateBLSKey")
-		duplicateAccount, err := testing.GenerateAndFundAccount(testCase, duplicateMap3NodeName, testCase.StakingParameters.CreateMap3Node.Map3Node.Amount, 1)
+		duplicateAccount, err := testing.GenerateAndFundAccount(testCase, duplicateMap3NodeName, testCase.StakingParameters.Create.Map3Node.Amount, 1)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to generate and fund account: %s", duplicateMap3NodeName)
 			testCase.HandleError(err, &duplicateAccount, msg)
@@ -60,7 +60,7 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 			blsKeys = nil
 		} else {
 			// reinit identity
-			err = testCase.StakingParameters.CreateMap3Node.Initialize()
+			err = testCase.StakingParameters.Create.Initialize()
 			if err != nil {
 				msg := fmt.Sprintf("Failed to re initialize testcase")
 				testCase.HandleError(err, &duplicateAccount, msg)
@@ -68,7 +68,7 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 			}
 		}
 
-		testCase.StakingParameters.CreateMap3Node.Map3Node.Account = &duplicateAccount
+		testCase.StakingParameters.Create.Map3Node.Account = &duplicateAccount
 		duplicateTx, _, duplicateMap3NodeExists, err := microstake.BasicCreateMap3Node(testCase, &duplicateAccount, nil, blsKeys)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to create map3Node using account %s, address: %s", duplicateAccount.Name, duplicateAccount.Address)
