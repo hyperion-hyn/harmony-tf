@@ -63,9 +63,9 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, map3
 			config.Configuration.Network.API.ChainID,
 			delegator.Address,
 			map3NodeAddress,
-			params.DelegationMap3Node.Delegate.Amount,
-			params.DelegationMap3Node.Delegate.Gas.Limit,
-			params.DelegationMap3Node.Delegate.Gas.Price,
+			params.Delegation.Delegate.Amount,
+			params.Delegation.Delegate.Gas.Limit,
+			params.Delegation.Delegate.Gas.Price,
 			currentNonce,
 			config.Configuration.Account.Passphrase,
 			config.Configuration.Network.API.NodeAddress(),
@@ -79,9 +79,9 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, map3
 			config.Configuration.Network.API.ChainID,
 			delegator.Address,
 			map3NodeAddress,
-			params.DelegationMap3Node.Undelegate.Amount,
-			params.DelegationMap3Node.Undelegate.Gas.Limit,
-			params.DelegationMap3Node.Undelegate.Gas.Price,
+			params.Delegation.Undelegate.Amount,
+			params.Delegation.Undelegate.Gas.Limit,
+			params.Delegation.Undelegate.Gas.Price,
 			currentNonce,
 			config.Configuration.Account.Passphrase,
 			config.Configuration.Network.API.NodeAddress(),
@@ -97,11 +97,11 @@ func executeDelegationMethod(method string, delegator *sdkAccounts.Account, map3
 }
 
 func validateDelegationValues(params *testParams.StakingParameters) error {
-	if params.DelegationMap3Node.Delegate.RawAmount != "" && (params.DelegationMap3Node.Delegate.Amount.IsNil() || params.DelegationMap3Node.Delegate.Amount.LT(ethCommon.NewDec(0))) {
+	if params.Delegation.Delegate.RawAmount != "" && (params.Delegation.Delegate.Amount.IsNil() || params.Delegation.Delegate.Amount.LT(ethCommon.NewDec(0))) {
 		return errNilDelegate
 	}
 
-	if params.DelegationMap3Node.Undelegate.RawAmount != "" && (params.DelegationMap3Node.Undelegate.Amount.IsNil() || params.DelegationMap3Node.Undelegate.Amount.LT(ethCommon.NewDec(0))) {
+	if params.Delegation.Undelegate.RawAmount != "" && (params.Delegation.Undelegate.Amount.IsNil() || params.Delegation.Undelegate.Amount.LT(ethCommon.NewDec(0))) {
 		return errNilUndelegate
 	}
 

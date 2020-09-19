@@ -22,7 +22,7 @@ func StandardScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	requiredFunding := testCase.StakingParameters.Create.Map3Node.Amount.Add(testCase.StakingParameters.DelegationMap3Node.Amount)
+	requiredFunding := testCase.StakingParameters.Create.Map3Node.Amount.Add(testCase.StakingParameters.Delegation.Amount)
 	fundingMultiple := int64(1)
 	_, _, err := funding.CalculateFundingDetails(requiredFunding, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
@@ -39,7 +39,7 @@ func StandardScenario(testCase *testing.TestCase) {
 
 	if map3Node.Exists {
 		delegatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Delegator")
-		delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.DelegationMap3Node.Amount, fundingMultiple)
+		delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.Delegation.Amount, fundingMultiple)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to fetch latest account balance for the account %s, address: %s", delegatorAccount.Name, delegatorAccount.Address)
 			testCase.HandleError(err, &delegatorAccount, msg)

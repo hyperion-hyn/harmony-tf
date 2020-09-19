@@ -158,7 +158,7 @@ func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.A
 	}
 
 	delegationSucceededColoring := logger.ResultColoring(delegationSucceeded, true)
-	logger.StakingLog(fmt.Sprintf("DelegationMap3Node from %s to %s of %f, successful: %s", delegatorAccount.Address, map3NodeAddress, testCase.StakingParameters.DelegationMap3Node.Delegate.Amount, delegationSucceededColoring), testCase.Verbose)
+	logger.StakingLog(fmt.Sprintf("DelegationMap3Node from %s to %s of %f, successful: %s", delegatorAccount.Address, map3NodeAddress, testCase.StakingParameters.Delegation.Delegate.Amount, delegationSucceededColoring), testCase.Verbose)
 
 	return tx, delegationSucceeded, nil
 }
@@ -184,8 +184,8 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 
 	undelegationSucceeded := false
 
-	delegateAmount := testCase.StakingParameters.DelegationMap3Node.Delegate.Amount
-	undelegateAmount := testCase.StakingParameters.DelegationMap3Node.Undelegate.Amount
+	delegateAmount := testCase.StakingParameters.Delegation.Delegate.Amount
+	undelegateAmount := testCase.StakingParameters.Delegation.Undelegate.Amount
 	remainingDelegateAmount := delegateAmount.Sub(undelegateAmount)
 
 	if undelegateAmount.LT(delegateAmount) {
@@ -210,7 +210,7 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 	}
 
 	undelegationSucceededColoring := logger.ResultColoring(undelegationSucceeded, true)
-	logger.StakingLog(fmt.Sprintf("Performed undelegation from map3Node %s by delegator %s,expect amount: %f ,successful: %s", map3NodeAddress, delegatorAccount.Address, testCase.StakingParameters.DelegationMap3Node.Undelegate.Amount, undelegationSucceededColoring), testCase.Verbose)
+	logger.StakingLog(fmt.Sprintf("Performed undelegation from map3Node %s by delegator %s,expect amount: %f ,successful: %s", map3NodeAddress, delegatorAccount.Address, testCase.StakingParameters.Delegation.Undelegate.Amount, undelegationSucceededColoring), testCase.Verbose)
 
 	return tx, undelegationSucceeded, nil
 }

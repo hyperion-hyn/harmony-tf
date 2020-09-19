@@ -22,7 +22,7 @@ func StandardScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	requiredFunding := testCase.StakingParameters.Create.Map3Node.Amount.Add(testCase.StakingParameters.DelegationMap3Node.Amount)
+	requiredFunding := testCase.StakingParameters.Create.Map3Node.Amount.Add(testCase.StakingParameters.Delegation.Amount)
 	fundingMultiple := int64(1)
 	_, _, err := funding.CalculateFundingDetails(requiredFunding, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
@@ -39,7 +39,7 @@ func StandardScenario(testCase *testing.TestCase) {
 
 	if map3Node.Exists {
 		delegatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Delegator")
-		delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.DelegationMap3Node.Amount, 1)
+		delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.Delegation.Amount, 1)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to generate and fund account %s", delegatorName)
 			testCase.HandleError(err, &delegatorAccount, msg)

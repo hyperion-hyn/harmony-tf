@@ -23,7 +23,7 @@ func NonExistingScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.DelegationMap3Node.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.Delegation.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -37,7 +37,7 @@ func NonExistingScenario(testCase *testing.TestCase) {
 	}
 
 	delegatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Delegator")
-	delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.DelegationMap3Node.Amount, fundingMultiple)
+	delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.Delegation.Amount, fundingMultiple)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to generate and fund %s account", delegatorName)
 		testCase.HandleError(err, &delegatorAccount, msg)
