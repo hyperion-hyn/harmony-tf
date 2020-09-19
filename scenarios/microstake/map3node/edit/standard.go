@@ -47,19 +47,19 @@ func StandardScenario(testCase *testing.TestCase) {
 		)
 		//node := config.Configuration.Network.API.NodeAddress()
 
-		for i := uint32(0); i < testCase.StakingParameters.EditMap3Node.Repeat; i++ {
+		for i := uint32(0); i < testCase.StakingParameters.Edit.Repeat; i++ {
 			if i == 0 || (lastEditTxErr == nil && lastEditTx.Success && lastSuccessfullyUpdated) {
-				blsKeyToRemove, blsKeyToAdd, blsErr := microstake.ManageBLSKeys(map3Node, testCase.StakingParameters.EditMap3Node.Mode, testCase.StakingParameters.Create.BLSSignatureMessage, testCase.Verbose)
+				blsKeyToRemove, blsKeyToAdd, blsErr := microstake.ManageBLSKeys(map3Node, testCase.StakingParameters.Edit.Mode, testCase.StakingParameters.Create.BLSSignatureMessage, testCase.Verbose)
 				if blsErr != nil {
 					msg := fmt.Sprintf("Failed to generate new bls key to use for adding to existing map3Node %s", map3Node.Account.Address)
 					testCase.HandleError(blsErr, map3Node.Account, msg)
 					return
 				}
 				if blsKeyToAdd != nil {
-					testCase.StakingParameters.EditMap3Node.Map3Node.BLSKeys = append(testCase.StakingParameters.EditMap3Node.Map3Node.BLSKeys, *blsKeyToAdd)
+					testCase.StakingParameters.Edit.Map3Node.BLSKeys = append(testCase.StakingParameters.Edit.Map3Node.BLSKeys, *blsKeyToAdd)
 				}
 				if blsKeyToRemove != nil {
-					testCase.StakingParameters.EditMap3Node.Map3Node.BLSKeys = append(testCase.StakingParameters.EditMap3Node.Map3Node.BLSKeys, *blsKeyToRemove)
+					testCase.StakingParameters.Edit.Map3Node.BLSKeys = append(testCase.StakingParameters.Edit.Map3Node.BLSKeys, *blsKeyToRemove)
 				}
 
 				lastEditTx, lastEditTxErr = microstake.BasicEditMap3Node(testCase, map3Node.Map3Address, map3Node.Account, blsKeyToRemove, blsKeyToAdd)
@@ -82,7 +82,7 @@ func StandardScenario(testCase *testing.TestCase) {
 					return
 				}
 
-				lastSuccessfullyUpdated = testCase.StakingParameters.EditMap3Node.EvaluateChanges(*lastMap3Node, testCase.Verbose)
+				lastSuccessfullyUpdated = testCase.StakingParameters.Edit.EvaluateMap3NodeChanges(*lastMap3Node, testCase.Verbose)
 				editValidatorColoring := logger.ResultColoring(lastSuccessfullyUpdated, true)
 				logger.StakingLog(fmt.Sprintf("Validator successfully edited: %s", editValidatorColoring), testCase.Verbose)
 			}

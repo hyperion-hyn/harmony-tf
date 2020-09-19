@@ -99,9 +99,9 @@ func EditMap3Node(validatorAddress string, senderAccount *sdkAccounts.Account, p
 	gasLimit := params.Gas.Limit
 	gasPrice := params.Gas.Price
 
-	if params.EditMap3Node.Gas.RawPrice != "" {
-		gasLimit = params.EditMap3Node.Gas.Limit
-		gasPrice = params.EditMap3Node.Gas.Price
+	if params.Edit.Gas.RawPrice != "" {
+		gasLimit = params.Edit.Gas.Limit
+		gasPrice = params.Edit.Gas.Price
 	}
 
 	txResult, err := sdkMap3Node.Edit(
@@ -110,7 +110,7 @@ func EditMap3Node(validatorAddress string, senderAccount *sdkAccounts.Account, p
 		rpcClient,
 		config.Configuration.Network.API.ChainID,
 		validatorAddress,
-		params.EditMap3Node.Map3Node.ToMicroStakeDescription(),
+		params.Edit.Map3Node.ToMicroStakeDescription(),
 		blsKeyToRemove,
 		blsKeyToAdd,
 		gasLimit,

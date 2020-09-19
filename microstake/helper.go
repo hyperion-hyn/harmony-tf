@@ -116,7 +116,7 @@ func BasicEditMap3Node(testCase *testing.TestCase, map3NodeAddress string, sende
 	}
 
 	logger.StakingLog(fmt.Sprintf("Proceeding to edit the map3Node %s ...", map3NodeAddress), testCase.Verbose)
-	testCase.StakingParameters.EditMap3Node.DetectChanges(testCase.Verbose)
+	testCase.StakingParameters.Edit.DetectMap3NodeChanges(testCase.Verbose)
 	logger.TransactionLog(fmt.Sprintf("Sending edit map3Node transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
 
 	editRawTx, err := EditMap3Node(map3NodeAddress, senderAccount, &testCase.StakingParameters, blsKeyToRemove, blsKeyToAdd)
