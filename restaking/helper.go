@@ -3,12 +3,12 @@ package restaking
 import (
 	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/params"
 	"github.com/hyperion-hyn/hyperion-tf/balances"
 	"github.com/hyperion-hyn/hyperion-tf/config"
 	"github.com/hyperion-hyn/hyperion-tf/crypto"
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	sdkCrypto "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/crypto"
+	golibMicrostake "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/microstake"
 	sdkMap3Node "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/microstake/map3node"
 	sdkDelegation "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/delegation"
 	sdkValidator "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/staking/validator"
@@ -49,8 +49,7 @@ func ReuseOrCreateValidator(testCase *testing.TestCase, validatorName string) (a
 		return
 	}
 
-	logger.Log(fmt.Sprintf("sleep %d second for map3Node active", config.Configuration.Network.WaitMap3ActiveTime), true)
-	time.Sleep(time.Duration(config.Configuration.Network.WaitMap3ActiveTime) * time.Second)
+	golibMicrostake.WaitActive()
 
 	tx, createdBlsKeys, validatorExists, err := BasicCreateValidator(testCase, map3NodeTx.ContractAddress, validator.Account, nil, nil)
 	if err != nil {
@@ -222,18 +221,35 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 		return sdkTxs.Transaction{}, false, err
 	}
 
-	undelegationSucceeded := false
-	var undelegationAmount ethCommon.Dec
+	//undelegationSucceeded := false
+	//var undelegationAmount ethCommon.Dec
+	//for _, del := range delegations {
+	//	if del.DelegatorAddress == address.Parse(delegatorAddress) && del.Undelegation.Amount.Sign() > 0 {
+	//		undelegationSucceeded = true
+	//		undelegationAmount = ethCommon.NewDecFromBigInt(del.Undelegation.Amount).QuoInt64(params.Ether)
+	//		break
+	//	}
+	//}
+	undelegationSucceeded := true
 	for _, del := range delegations {
-		if del.DelegatorAddress == address.Parse(delegatorAddress) && del.Undelegation.Amount.Sign() > 0 {
-			undelegationSucceeded = true
-			undelegationAmount = ethCommon.NewDecFromBigInt(del.Undelegation.Amount).QuoInt64(params.Ether)
+		if del.DelegatorAddress == delegatorAccount.Account.Address {
+			undelegationSucceeded = false
 			break
 		}
 	}
 
+	//double check when not release map3Node
+	if !undelegationSucceeded {
+		for _, del := range delegations {
+			if del.DelegatorAddress == address.Parse(delegatorAddress) && del.Undelegation.Amount.Sign() > 0 {
+				undelegationSucceeded = true
+				break
+			}
+		}
+	}
+
 	undelegationSucceededColoring := logger.ResultColoring(undelegationSucceeded, true)
-	logger.StakingLog(fmt.Sprintf("Performed undelegation from validator %s by delegator %s,expect amount: %f, actual undelegation amount %f ,successful: %s", validatorAddress, delegatorAccount.Address, testCase.StakingParameters.DelegationRestaking.Undelegate.Amount, undelegationAmount, undelegationSucceededColoring), testCase.Verbose)
+	logger.StakingLog(fmt.Sprintf("Performed undelegation from validator %s by delegator %ssuccessful: %s", validatorAddress, delegatorAccount.Address, undelegationSucceededColoring), testCase.Verbose)
 
 	return tx, undelegationSucceeded, nil
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/hyperion-hyn/hyperion-tf/funding"
 	"github.com/hyperion-hyn/hyperion-tf/keys"
 	restakingDelegationDelegateScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/restaking/delegation/delegate"
+	restakingDelegationUndelegateScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/restaking/delegation/undelegate"
 	restakingCreateValidatorScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/restaking/validator/create"
 	restakingEditValidatorScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/restaking/validator/edit"
 	stakingDelegationDelegateScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/staking/delegation/delegate"
@@ -192,6 +193,12 @@ func execute() {
 				restakingDelegationDelegateScenarios.InvalidAddressScenario(testCase)
 			case "restaking/delegation/delegate/non_existing":
 				restakingDelegationDelegateScenarios.NonExistingScenario(testCase)
+			case "restaking/delegation/undelegate/standard":
+				restakingDelegationUndelegateScenarios.StandardScenario(testCase)
+			case "restaking/delegation/undelegate/invalid_address":
+				restakingDelegationUndelegateScenarios.InvalidAddressScenario(testCase)
+			case "restaking/delegation/undelegate/non_existing":
+				restakingDelegationUndelegateScenarios.NonExistingScenario(testCase)
 			default:
 				testCase.Executed = false
 				fmt.Println(fmt.Sprintf("Please specify a valid test type for your test case %s", testCase.Name))

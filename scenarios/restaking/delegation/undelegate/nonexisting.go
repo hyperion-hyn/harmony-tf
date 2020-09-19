@@ -1,4 +1,4 @@
-package delegate
+package undelegate
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ func NonExistingScenario(testCase *testing.TestCase) {
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
 	validatorAccount, err := accounts.GenerateAccount(validatorName)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to generate %s account", validatorName)
+		msg := fmt.Sprintf("Failed to generate account %s", validatorName)
 		testCase.HandleError(err, &validatorAccount, msg)
 		return
 	}
@@ -41,7 +41,7 @@ func NonExistingScenario(testCase *testing.TestCase) {
 	delegatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Delegator")
 	delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.DelegationRestaking.Amount, fundingMultiple)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to generate and fund %s account", delegatorName)
+		msg := fmt.Sprintf("Failed to generate and fund account %s", delegatorName)
 		testCase.HandleError(err, &delegatorAccount, msg)
 		return
 	}
@@ -62,19 +62,18 @@ func NonExistingScenario(testCase *testing.TestCase) {
 
 	golibMicrostake.WaitActive()
 
-	delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, validatorAccount.Address, map3NodeTx.ContractAddress, nil)
+	undelegationTx, undelegationSucceeded, err := staking.BasicUndelegation(testCase, &delegatorAccount, validatorAccount.Address, map3NodeTx.ContractAddress, nil)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address)
+		msg := fmt.Sprintf("Failed to undelegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address)
 		testCase.HandleError(err, &validatorAccount, msg)
 		return
 	}
-	testCase.Transactions = append(testCase.Transactions, delegationTx)
+	testCase.Transactions = append(testCase.Transactions, undelegationTx)
 
-	testCase.Result = delegationTx.Success && delegationSucceeded
+	testCase.Result = undelegationTx.Success && undelegationSucceeded
 
 	logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
-
 	testing.Title(testCase, "footer", testCase.Verbose)
 
 	if !testCase.StakingParameters.ReuseExistingValidator {

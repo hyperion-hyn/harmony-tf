@@ -1,9 +1,9 @@
-package delegate
+package undelegate
 
 import (
 	"fmt"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/microstake"
-	"github.com/hyperion-hyn/hyperion-tf/restaking"
+	"strings"
 	"time"
 
 	tfAccounts "github.com/hyperion-hyn/hyperion-tf/accounts"
@@ -12,11 +12,11 @@ import (
 	sdkAccounts "github.com/hyperion-hyn/hyperion-tf/extension/go-lib/accounts"
 	"github.com/hyperion-hyn/hyperion-tf/funding"
 	"github.com/hyperion-hyn/hyperion-tf/logger"
-	"github.com/hyperion-hyn/hyperion-tf/staking"
+	"github.com/hyperion-hyn/hyperion-tf/restaking"
 	"github.com/hyperion-hyn/hyperion-tf/testing"
 )
 
-// InvalidAddressScenario - executes a delegation test case where the delegator address isn't the sender address
+// InvalidAddressScenario - executes an undelegation test case where the undelegator address isn't the sender address
 func InvalidAddressScenario(testCase *testing.TestCase) {
 	testing.Title(testCase, "header", testCase.Verbose)
 	testCase.Executed = true
@@ -41,8 +41,8 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	for _, accountType := range accountTypes {
-		accountName := tfAccounts.GenerateTestCaseAccountName(testCase.Name, accountType)
-		account, err := testing.GenerateAndFundAccount(testCase, accountName, testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
+		accountName := tfAccounts.GenerateTestCaseAccountName(testCase.Name, strings.Title(accountType))
+		account, err := testing.GenerateAndFundAccount(testCase, accountName, testCase.StakingParameters.CreateRestaking.Validator.Amount, 1)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to generate and fund %s account %s", accountType, accountName)
 			testCase.HandleError(err, &account, msg)
@@ -52,8 +52,8 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	validatorAccount, delegatorAccount, senderAccount := accounts["validator"], accounts["delegator"], accounts["sender"]
-
 	testCase.StakingParameters.CreateRestaking.Map3Node.Account = &validatorAccount
+
 	map3NodeTx, _, map3NodeExists, err := restaking.BasicCreateMap3Node(testCase, &validatorAccount, nil, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", validatorAccount.Name, validatorAccount.Address)
@@ -83,7 +83,12 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
-	accountEndingBalance, _ := balances.GetBalance(validatorAccount.Address)
+	accountEndingBalance, err := balances.GetBalance(validatorAccount.Address)
+	if err != nil {
+		msg := fmt.Sprintf("Failed to fetch ending balance for account %s, address: %s", validatorAccount.Name, validatorAccount.Address)
+		testCase.HandleError(err, &validatorAccount, msg)
+		return
+	}
 	expectedAccountEndingBalance := validatorAccount.Balance.Sub(testCase.StakingParameters.CreateRestaking.Validator.Amount)
 
 	if testCase.Expected {
@@ -95,7 +100,6 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	successfulValidatorCreation := tx.Success && accountEndingBalance.LT(expectedAccountEndingBalance) && validatorExists
 
 	if successfulValidatorCreation {
-
 		testCase.StakingParameters.DelegationRestaking.Delegate.Map3Node.Account = &delegatorAccount
 		map3NodeTx, _, map3NodeExists, err := restaking.BasicCreateDelegateMap3Node(testCase, &delegatorAccount, nil, nil)
 		if err != nil {
@@ -112,7 +116,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 
 		microstake.WaitActive()
 
-		delegationTx, delegationSucceeded, err := staking.BasicDelegation(testCase, &delegatorAccount, tx.ContractAddress, map3NodeTx.ContractAddress, &senderAccount)
+		delegationTx, delegationSucceeded, err := restaking.BasicDelegation(testCase, &delegatorAccount, tx.ContractAddress, map3NodeTx.ContractAddress, nil)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address)
 			testCase.HandleError(err, &validatorAccount, msg)
@@ -120,17 +124,29 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 		}
 		testCase.Transactions = append(testCase.Transactions, delegationTx)
 
-		testCase.Result = delegationTx.Success && delegationSucceeded
+		successfulDelegation := delegationTx.Success && delegationSucceeded
+
+		if successfulDelegation {
+			undelegationTx, undelegationSucceeded, err := restaking.BasicUndelegation(testCase, &delegatorAccount, tx.ContractAddress, map3NodeTx.ContractAddress, &senderAccount)
+			if err != nil {
+				msg := fmt.Sprintf("Failed to undelegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validatorAccount.Name, validatorAccount.Address)
+				testCase.HandleError(err, &validatorAccount, msg)
+				return
+			}
+			testCase.Transactions = append(testCase.Transactions, undelegationTx)
+
+			testCase.Result = undelegationTx.Success && undelegationSucceeded
+		}
 	}
 
 	logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)
-
 	testing.Title(testCase, "footer", testCase.Verbose)
 
 	if !testCase.StakingParameters.ReuseExistingValidator {
 		testing.Teardown(&validatorAccount, config.Configuration.Funding.Account.Address)
 	}
 	testing.Teardown(&delegatorAccount, config.Configuration.Funding.Account.Address)
+
 	testCase.FinishedAt = time.Now().UTC()
 }
