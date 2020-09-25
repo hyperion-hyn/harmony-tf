@@ -10,7 +10,7 @@ require (
 	github.com/elliotchance/orderedmap v1.2.1
 	github.com/ethereum/go-ethereum v1.8.27
 	github.com/gookit/color v1.2.4
-	github.com/harmony-one/bls v0.0.6
+	github.com/hyperion-hyn/bls v0.0.6
 	github.com/mackerelio/go-osstat v0.1.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1

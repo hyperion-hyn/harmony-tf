@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/crypto/bls"
-	bls_core "github.com/harmony-one/bls/ffi/go/bls"
+	bls_core "github.com/hyperion-hyn/bls/ffi/go/bls"
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/common"
 	"io"
 	"os"

@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/staking/types/common"
 	"github.com/ethereum/go-ethereum/staking/types/microstaking"
 	"github.com/ethereum/go-ethereum/staking/types/restaking"
-	bls_core "github.com/harmony-one/bls/ffi/go/bls"
+	bls_core "github.com/hyperion-hyn/bls/ffi/go/bls"
 	"github.com/hyperion-hyn/hyperion-tf/extension/crypto/hash"
 	"io"
 )
