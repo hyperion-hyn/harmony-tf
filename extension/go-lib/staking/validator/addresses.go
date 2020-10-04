@@ -2,7 +2,6 @@ package validator
 
 import (
 	"context"
-	"github.com/ethereum/go-ethereum/common"
 	goSdkRPC "github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/rpc"
 )
 
@@ -14,11 +13,11 @@ func All(rpcClient *goSdkRPC.HTTPMessenger) (addresses []string, err error) {
 		return nil, err
 	}
 	// convert to hynAddress
-	hynAddress := make([]string, len(addresses))
-	for i, addressTemp := range addresses {
-		hynAddress[i] = common.MustAddressToBech32(common.HexToAddress(addressTemp))
-	}
-	return hynAddress, nil
+	//hynAddress := make([]string, len(addresses))
+	//for i, addressTemp := range addresses {
+	//	hynAddress[i] = common.MustAddressToBech32(common.HexToAddress(addressTemp))
+	//}
+	return addresses, nil
 }
 
 // Exists - checks if a given validator exists

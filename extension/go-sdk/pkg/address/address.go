@@ -59,19 +59,22 @@ func Bech32ToAddress(b32 string) (addr T, err error) {
 // ParseAddr parses the given address, either as bech32 or as hex.
 // The result can be 0x00..00 if the passing param is not a correct address.
 func Parse(s string) T {
-	if addr, err := Bech32ToAddress(s); err == nil {
-		return addr
-	}
+	//if addr, err := Bech32ToAddress(s); err == nil {
+	//	return addr
+	//}
 	// The result can be 0x00...00 if the passing param is not a correct address.
 	return ethCommon.HexToAddress(s)
 }
 
 func ToBech32(addr T) string {
-	b32, err := BuildBech32Addr(Bech32AddressHRP, addr)
-	if err != nil {
-		panic(err)
-	}
-	return b32
+	//b32, err := BuildBech32Addr(Bech32AddressHRP, addr)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//return b32
+
+	// replace to ethaddress for test
+	return addr.Hex()
 }
 
 func BuildBech32Addr(hrp string, addr T) (string, error) {
