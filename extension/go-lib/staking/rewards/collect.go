@@ -48,7 +48,7 @@ func CollectRewards(
 
 func createCollectRewardsTransactionGenerator(delegatorAddress string, validatorAddress string) (transactions.StakeMsgFulfiller, error) {
 	payloadGenerator := func() (types.TransactionType, interface{}) {
-		return types.CollectRedelRewards, restaking.CollectReward{
+		return types.CollectRestakingReward, restaking.CollectReward{
 			address.Parse(delegatorAddress),
 			address.Parse(validatorAddress),
 		}
