@@ -42,9 +42,7 @@ func StandardScenario(testCase *testing.TestCase) {
 	logger.FundingLog(fmt.Sprintf("Funding sender account: %s, address: %s", senderAccount.Name, senderAccount.Address), testCase.Verbose)
 	funding.PerformFundingTransaction(
 		&config.Configuration.Funding.Account,
-
 		senderAccount.Address,
-
 		requiredFunding,
 		-1,
 		config.Configuration.Funding.Gas.Limit,
