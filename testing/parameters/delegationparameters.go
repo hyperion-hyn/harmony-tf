@@ -22,6 +22,7 @@ type DelegationInstruction struct {
 	RawAmount string              `yaml:"amount"`
 	Amount    ethCommon.Dec       `yaml:"-"`
 	Gas       sdkNetworkTypes.Gas `yaml:"gas"`
+	WaitEpoch int64               `yaml:"wait_epoch"`
 }
 
 // Initialize - initializes the edit staking parameters

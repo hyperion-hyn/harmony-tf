@@ -135,6 +135,12 @@ func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.A
 	logger.StakingLog("Proceeding to perform delegation...", testCase.Verbose)
 	logger.TransactionLog(fmt.Sprintf("Sending delegation transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
 
+	switch testCase.StakingParameters.Mode {
+	case "delegate_amount_larger_than_balance":
+		testCase.StakingParameters.Delegation.Amount = testCase.StakingParameters.Delegation.Amount.Mul(ethCommon.NewDec(2))
+		testCase.StakingParameters.Delegation.Delegate.Amount = testCase.StakingParameters.Delegation.Delegate.Amount.Mul(ethCommon.NewDec(2))
+	}
+
 	rawTx, err := Delegate(delegatorAccount, map3NodeAddress, senderAccount, &testCase.StakingParameters)
 	if err != nil {
 		return sdkTxs.Transaction{}, false, err

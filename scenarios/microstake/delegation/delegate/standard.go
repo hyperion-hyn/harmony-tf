@@ -2,6 +2,7 @@ package delegate
 
 import (
 	"fmt"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/utils"
 	"time"
 
 	"github.com/hyperion-hyn/hyperion-tf/accounts"
@@ -44,6 +45,16 @@ func StandardScenario(testCase *testing.TestCase) {
 			msg := fmt.Sprintf("Failed to fetch latest account balance for the account %s, address: %s", delegatorAccount.Name, delegatorAccount.Address)
 			testCase.HandleError(err, &delegatorAccount, msg)
 			return
+		}
+		if testCase.StakingParameters.Delegation.Delegate.WaitEpoch > 0 {
+			rpc, _ := config.Configuration.Network.API.RPCClient()
+			err = utils.WaitForEpoch(rpc, testCase.StakingParameters.Delegation.Delegate.WaitEpoch)
+			if err != nil {
+				msg := fmt.Sprintf("Wait for skip epoch error")
+				testCase.HandleError(err, &delegatorAccount, msg)
+				return
+			}
+
 		}
 
 		delegationTx, delegationSucceeded, err := microstake.BasicDelegation(testCase, &delegatorAccount, map3Node.Map3Address, nil)
