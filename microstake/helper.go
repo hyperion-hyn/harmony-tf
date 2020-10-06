@@ -191,6 +191,10 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 	undelegationSucceeded := false
 
 	delegateAmount := testCase.StakingParameters.Delegation.Delegate.Amount
+
+	if testCase.StakingParameters.Mode == "undelegate_operator" {
+		delegateAmount = testCase.StakingParameters.Create.Map3Node.Amount
+	}
 	undelegateAmount := testCase.StakingParameters.Delegation.Undelegate.Amount
 	remainingDelegateAmount := delegateAmount.Sub(undelegateAmount)
 
@@ -203,7 +207,6 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 				break
 			}
 		}
-
 	} else {
 		undelegationSucceeded = true
 		for _, del := range delegations {

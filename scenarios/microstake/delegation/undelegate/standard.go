@@ -2,6 +2,7 @@ package undelegate
 
 import (
 	"fmt"
+	"github.com/hyperion-hyn/hyperion-tf/extension/go-lib/utils"
 	"time"
 
 	"github.com/hyperion-hyn/hyperion-tf/accounts"
@@ -57,7 +58,22 @@ func StandardScenario(testCase *testing.TestCase) {
 		successfulDelegation := delegationTx.Success && delegationSucceeded
 
 		if successfulDelegation {
-			undelegationTx, undelegationSucceeded, err := staking.BasicUndelegation(testCase, &delegatorAccount, map3Node.Map3Address, nil)
+
+			if testCase.StakingParameters.Delegation.Undelegate.WaitEpoch > 0 {
+				rpc, _ := config.Configuration.Network.API.RPCClient()
+				err = utils.WaitForEpoch(rpc, testCase.StakingParameters.Delegation.Undelegate.WaitEpoch)
+				if err != nil {
+					msg := fmt.Sprintf("Wait for skip epoch error")
+					testCase.HandleError(err, &delegatorAccount, msg)
+					return
+				}
+			}
+
+			undelegatorAccount := &delegatorAccount
+			if testCase.StakingParameters.Mode == "undelegate_operator" {
+				undelegatorAccount = account
+			}
+			undelegationTx, undelegationSucceeded, err := staking.BasicUndelegation(testCase, undelegatorAccount, map3Node.Map3Address, nil)
 			if err != nil {
 				msg := fmt.Sprintf("Failed to undelegate from account %s, address %s to map3Node %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, map3Node.Account.Name, map3Node.Account.Address)
 				testCase.HandleError(err, map3Node.Account, msg)
