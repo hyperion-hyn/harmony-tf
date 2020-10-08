@@ -3,6 +3,7 @@ package testcases
 import (
 	"fmt"
 	microstakeDelegateMap3NodeScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/microstake/delegation/delegate"
+	microstakeTerminateMap3NodeScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/microstake/delegation/terminate"
 	microstakeUndelegateMap3NodeScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/microstake/delegation/undelegate"
 	microstakeCreateMap3NodeScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/microstake/map3node/create"
 	microstakeEditMap3NodeScenarios "github.com/hyperion-hyn/hyperion-tf/scenarios/microstake/map3node/edit"
@@ -173,6 +174,12 @@ func execute() {
 				microstakeUndelegateMap3NodeScenarios.InvalidAddressScenario(testCase)
 			case "microstake/delegation/undelegate/non_existing":
 				microstakeUndelegateMap3NodeScenarios.NonExistingScenario(testCase)
+			case "microstake/delegation/terminate/standard":
+				microstakeTerminateMap3NodeScenarios.StandardScenario(testCase)
+			case "microstake/delegation/terminate/non_existing":
+				microstakeTerminateMap3NodeScenarios.NonExistingScenario(testCase)
+			case "microstake/delegation/terminate/invalid_address":
+				microstakeTerminateMap3NodeScenarios.InvalidAddressScenario(testCase)
 			case "restaking/validator/create/standard":
 				restakingCreateValidatorScenarios.StandardScenario(testCase)
 			case "restaking/validator/create/invalid_map3_node_address":

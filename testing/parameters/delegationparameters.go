@@ -15,6 +15,7 @@ type DelegationParameters struct {
 
 	Delegate   DelegationInstruction `yaml:"delegate"`
 	Undelegate DelegationInstruction `yaml:"undelegate"`
+	Terminate  DelegationInstruction `yaml:"terminate"`
 }
 
 // DelegationInstruction - represents a delegation or undelegation instruction

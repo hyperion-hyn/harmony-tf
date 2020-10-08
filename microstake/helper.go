@@ -4,6 +4,7 @@ import (
 	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum/go-ethereum/staking/types/microstaking"
 	"github.com/hyperion-hyn/hyperion-tf/balances"
 	"github.com/hyperion-hyn/hyperion-tf/config"
 	"github.com/hyperion-hyn/hyperion-tf/crypto"
@@ -222,6 +223,35 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 	logger.StakingLog(fmt.Sprintf("Performed undelegation from map3Node %s by delegator %s,expect amount: %f ,successful: %s", map3NodeAddress, delegatorAccount.Address, testCase.StakingParameters.Delegation.Undelegate.Amount, undelegationSucceededColoring), testCase.Verbose)
 
 	return tx, undelegationSucceeded, nil
+}
+
+// BasicTerminate - helper method to perform terminate
+func BasicTerminate(testCase *testing.TestCase, operatorAccount *sdkAccounts.Account, map3NodeAddress string, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
+	logger.StakingLog("Proceeding to perform terminate...", testCase.Verbose)
+	logger.TransactionLog(fmt.Sprintf("Sending terminate transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
+
+	rawTx, err := Terminate(operatorAccount, map3NodeAddress, senderAccount, &testCase.StakingParameters)
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+	tx := sdkTxs.ToTransaction(operatorAccount.Address, map3NodeAddress, rawTx, err)
+	txResultColoring := logger.ResultColoring(tx.Success, true)
+	logger.TransactionLog(fmt.Sprintf("Performed terminate - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
+
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
+
+	nodeInfo, err := sdkMap3Node.Information(rpcClient, address.Parse(map3NodeAddress))
+
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+
+	terminateSucceeded := nodeInfo.Map3Node.Status == byte(microstaking.Terminated)
+
+	delegationSucceededColoring := logger.ResultColoring(terminateSucceeded, true)
+	logger.StakingLog(fmt.Sprintf("termimmate  contract  %s by %s , successful: %s", map3NodeAddress, operatorAccount.Address, delegationSucceededColoring), testCase.Verbose)
+
+	return tx, terminateSucceeded, nil
 }
 
 // ManageBLSKeys - manage bls keys for edit map3Node scenarios

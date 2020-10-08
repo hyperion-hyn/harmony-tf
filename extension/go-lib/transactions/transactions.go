@@ -209,6 +209,7 @@ func SendRawTransaction(rpcClient *goSdkRPC.HTTPMessenger, signature *string) (i
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("tx sent: %s \n", tx.Hash().Hex())
 	return tx.Hash().Hex(), nil
 
 }
