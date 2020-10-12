@@ -18,3 +18,13 @@ func ByMap3Node(rpcClient *goSdkRPC.HTTPMessenger, map3NodeAddress string) ([]mi
 	return map3NodeWrapperRPC.Microdelegations, nil
 
 }
+
+func ByMap3AddressAndDelegatorAddress(rpcClient *goSdkRPC.HTTPMessenger, map3NodeAddress string, delegatorAddress string) (*microstaking.Microdelegation_, error) {
+
+	delegatorRPC, err := rpcClient.GetClient().GetMap3NodeDelegation(context.Background(), address.Parse(map3NodeAddress), address.Parse(delegatorAddress), nil)
+	if err != nil {
+		return nil, err
+	}
+	return delegatorRPC, nil
+
+}

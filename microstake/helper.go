@@ -16,6 +16,7 @@ import (
 	"github.com/hyperion-hyn/hyperion-tf/extension/go-sdk/pkg/address"
 	"github.com/hyperion-hyn/hyperion-tf/logger"
 	"github.com/hyperion-hyn/hyperion-tf/testing"
+	"math/big"
 	"time"
 )
 
@@ -155,10 +156,25 @@ func BasicDelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts.A
 	if err != nil {
 		return sdkTxs.Transaction{}, false, err
 	}
+	nodeInfo, err := sdkMap3Node.Information(rpcClient, address.Parse(map3NodeAddress))
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+
+	fmt.Printf("map3Node status :%d \n", nodeInfo.Map3Node.Status)
+
+	delegationAmount := testCase.StakingParameters.Delegation.Delegate.Amount
 
 	delegationSucceeded := false
 	for _, del := range delegations {
-		if del.DelegatorAddress == address.Parse(delegatorAccount.Address) {
+		actualDelegatePendingAmount := new(big.Int)
+		if nodeInfo.Map3Node.Status == uint8(microstaking.Pending) {
+			actualDelegatePendingAmount = del.PendingDelegation.Amount
+		} else {
+			actualDelegatePendingAmount = del.Amount
+		}
+		fmt.Printf("actual delegate amount :%s \n", actualDelegatePendingAmount.String())
+		if del.DelegatorAddress == address.Parse(delegatorAccount.Address) && delegationAmount.BigInt().Cmp(actualDelegatePendingAmount) == 0 {
 			delegationSucceeded = true
 			break
 		}
@@ -250,6 +266,59 @@ func BasicTerminate(testCase *testing.TestCase, operatorAccount *sdkAccounts.Acc
 
 	delegationSucceededColoring := logger.ResultColoring(terminateSucceeded, true)
 	logger.StakingLog(fmt.Sprintf("termimmate  contract  %s by %s , successful: %s", map3NodeAddress, operatorAccount.Address, delegationSucceededColoring), testCase.Verbose)
+
+	return tx, terminateSucceeded, nil
+}
+
+// BasicTerminate - helper method to perform terminate
+func BasicRenew(testCase *testing.TestCase, operatorAccount *sdkAccounts.Account, map3NodeAddress string, isOperator bool, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
+	logger.StakingLog("Proceeding to perform renew...", testCase.Verbose)
+	logger.TransactionLog(fmt.Sprintf("Sending renew transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
+
+	rawTx, err := Renew(operatorAccount, map3NodeAddress, senderAccount, isOperator, &testCase.StakingParameters)
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+	tx := sdkTxs.ToTransaction(operatorAccount.Address, map3NodeAddress, rawTx, err)
+	txResultColoring := logger.ResultColoring(tx.Success, true)
+	logger.TransactionLog(fmt.Sprintf("Performed renew - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
+
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
+	nodeInfo, err := sdkMap3Node.Information(rpcClient, address.Parse(map3NodeAddress))
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+	delegation, err := sdkDelegation.ByMap3AddressAndDelegatorAddress(rpcClient, map3NodeAddress, operatorAccount.Address)
+
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+
+	var terminateSucceeded bool
+	if isOperator {
+		if testCase.StakingParameters.Delegation.Renew.OperatorRenew {
+			terminateSucceeded = delegation.Renewal.Status == uint8(microstaking.Renewed)
+			if testCase.StakingParameters.Delegation.Renew.OperatorCommission != nil {
+				commissionRate := nodeInfo.Map3Node.Commission.RateForNextPeriod.Equal(*testCase.StakingParameters.Delegation.Renew.OperatorCommission)
+				if !commissionRate {
+					logger.StakingLog(fmt.Sprintf("renew  commission fail ,expect: %s ,actual: %s", testCase.StakingParameters.Delegation.Renew.OperatorCommission.String(), nodeInfo.Map3Node.Commission.RateForNextPeriod.String()), testCase.Verbose)
+				}
+				terminateSucceeded = terminateSucceeded && commissionRate
+			}
+
+		} else {
+			terminateSucceeded = delegation.Renewal.Status == uint8(microstaking.NotRenewed)
+		}
+	} else {
+		if testCase.StakingParameters.Delegation.Renew.ParticipantRenew {
+			terminateSucceeded = delegation.Renewal.Status == uint8(microstaking.Renewed)
+		} else {
+			terminateSucceeded = delegation.Renewal.Status == uint8(microstaking.NotRenewed)
+		}
+	}
+
+	delegationSucceededColoring := logger.ResultColoring(terminateSucceeded, true)
+	logger.StakingLog(fmt.Sprintf("renew  contract  %s by %s , successful: %s", map3NodeAddress, operatorAccount.Address, delegationSucceededColoring), testCase.Verbose)
 
 	return tx, terminateSucceeded, nil
 }
