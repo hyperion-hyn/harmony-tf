@@ -128,12 +128,6 @@ func (editParams *EditValidatorParameters) DetectChanges(verbose bool) {
 		editParams.Changes.TotalChanged++
 	}
 
-	if editParams.Validator.RawMinimumSelfDelegation != "" {
-		logger.StakingLog(fmt.Sprintf("Will update the minimum self delegation of the validator to %f", editParams.Validator.MinimumSelfDelegation), verbose)
-		editParams.Changes.MinimumSelfDelegation = true
-		editParams.Changes.TotalChanged++
-	}
-
 	if editParams.Validator.RawMaximumTotalDelegation != "" {
 		logger.StakingLog(fmt.Sprintf("Will update the maximum total delegation of the validator to %f", editParams.Validator.MaximumTotalDelegation), verbose)
 		editParams.Changes.MaximumTotalDelegation = true

@@ -13,7 +13,6 @@ import (
 
 var (
 	errNilAmount             = errors.New("Amount can not be nil")
-	errNilMinSelfDelegation  = errors.New("MinSelfDelegation can not be nil")
 	errNilMaxTotalDelegation = errors.New("MaxTotalDelegation can not be nil")
 )
 
@@ -128,10 +127,6 @@ func CreateMap3Node(map3NodeAccount *sdkAccounts.Account, senderAccount *sdkAcco
 func validateValidatorValues(validator sdkValidator.Validator) error {
 	if validator.Amount.IsNil() {
 		return errNilAmount
-	}
-
-	if validator.MinimumSelfDelegation.IsNil() {
-		return errNilMinSelfDelegation
 	}
 
 	if validator.MaximumTotalDelegation.IsNil() {

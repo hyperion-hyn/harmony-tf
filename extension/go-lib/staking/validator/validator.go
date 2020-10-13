@@ -19,9 +19,6 @@ type Validator struct {
 	BLSKeys          []crypto.BLSKey  `yaml:"-"`
 	Exists           bool
 
-	RawMinimumSelfDelegation string        `yaml:"minimum_self_delegation"`
-	MinimumSelfDelegation    ethCommon.Dec `yaml:"-"`
-
 	RawMaximumTotalDelegation string        `yaml:"maximum_total_delegation"`
 	MaximumTotalDelegation    ethCommon.Dec `yaml:"-"`
 
@@ -54,14 +51,6 @@ type Commission struct {
 
 // Initialize - initializes and converts values for a given validator
 func (validator *Validator) Initialize() error {
-	// Set the shard id - will be used when generating bls keys
-	if validator.RawMinimumSelfDelegation != "" {
-		decMinimumSelfDelegation, err := common.NewDecFromString(validator.RawMinimumSelfDelegation)
-		if err != nil {
-			return errors.Wrapf(err, "Validator: MinimumSelfDelegation")
-		}
-		validator.MinimumSelfDelegation = decMinimumSelfDelegation
-	}
 
 	if validator.RawMaximumTotalDelegation != "" {
 		decMaximumTotalDelegation, err := common.NewDecFromString(validator.RawMaximumTotalDelegation)

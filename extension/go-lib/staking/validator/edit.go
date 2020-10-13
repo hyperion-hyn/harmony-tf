@@ -28,7 +28,6 @@ func Edit(
 	operatorAddress string,
 	description restaking.Description_,
 	commissionRate *ethCommon.Dec,
-	minimumSelfDelegation ethCommon.Dec,
 	maximumTotalDelegation ethCommon.Dec,
 	blsKeyToRemove *crypto.BLSKey,
 	blsKeyToAdd *crypto.BLSKey,
@@ -49,7 +48,7 @@ func Edit(
 
 	var logMessage string
 	if network.Verbose {
-		logMessage = fmt.Sprintf("Generating a new edit validator transaction:\n\tValidator Address: %s\n\tValidator Name: %s\n\tValidator Identity: %s\n\tValidator Website: %s\n\tValidator Security Contact: %s\n\tValidator Details: %s\n\tCommission Rate: %v\n\tMinimum Self Delegation: %f\n\tMaximum Total Delegation: %f\n\tRemove BLS key: %v\n\tAdd BLS key: %v\n\tStatus: %v",
+		logMessage = fmt.Sprintf("Generating a new edit validator transaction:\n\tValidator Address: %s\n\tValidator Name: %s\n\tValidator Identity: %s\n\tValidator Website: %s\n\tValidator Security Contact: %s\n\tValidator Details: %s\n\tCommission Rate: %v\n\tMaximum Total Delegation: %f\n\tRemove BLS key: %v\n\tAdd BLS key: %v\n\tStatus: %v",
 			validatorAddress,
 			description.Name,
 			description.Identity,
@@ -57,7 +56,6 @@ func Edit(
 			description.SecurityContact,
 			description.Details,
 			commissionRate,
-			minimumSelfDelegation,
 			maximumTotalDelegation,
 			blsKeyToRemove,
 			blsKeyToAdd,

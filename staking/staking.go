@@ -121,7 +121,6 @@ func EditValidator(validatorAddress string, operatorAddress string, senderAccoun
 		operatorAddress,
 		params.Edit.Validator.ToStakingDescription(),
 		commissionRate,
-		params.Edit.Validator.MinimumSelfDelegation,
 		params.Edit.Validator.MaximumTotalDelegation,
 		blsKeyToRemove,
 		blsKeyToAdd,
@@ -144,10 +143,6 @@ func EditValidator(validatorAddress string, operatorAddress string, senderAccoun
 func validateValidatorValues(validator sdkValidator.Validator) error {
 	if validator.Amount.IsNil() {
 		return errNilAmount
-	}
-
-	if validator.MinimumSelfDelegation.IsNil() {
-		return errNilMinSelfDelegation
 	}
 
 	if validator.MaximumTotalDelegation.IsNil() {
