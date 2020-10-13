@@ -44,15 +44,15 @@ func NonExistingScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	undelegationTx, undelegationSucceeded, err := microstake.BasicTerminate(testCase, &delegatorAccount, map3NodeAccount.Address, nil)
+	renewTx, renewSucceeded, err := microstake.BasicRenew(testCase, &delegatorAccount, map3NodeAccount.Address, true, nil)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to undelegate from account %s, address %s to map3Node %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, map3NodeAccount.Name, map3NodeAccount.Address)
+		msg := fmt.Sprintf("Failed to renew from account %s, address %s to map3Node %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, map3NodeAccount.Name, map3NodeAccount.Address)
 		testCase.HandleError(err, &map3NodeAccount, msg)
 		return
 	}
-	testCase.Transactions = append(testCase.Transactions, undelegationTx)
+	testCase.Transactions = append(testCase.Transactions, renewTx)
 
-	testCase.Result = undelegationTx.Success && undelegationSucceeded
+	testCase.Result = renewTx.Success && renewSucceeded
 
 	logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)
 	logger.ResultLog(testCase.Result, testCase.Expected, testCase.Verbose)

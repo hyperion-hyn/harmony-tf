@@ -185,6 +185,10 @@ func execute() {
 				microstakeRenewMap3NodeScenarios.StandardScenario(testCase)
 			case "microstake/delegation/renew/auto":
 				microstakeRenewMap3NodeScenarios.AutoRenewScenario(testCase)
+			case "microstake/delegation/renew/non_existing":
+				microstakeRenewMap3NodeScenarios.NonExistingScenario(testCase)
+			case "microstake/delegation/renew/invalid_address":
+				microstakeRenewMap3NodeScenarios.InvalidAddressScenario(testCase)
 			case "restaking/validator/create/standard":
 				restakingCreateValidatorScenarios.StandardScenario(testCase)
 			case "restaking/validator/create/invalid_map3_node_address":

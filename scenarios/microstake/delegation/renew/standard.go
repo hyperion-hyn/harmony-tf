@@ -80,7 +80,7 @@ func StandardScenario(testCase *testing.TestCase) {
 				testCase.Transactions = append(testCase.Transactions, renewTx)
 				testCase.Result = testCase.Result && renewTx.Success && renewSucceeded
 			}
-			if testCase.StakingParameters.Delegation.Renew.ParticipantRenew {
+			if testCase.StakingParameters.Delegation.Renew.ParticipantSendRenew {
 				if testCase.StakingParameters.Delegation.Renew.ParticipantWaitEpoch > 0 {
 					err = utils.WaitForEpoch(rpc, testCase.StakingParameters.Delegation.Renew.ParticipantWaitEpoch)
 					if err != nil {
@@ -89,6 +89,18 @@ func StandardScenario(testCase *testing.TestCase) {
 						return
 					}
 				}
+				renewTx, renewSucceeded, err := staking.BasicRenew(testCase, &delegatorAccount, map3Node.Map3Address, false, nil)
+				if err != nil {
+					msg := fmt.Sprintf("Failed to renew from account %s, address %s to map3Node %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, map3Node.Account.Name, map3Node.Account.Address)
+					testCase.HandleError(err, map3Node.Account, msg)
+					return
+				}
+				testCase.Transactions = append(testCase.Transactions, renewTx)
+				testCase.Result = testCase.Result && renewTx.Success && renewSucceeded
+			}
+
+			// repeat renew again
+			if testCase.StakingParameters.Mode == "repeat_renew" {
 				renewTx, renewSucceeded, err := staking.BasicRenew(testCase, &delegatorAccount, map3Node.Map3Address, false, nil)
 				if err != nil {
 					msg := fmt.Sprintf("Failed to renew from account %s, address %s to map3Node %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, map3Node.Account.Name, map3Node.Account.Address)

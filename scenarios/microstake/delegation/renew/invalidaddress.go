@@ -94,25 +94,24 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 		successfulDelegation := delegationTx.Success && delegationSucceeded
 
 		if successfulDelegation {
-			if testCase.StakingParameters.Delegation.Terminate.WaitEpoch > 0 {
+			if testCase.StakingParameters.Delegation.Renew.OperatorWaitEpoch > 0 {
 				rpc, _ := config.Configuration.Network.API.RPCClient()
-				err = utils.WaitForEpoch(rpc, testCase.StakingParameters.Delegation.Terminate.WaitEpoch)
+				err = utils.WaitForEpoch(rpc, testCase.StakingParameters.Delegation.Renew.OperatorWaitEpoch)
 				if err != nil {
 					msg := fmt.Sprintf("Wait for skip epoch error")
 					testCase.HandleError(err, &delegatorAccount, msg)
 					return
 				}
 			}
-
-			undelegationTx, undelegationSucceeded, err := microstake.BasicTerminate(testCase, &delegatorAccount, tx.ContractAddress, &senderAccount)
+			renewTx, renewSucceeded, err := microstake.BasicRenew(testCase, &delegatorAccount, tx.ContractAddress, true, &senderAccount)
 			if err != nil {
-				msg := fmt.Sprintf("Failed to undelegate from account %s, address %s to map3Node %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, map3NodeAccount.Name, map3NodeAccount.Address)
+				msg := fmt.Sprintf("Failed to renew from account %s, address %s to map3Node %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, map3NodeAccount.Name, map3NodeAccount.Address)
 				testCase.HandleError(err, &map3NodeAccount, msg)
 				return
 			}
-			testCase.Transactions = append(testCase.Transactions, undelegationTx)
+			testCase.Transactions = append(testCase.Transactions, renewTx)
 
-			testCase.Result = undelegationTx.Success && undelegationSucceeded
+			testCase.Result = renewTx.Success && renewSucceeded
 		}
 	}
 
