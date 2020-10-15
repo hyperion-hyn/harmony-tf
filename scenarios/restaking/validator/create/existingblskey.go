@@ -25,13 +25,13 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Map3Node.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
-	account, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
+	account, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.CreateRestaking.Map3Node.Amount, fundingMultiple)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to generate and fund the account %s", validatorName)
 		testCase.HandleError(err, &account, msg)
@@ -67,7 +67,7 @@ func ExistingBLSKeyScenario(testCase *testing.TestCase) {
 		logger.StakingLog(fmt.Sprintf("Proceeding with trying to create a new validator using the previously used bls key: %s", blsKeys[0].PublicKeyHex), testCase.Verbose)
 
 		duplicateValidatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator_DuplicateBLSKey")
-		duplicateAccount, err := testing.GenerateAndFundAccount(testCase, duplicateValidatorName, testCase.StakingParameters.CreateRestaking.Validator.Amount, 1)
+		duplicateAccount, err := testing.GenerateAndFundAccount(testCase, duplicateValidatorName, testCase.StakingParameters.CreateRestaking.Map3Node.Amount, 1)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to generate and fund account: %s", duplicateValidatorName)
 			testCase.HandleError(err, &duplicateAccount, msg)

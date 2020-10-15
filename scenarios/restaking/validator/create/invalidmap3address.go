@@ -39,7 +39,7 @@ func InvalidMap3NodeAddressScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	map3Address := "hyn1pwzuzz3rsty93w3tftxxj0cqk8pstxwnz5vrlz"
+	map3Address := "0x462FC87Eb176c04A7369F4D8fa4Ec9a554E46397"
 
 	// createStakingValidator
 	testCase.StakingParameters.CreateRestaking.Validator.Account = &account

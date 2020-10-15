@@ -24,13 +24,13 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Map3Node.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
 
 	senderName := accounts.GenerateTestCaseAccountName(testCase.Name, "InvalidSender")
-	senderAccount, err := testing.GenerateAndFundAccount(testCase, senderName, testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
+	senderAccount, err := testing.GenerateAndFundAccount(testCase, senderName, testCase.StakingParameters.CreateRestaking.Map3Node.Amount, fundingMultiple)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to generate and fund account: %s", senderName)
 		testCase.HandleError(err, &senderAccount, msg)

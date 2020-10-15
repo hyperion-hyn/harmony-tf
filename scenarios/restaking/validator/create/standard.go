@@ -41,7 +41,7 @@ func StandardScenario(testCase *testing.TestCase) {
 	}
 
 	testCase.StakingParameters.CreateRestaking.Map3Node.Account = &account
-	tx, _, map3NodeExists, err := restaking.BasicCreateMap3Node(testCase, &account, nil, nil)
+	map3Tx, _, map3NodeExists, err := restaking.BasicCreateMap3Node(testCase, &account, nil, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", account.Name, account.Address)
 		testCase.HandleError(err, &account, msg)
@@ -59,7 +59,7 @@ func StandardScenario(testCase *testing.TestCase) {
 	// createStakingValidator
 
 	testCase.StakingParameters.CreateRestaking.Validator.Account = &account
-	tx, _, validatorExists, err := restaking.BasicCreateValidator(testCase, tx.ContractAddress, &account, nil, nil)
+	tx, _, validatorExists, err := restaking.BasicCreateValidator(testCase, map3Tx.ContractAddress, &account, nil, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", account.Name, account.Address)
 		testCase.HandleError(err, &account, msg)
@@ -67,13 +67,25 @@ func StandardScenario(testCase *testing.TestCase) {
 	}
 	testCase.Transactions = append(testCase.Transactions, tx)
 
+	// test same map3 repeat restaking to other new validator
+	if testCase.StakingParameters.Mode == "double_restaking" {
+		testCase.StakingParameters.CreateRestaking.Validator.Account = &account
+		tx, _, validatorExists, err = restaking.BasicCreateValidator(testCase, map3Tx.ContractAddress, &account, nil, nil)
+		if err != nil {
+			msg := fmt.Sprintf("Failed to create validator using account %s, address: %s", account.Name, account.Address)
+			testCase.HandleError(err, &account, msg)
+			return
+		}
+		testCase.Transactions = append(testCase.Transactions, tx)
+	}
+
 	if config.Configuration.Network.StakingWaitTime > 0 {
 		time.Sleep(time.Duration(config.Configuration.Network.StakingWaitTime) * time.Second)
 	}
 
 	// The ending balance of the account that created the validator should be less than the funded amount since the create validator tx should've used the specified amount for self delegation
 	accountEndingBalance, _ := balances.GetBalance(account.Address)
-	expectedAccountEndingBalance := account.Balance.Sub(testCase.StakingParameters.CreateRestaking.Validator.Amount)
+	expectedAccountEndingBalance := account.Balance.Sub(testCase.StakingParameters.CreateRestaking.Map3Node.Amount)
 
 	if testCase.Expected {
 		logger.BalanceLog(fmt.Sprintf("Account %s, address: %s has an ending balance of %f  after the test - expected value: %f (or less)", account.Name, account.Address, accountEndingBalance, expectedAccountEndingBalance), testCase.Verbose)
