@@ -26,7 +26,7 @@ func StandardScenario(testCase *testing.TestCase) {
 		return
 	}
 
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Validator.Amount, 1)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Map3Node.Amount, 1)
 	if testCase.ErrorOccurred(err) {
 		return
 	}

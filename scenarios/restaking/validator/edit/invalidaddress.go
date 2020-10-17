@@ -24,7 +24,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Map3Node.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
@@ -39,7 +39,7 @@ func InvalidAddressScenario(testCase *testing.TestCase) {
 
 	if validator.Exists {
 		invalidAccountName := accounts.GenerateTestCaseAccountName(testCase.Name, "InvalidChanger")
-		invalidAccount, err := testing.GenerateAndFundAccount(testCase, invalidAccountName, testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
+		invalidAccount, err := testing.GenerateAndFundAccount(testCase, invalidAccountName, testCase.StakingParameters.CreateRestaking.Map3Node.Amount, fundingMultiple)
 		if err != nil {
 			msg := fmt.Sprintf("Failed to generate and fund account %s", invalidAccountName)
 			testCase.HandleError(err, validator.Account, msg)

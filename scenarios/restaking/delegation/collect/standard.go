@@ -1,4 +1,4 @@
-package delegate
+package undelegate
 
 import (
 	"fmt"
@@ -40,9 +40,9 @@ func StandardScenario(testCase *testing.TestCase) {
 
 	if validator.Exists {
 		delegatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Delegator")
-		delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.DelegationRestaking.Amount, fundingMultiple)
+		delegatorAccount, err := testing.GenerateAndFundAccount(testCase, delegatorName, testCase.StakingParameters.DelegationRestaking.Amount, 1)
 		if err != nil {
-			msg := fmt.Sprintf("Failed to fetch latest account balance for the account %s, address: %s", delegatorAccount.Name, delegatorAccount.Address)
+			msg := fmt.Sprintf("Failed to generate and fund account %s", delegatorName)
 			testCase.HandleError(err, &delegatorAccount, msg)
 			return
 		}
@@ -72,28 +72,18 @@ func StandardScenario(testCase *testing.TestCase) {
 		}
 		testCase.Transactions = append(testCase.Transactions, delegationTx)
 
-		testCase.Result = delegationTx.Success && delegationSucceeded
+		successfulDelegation := delegationTx.Success && delegationSucceeded
 
-		if testCase.StakingParameters.Mode == "double_delegate" {
-			validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator2")
-			account2, validator2, err := restaking.ReuseOrCreateValidator(testCase, validatorName)
+		if successfulDelegation {
+			collectedTx, collectedSucceeded, err := restaking.BasicCollectRestaking(testCase, &delegatorAccount, validator.ValidatorAddress, map3NodeTx.ContractAddress, nil)
 			if err != nil {
-				msg := fmt.Sprintf("Failed to create validator using account %s", validatorName)
-				testCase.HandleError(err, account2, msg)
+				msg := fmt.Sprintf("Failed to collected from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validator.Account.Name, validator.Account.Address)
+				testCase.HandleError(err, validator.Account, msg)
 				return
 			}
-			if validator2.Exists {
-				delegationTx, delegationSucceeded, err := restaking.BasicDelegation(testCase, &delegatorAccount, validator2.ValidatorAddress, map3NodeTx.ContractAddress, nil)
-				if err != nil {
-					msg := fmt.Sprintf("Failed to delegate from account %s, address %s to validator %s, address: %s", delegatorAccount.Name, delegatorAccount.Address, validator.Account.Name, validator.Account.Address)
-					testCase.HandleError(err, validator.Account, msg)
-					return
-				}
-				testCase.Transactions = append(testCase.Transactions, delegationTx)
+			testCase.Transactions = append(testCase.Transactions, collectedTx)
 
-				testCase.Result = delegationTx.Success && delegationSucceeded
-
-			}
+			testCase.Result = collectedTx.Success && collectedSucceeded
 		}
 
 		logger.TeardownLog("Performing test teardown (returning funds and removing accounts)", testCase.Verbose)

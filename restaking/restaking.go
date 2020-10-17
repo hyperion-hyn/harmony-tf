@@ -125,9 +125,6 @@ func CreateMap3Node(map3NodeAccount *sdkAccounts.Account, senderAccount *sdkAcco
 }
 
 func validateValidatorValues(validator sdkValidator.Validator) error {
-	if validator.Amount.IsNil() {
-		return errNilAmount
-	}
 
 	if validator.MaximumTotalDelegation.IsNil() {
 		return errNilMaxTotalDelegation

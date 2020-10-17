@@ -254,6 +254,37 @@ func BasicUndelegation(testCase *testing.TestCase, delegatorAccount *sdkAccounts
 	return tx, undelegationSucceeded, nil
 }
 
+// BasicUndelegation - helper method to perform undelegation
+func BasicCollectRestaking(testCase *testing.TestCase, delegatorAccount *sdkAccounts.Account, validatorAddress string, delegatorAddress string, senderAccount *sdkAccounts.Account) (sdkTxs.Transaction, bool, error) {
+	logger.StakingLog("Proceeding to perform collect restaking...", testCase.Verbose)
+	logger.TransactionLog(fmt.Sprintf("Sending collect restaking transaction - will wait up to %d seconds for it to finalize", testCase.StakingParameters.Timeout), testCase.Verbose)
+
+	rawTx, err := CollectRestaking(delegatorAccount, validatorAddress, delegatorAddress, senderAccount, &testCase.StakingParameters)
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+	tx := sdkTxs.ToTransaction(delegatorAccount.Address, validatorAddress, rawTx, err)
+	txResultColoring := logger.ResultColoring(tx.Success, true)
+	logger.TransactionLog(fmt.Sprintf("Performed collect restaking - transaction hash: %s, tx successful: %s", tx.TransactionHash, txResultColoring), testCase.Verbose)
+
+	rpcClient, err := config.Configuration.Network.API.RPCClient()
+	delegation, err := sdkDelegation.ByDelegator(rpcClient, validatorAddress, delegatorAddress)
+	if err != nil {
+		return sdkTxs.Transaction{}, false, err
+	}
+
+	collectedSucceeded := false
+	fmt.Printf("redelegation:%s reward:%s \n", delegatorAddress, delegation.Reward.String())
+	if delegation.Reward.Cmp(ethCommon.Big0) == 0 {
+		collectedSucceeded = true
+	}
+
+	undelegationSucceededColoring := logger.ResultColoring(collectedSucceeded, true)
+	logger.StakingLog(fmt.Sprintf("Performed undelegation from validator %s by delegator %ssuccessful: %s", validatorAddress, delegatorAccount.Address, undelegationSucceededColoring), testCase.Verbose)
+
+	return tx, collectedSucceeded, nil
+}
+
 func BasicCreateDelegateMap3Node(testCase *testing.TestCase, validatorAccount *sdkAccounts.Account, senderAccount *sdkAccounts.Account, blsKeys []sdkCrypto.BLSKey) (sdkTxs.Transaction, []sdkCrypto.BLSKey, bool, error) {
 	if senderAccount == nil {
 		senderAccount = validatorAccount

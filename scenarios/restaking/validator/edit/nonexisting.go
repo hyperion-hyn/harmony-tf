@@ -23,13 +23,13 @@ func NonExistingScenario(testCase *testing.TestCase) {
 	}
 
 	fundingMultiple := int64(1)
-	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
+	_, _, err := funding.CalculateFundingDetails(testCase.StakingParameters.CreateRestaking.Map3Node.Amount, fundingMultiple)
 	if testCase.ErrorOccurred(err) {
 		return
 	}
 
 	validatorName := accounts.GenerateTestCaseAccountName(testCase.Name, "Validator")
-	account, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.CreateRestaking.Validator.Amount, fundingMultiple)
+	account, err := testing.GenerateAndFundAccount(testCase, validatorName, testCase.StakingParameters.CreateRestaking.Map3Node.Amount, fundingMultiple)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to fetch latest account balance for the account %s, address: %s", account.Name, account.Address)
 		testCase.HandleError(err, &account, msg)
